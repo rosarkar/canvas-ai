@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canvas Protocol — Dashboard</title>
+  <style>
+    :root {
+      --bg: #F7F6F3;
+      --surface: #FFFFFF;
+      --border: #E4E2DC;
+      --text: #17171D;
+      --muted: #6E6C7A;
+      --accent: #C9821F;
+      --accent-hover: #B27317;
+      --green: #16a34a;
+      --green-bg: rgba(22,163,74,0.12);
+      --yellow: #b45309;
+      --yellow-bg: rgba(180,83,9,0.12);
+      --red: #dc2626;
+      --red-bg: rgba(220,38,38,0.10);
+      --gray-bg: rgba(110,108,122,0.14);
+      --pill-bg: rgba(201,130,31,0.10);
+      --radius: 10px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #08080B;
+        --surface: #0E0E14;
+        --border: #1C1C28;
+        --text: #F0EDE8;
+        --muted: #9694A4;
+        --accent: #E9A84C;
+        --accent-hover: #F2BC6B;
+        --green: #4ADE80;
+        --green-bg: rgba(34,197,94,0.15);
+        --yellow: #eab308;
+        --yellow-bg: rgba(234,179,8,0.15);
+        --red: #ef4444;
+        --red-bg: rgba(239,68,68,0.12);
+        --gray-bg: rgba(150,148,164,0.15);
+        --pill-bg: rgba(233,168,76,0.12);
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    header .logo span { color: var(--accent); }
+    header .tag { font-size: 11px; background: var(--border); color: var(--muted); padding: 3px 8px; border-radius: 20px; }
+    main { max-width: 980px; margin: 0 auto; padding: 32px 20px 64px; }
+
+    /* Login + empty state */
+    #login-view { text-align: center; padding-top: 72px; }
+    #login-view h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+    #login-view p { color: var(--muted); margin-bottom: 32px; font-size: 15px; }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 12px 22px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    button:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .error-msg { color: var(--red); font-size: 13px; margin-top: 14px; }
+    .help-text { color: var(--muted); font-size: 13px; margin-top: 16px; line-height: 1.6; }
+
+    .ghost-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    .ghost-btn:hover { border-color: var(--muted); color: var(--text); background: transparent; }
+
+    .dash-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .wallet-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .wallet-addr { font-family: "SF Mono", "Fira Code", monospace; font-size: 13px; word-break: break-all; }
+
+    /* Role switcher */
+    .role-switch {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .role-switch button {
+      background: transparent;
+      color: var(--muted);
+      border-radius: 0;
+      padding: 9px 18px;
+      font-size: 13px;
+    }
+    .role-switch button.active { background: var(--accent); color: #fff; }
+    .role-switch button:not(.active):hover { background: var(--gray-bg); color: var(--text); }
+
+    /* Group selector */
+    .group-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .group-tabs button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .group-tabs button.active { border-color: var(--accent); color: var(--accent); background: var(--pill-bg); }
+
+    /* Cards + grids */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .section-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 24px 0 12px; }
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 8px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 22px; font-weight: 700; }
+    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    .pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      background: var(--pill-bg);
+      color: var(--accent);
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin: 2px 4px 2px 0;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .badge-high, .status-active { background: var(--green-bg); color: var(--green); }
+    .badge-medium, .status-paused, .status-pending_deposit, .status-pending_approval { background: var(--yellow-bg); color: var(--yellow); }
+    .badge-low { background: var(--gray-bg); color: var(--muted); }
+    .status-exhausted, .status-expired, .status-withdrawn { background: var(--red-bg); color: var(--red); }
+
+    .profile-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .profile-title { font-size: 17px; font-weight: 700; }
+    .profile-sub { font-size: 13px; color: var(--muted); margin: 6px 0 10px; line-height: 1.5; }
+    .kv-row { display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; margin-top: 10px; }
+    .kv-row .k { color: var(--muted); margin-right: 5px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    td { padding: 8px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    .table-wrap { overflow-x: auto; }
+
+    .pass-dot { color: var(--green); font-weight: 600; }
+    .fail-dot { color: var(--red); font-weight: 600; }
+    .mono { font-family: "SF Mono", "Fira Code", monospace; font-size: 12px; }
+
+    .actions-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .actions-row a {
+      display: inline-block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 16px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .actions-row a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+
+    /* Campaign cards */
+    .campaign-card { cursor: pointer; transition: border-color 0.15s; }
+    .campaign-card:hover { border-color: var(--accent); }
+    .campaign-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .campaign-name { font-weight: 600; font-size: 15px; }
+    .campaign-meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 12px 0; }
+    .meta-label { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+    .meta-value { font-size: 14px; font-weight: 500; }
+    .brief-detail { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; font-size: 13px; display: none; }
+    .campaign-card.expanded .brief-detail { display: block; }
+    .brief-detail .k { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .brief-detail p { margin-bottom: 10px; line-height: 1.5; }
+
+    /* Available groups */
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .filter-bar input, .filter-bar select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      outline: none;
+    }
+    .filter-bar input { flex: 1; min-width: 180px; }
+    .filter-bar input:focus, .filter-bar select:focus { border-color: var(--accent); }
+    .avail-row { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .avail-row .target-btn { padding: 8px 14px; font-size: 13px; }
+
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+    .empty-state p { margin-bottom: 8px; }
+
+    #getstarted-view { text-align: center; padding-top: 40px; }
+    #getstarted-view h2 { margin-bottom: 10px; }
+    #getstarted-view p { color: var(--muted); margin-bottom: 28px; }
+    .getstarted-links { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .getstarted-links a {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .getstarted-links a:hover { background: var(--accent-hover); text-decoration: none; }
+
+    @media (max-width: 640px) {
+      .stats-row, .campaign-meta { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Canvas<span>Protocol</span></div>
+  <div class="tag">Dashboard</div>
+</header>
+
+<main>
+  <!-- Login -->
+  <div id="login-view">
+    <h1>Canvas Dashboard</h1>
+    <p>Connect your wallet to view your groups and campaigns.</p>
+    <button id="login-btn" onclick="login()">Connect wallet</button>
+    <div id="error-msg" class="error-msg" style="display:none;"></div>
+    <div class="help-text">
+      You'll be asked to sign a message (no transaction, no gas) to prove you own the wallet.
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard-view" style="display:none;">
+    <div class="dash-header">
+      <div>
+        <div class="wallet-label">Logged in as</div>
+        <div class="wallet-addr" id="wallet-display"></div>
+      </div>
+      <button class="ghost-btn" onclick="logout()">Switch wallet</button>
+    </div>
+
+    <div class="role-switch" id="role-switch" style="display:none;">
+      <button id="role-owner-btn" onclick="setRole('group_owner')">Group owner</button>
+      <button id="role-adv-btn" onclick="setRole('advertiser')">Advertiser</button>
+    </div>
+
+    <div id="getstarted-view" style="display:none;">
+      <h2>Welcome to Canvas</h2>
+      <p>This wallet has no groups or campaigns yet. Get started in Telegram:</p>
+      <div class="getstarted-links">
+        <a href="https://t.me/CanvasVerificationBot?start=register" target="_blank">Register a group</a>
+        <a href="https://t.me/CanvasVerificationBot?start=buy" target="_blank">Start a campaign</a>
+      </div>
+    </div>
+
+    <div id="owner-view" style="display:none;"></div>
+    <div id="advertiser-view" style="display:none;"></div>
+  </div>
+</main>
+
+<script>
+  const loginView = document.getElementById('login-view');
+  const dashView = document.getElementById('dashboard-view');
+  const errorMsg = document.getElementById('error-msg');
+
+  // Signed auth: the API requires a wallet signature of "Canvas auth: <epoch-ms>"
+  // within a 5-minute window. Cache {wallet, ts, sig} for 4 minutes so refreshes
+  // don't re-prompt; past that the user reconnects with one click.
+  const AUTH_KEY = 'canvas_dashboard_auth';
+  const AUTH_MAX_AGE_MS = 4 * 60 * 1000;
+  const BOT = 'https://t.me/CanvasVerificationBot';
+
+  let DATA = null;
+  let currentRole = null;
+  let selectedGroupId = null;
+
+  function savedAuth() {
+    try {
+      const raw = sessionStorage.getItem(AUTH_KEY);
+      if (!raw) return null;
+      const auth = JSON.parse(raw);
+      if (!auth.wallet || !auth.ts || !auth.sig) return null;
+      if (Date.now() - Number(auth.ts) > AUTH_MAX_AGE_MS) return null;
+      return auth;
+    } catch { return null; }
+  }
+
+  const restored = savedAuth();
+  if (restored) loadDashboard(restored);
+
+  function showError(msg) { errorMsg.textContent = msg; errorMsg.style.display = 'block'; }
+  function clearError() { errorMsg.style.display = 'none'; }
+
+  async function getProvider() {
+    // Injected wallet when present; otherwise the Coinbase smart wallet popup via the
+    // Base Account SDK (server sends COOP same-origin-allow-popups so this works in
+    // Telegram's in-app browser too).
+    if (window.ethereum) return window.ethereum;
+    const { createBaseAccountSDK } = await import('https://esm.sh/@base-org/account');
+    return createBaseAccountSDK({ appName: 'Canvas Protocol' }).getProvider();
+  }
+
+  async function connectAndSign() {
+    const provider = await getProvider();
+    const accounts = await provider.request({ method: 'eth_requestAccounts' });
+    const wallet = accounts[0];
+    if (!wallet) throw new Error('No wallet connected');
+    const ts = Date.now();
+    const message = 'Canvas auth: ' + ts;
+    const hexMessage = '0x' + Array.from(new TextEncoder().encode(message))
+      .map((b) => b.toString(16).padStart(2, '0')).join('');
+    const sig = await provider.request({ method: 'personal_sign', params: [hexMessage, wallet] });
+    return { wallet, ts, sig };
+  }
+
+  async function login() {
+    clearError();
+    const btn = document.getElementById('login-btn');
+    btn.disabled = true;
+    btn.textContent = 'Connecting...';
+    try {
+      const auth = await connectAndSign();
+      await loadDashboard(auth);
+    } catch (err) {
+      showError(err?.message || 'Wallet connection failed or was cancelled.');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Connect wallet';
+  }
+
+  async function loadDashboard(auth) {
+    try {
+      const res = await fetch(
+        '/api/dashboard?wallet=' + encodeURIComponent(auth.wallet) +
+        '&ts=' + encodeURIComponent(auth.ts) +
+        '&sig=' + encodeURIComponent(auth.sig),
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 401) sessionStorage.removeItem(AUTH_KEY);
+        showError(data.error || 'Could not load dashboard.');
+        return;
+      }
+      sessionStorage.setItem(AUTH_KEY, JSON.stringify(auth));
+      DATA = data;
+      renderShell();
+    } catch (err) {
+      showError('Network error. Please try again.');
+    }
+  }
+
+  function renderShell() {
+    document.getElementById('wallet-display').textContent = DATA.wallet;
+    loginView.style.display = 'none';
+    dashView.style.display = 'block';
+
+    const both = DATA.roles.includes('group_owner') && DATA.roles.includes('advertiser');
+    document.getElementById('role-switch').style.display = both ? 'inline-flex' : 'none';
+
+    if (DATA.roles.length === 0) {
+      document.getElementById('getstarted-view').style.display = 'block';
+      return;
+    }
+    document.getElementById('getstarted-view').style.display = 'none';
+    setRole(DATA.roles.includes('group_owner') ? 'group_owner' : 'advertiser');
+  }
+
+  function setRole(role) {
+    currentRole = role;
+    document.getElementById('role-owner-btn').classList.toggle('active', role === 'group_owner');
+    document.getElementById('role-adv-btn').classList.toggle('active', role === 'advertiser');
+    document.getElementById('owner-view').style.display = role === 'group_owner' ? 'block' : 'none';
+    document.getElementById('advertiser-view').style.display = role === 'advertiser' ? 'block' : 'none';
+    if (role === 'group_owner') renderOwner();
+    else renderAdvertiser();
+  }
+
+  // ---------- helpers ----------
+
+  function escHtml(str) {
+    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function usd(n) { return '$' + Number(n || 0).toFixed(2); }
+  function truncAddr(a) { return a ? a.slice(0, 6) + '…' + a.slice(-4) : '—'; }
+  function fmtDate(iso) {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+      ' ' + new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+  function tagPills(tags) {
+    const cats = Array.isArray(tags?.categories) ? tags.categories : [];
+    return cats.map((c) => `<span class="pill">${escHtml(c)}</span>`).join('');
+  }
+  function activityBadge(tags) {
+    const lvl = tags?.activityLevel;
+    if (!lvl) return '';
+    return `<span class="badge badge-${escHtml(lvl)}">${escHtml(lvl)} activity</span>`;
+  }
+  function passFail(p) {
+    return p ? '<span class="pass-dot">✓ pass</span>' : '<span class="fail-dot">✗ fail</span>';
+  }
+
+  // ---------- group owner view ----------
+
+  function renderOwner() {
+    const view = document.getElementById('owner-view');
+    const groups = DATA.groups;
+    if (!groups.some((g) => g.groupId === selectedGroupId)) selectedGroupId = groups[0].groupId;
+    const g = groups.find((x) => x.groupId === selectedGroupId);
+
+    const tabs = groups.length > 1
+      ? `<div class="group-tabs">${groups.map((x) =>
+          `<button class="${x.groupId === selectedGroupId ? 'active' : ''}" onclick="selectGroup(${x.groupId})">${escHtml(x.groupTitle || 'Group #' + x.groupId)}</button>`,
+        ).join('')}</div>`
+      : '';
+
+    const tags = g.groupTags || {};
+    const joins = tags.estimatedMonthlyJoins != null
+      ? `<span><span class="k">Est. monthly joins</span>~${escHtml(tags.estimatedMonthlyJoins)}</span>` : '';
+    const price = g.minPrice != null
+      ? `<span><span class="k">Price per verified join</span>${usd(g.minPrice)}</span>` : '';
+    const link = g.portalInviteLink
+      ? `<span><a href="${escHtml(g.portalInviteLink)}" target="_blank">Group link ↗</a></span>` : '';
+
+    const profile = `
+      <div class="card">
+        <div class="profile-top">
+          <div class="profile-title">${escHtml(g.groupTitle || 'Group #' + g.groupId)}</div>
+          ${activityBadge(tags)}
+        </div>
+        ${tags.audienceDescription ? `<div class="profile-sub">${escHtml(tags.audienceDescription)}</div>` : ''}
+        <div>${tagPills(tags)}</div>
+        <div class="kv-row">${price}${joins}${link}</div>
+      </div>`;
+
+    const e = g.earnings;
+    const earnings = `
+      <div class="section-title">Earnings</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">All time</div><div class="stat-value">${usd(e.allTime)}</div></div>
+        <div class="stat-card"><div class="stat-label">This month</div><div class="stat-value">${usd(e.thisMonth)}</div></div>
+        <div class="stat-card"><div class="stat-label">This week</div><div class="stat-value">${usd(e.thisWeek)}</div></div>
+        <div class="stat-card"><div class="stat-label">Pending payout</div><div class="stat-value">${usd(e.pending)}</div><div class="stat-sub">paid out daily in batch</div></div>
+      </div>`;
+
+    const a = g.activity;
+    const activity = `
+      <div class="section-title">Verification activity — last 30 days</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Joins attempted</div><div class="stat-value">${a.attempts30d}</div></div>
+        <div class="stat-card"><div class="stat-label">Passed</div><div class="stat-value">${a.passed30d}</div></div>
+        <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-value">${a.failed30d}</div></div>
+        <div class="stat-card"><div class="stat-label">Pass rate</div><div class="stat-value">${a.passRatePct != null ? a.passRatePct + '%' : '—'}</div></div>
+      </div>`;
+
+    const campaigns = g.activeCampaigns.length
+      ? `<div class="card table-wrap"><table>
+           <tr><th>Advertiser</th><th>Bid</th><th>Budget left</th><th>Task brief</th></tr>
+           ${g.activeCampaigns.map((c) => `
+             <tr>
+               <td class="mono">${escHtml(truncAddr(c.advertiserWallet))}</td>
+               <td>${usd(c.bidPerVerification)}</td>
+               <td>${usd(c.remainingBudget)}</td>
+               <td style="color:var(--muted)">${escHtml(c.briefSummary || '—')}</td>
+             </tr>`).join('')}
+         </table></div>`
+      : `<div class="card empty-state">No campaigns are targeting this group right now.</div>`;
+
+    const recent = g.recentVerifications.length
+      ? `<div class="card table-wrap"><table>
+           <tr><th>When</th><th>Result</th><th>Turns</th><th>Score</th></tr>
+           ${g.recentVerifications.map((v) => `
+             <tr>
+               <td style="color:var(--muted)">${fmtDate(v.createdAt)}</td>
+               <td>${passFail(v.passed)}</td>
+               <td>${v.conversationTurns}</td>
+               <td>${v.kimiScore != null ? v.kimiScore : '—'}</td>
+             </tr>`).join('')}
+         </table></div>`
+      : `<div class="card empty-state">No verifications yet.</div>`;
+
+    const actions = `
+      <div class="section-title">Quick actions</div>
+      <div class="actions-row">
+        <a href="${BOT}?start=rules" target="_blank">Edit rules</a>
+        <a href="${BOT}?start=price" target="_blank">Update price</a>
+        ${g.portalInviteLink ? `<a href="${escHtml(g.portalInviteLink)}" target="_blank">View group</a>` : ''}
+        <a href="${BOT}?start=register" target="_blank">Register another group</a>
+      </div>`;
+
+    view.innerHTML = tabs + profile + earnings + activity +
+      '<div class="section-title">Active campaigns targeting this group</div>' + campaigns +
+      '<div class="section-title">Recent verifications</div>' + recent + actions;
+  }
+
+  function selectGroup(id) {
+    selectedGroupId = id;
+    renderOwner();
+  }
+
+  // ---------- advertiser view ----------
+
+  const expandedCampaigns = new Set();
+  let availSearch = '';
+  let availLevel = '';
+
+  function renderAdvertiser() {
+    const view = document.getElementById('advertiser-view');
+    const s = DATA.spendSummary;
+
+    const spend = `
+      <div class="section-title">Spend summary</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Total spent</div><div class="stat-value">${usd(s.totalSpent)}</div><div class="stat-sub">${usd(s.spentThisMonth)} this month</div></div>
+        <div class="stat-card"><div class="stat-label">Completions</div><div class="stat-value">${s.totalCompletions}</div></div>
+        <div class="stat-card"><div class="stat-label">Avg cost / completion</div><div class="stat-value">${s.avgCostPerCompletion != null ? usd(s.avgCostPerCompletion) : '—'}</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Kimi score</div><div class="stat-value">${s.avgKimiScore != null ? s.avgKimiScore : '—'}</div></div>
+      </div>`;
+
+    const campaigns = DATA.campaigns.length
+      ? DATA.campaigns.map(renderCampaignCard).join('')
+      : `<div class="card empty-state"><p>No campaigns yet.</p><p><a href="${BOT}?start=buy" target="_blank">Start one in the Canvas bot →</a></p></div>`;
+
+    const feed = DATA.completionFeed.length
+      ? `<div class="card table-wrap"><table>
+           <tr><th>When</th><th>Group</th><th>Result</th><th>Turns</th><th>Score</th></tr>
+           ${DATA.completionFeed.map((v) => `
+             <tr>
+               <td style="color:var(--muted)">${fmtDate(v.createdAt)}</td>
+               <td>${escHtml(v.groupTitle || '—')}</td>
+               <td>${passFail(v.passed)}</td>
+               <td>${v.conversationTurns}</td>
+               <td>${v.kimiScore != null ? v.kimiScore : '—'}</td>
+             </tr>`).join('')}
+         </table></div>`
+      : `<div class="card empty-state">No completions yet.</div>`;
+
+    const actions = `
+      <div class="section-title">Quick actions</div>
+      <div class="actions-row">
+        <a href="${BOT}?start=buy" target="_blank">New campaign</a>
+        <a href="${BOT}?start=topup" target="_blank">Top up existing campaign</a>
+      </div>`;
+
+    view.innerHTML = spend +
+      '<div class="section-title">Campaigns</div>' + campaigns +
+      '<div class="section-title">Completion feed</div>' + feed +
+      '<div class="section-title">Available groups</div>' + renderAvailable() +
+      actions;
+
+    document.getElementById('avail-search')?.addEventListener('input', (ev) => {
+      availSearch = ev.target.value.toLowerCase();
+      refreshAvailable();
+    });
+    document.getElementById('avail-level')?.addEventListener('change', (ev) => {
+      availLevel = ev.target.value;
+      refreshAvailable();
+    });
+  }
+
+  function renderCampaignCard(c) {
+    const expanded = expandedCampaigns.has(c.advertiserId);
+    const tags = c.groupTags || {};
+    const brief = c.brief || {};
+    const briefHtml = ['goal', 'targetSignal', 'openingPrompt']
+      .filter((k) => brief[k])
+      .map((k) => `<div class="k">${k === 'targetSignal' ? 'Target signal' : k === 'openingPrompt' ? 'Opening prompt' : 'Goal'}</div><p>${escHtml(brief[k])}</p>`)
+      .join('') || `<p style="color:var(--muted)">No task brief on file.</p>`;
+
+    return `
+      <div class="card campaign-card ${expanded ? 'expanded' : ''}" onclick="toggleCampaign(${c.advertiserId})">
+        <div class="campaign-top">
+          <div class="campaign-name">${escHtml(c.groupTitle || 'Group #' + c.groupId)}</div>
+          <span class="badge status-${escHtml(c.status)}">${escHtml(c.status)}</span>
+        </div>
+        ${tags.audienceDescription ? `<div class="profile-sub">${escHtml(tags.audienceDescription)}</div>` : ''}
+        <div>${tagPills(tags)}</div>
+        <div class="campaign-meta">
+          <div><div class="meta-label">Bid</div><div class="meta-value">${usd(c.bidPerVerification)}</div></div>
+          <div><div class="meta-label">Deposited</div><div class="meta-value">${usd(c.totalDeposited)}</div></div>
+          <div><div class="meta-label">Budget left</div><div class="meta-value">${usd(c.remainingBudget)}</div></div>
+          <div><div class="meta-label">Completions</div><div class="meta-value">${c.completions}${c.passRatePct != null ? ` <span style="color:var(--muted);font-weight:400">(${c.passRatePct}% pass)</span>` : ''}</div></div>
+        </div>
+        <div class="brief-detail">${briefHtml}</div>
+      </div>`;
+  }
+
+  function toggleCampaign(id) {
+    if (expandedCampaigns.has(id)) expandedCampaigns.delete(id);
+    else expandedCampaigns.add(id);
+    renderAdvertiser();
+  }
+
+  function filteredAvailable() {
+    return DATA.availableGroups.filter((g) => {
+      const tags = g.groupTags || {};
+      if (availLevel && tags.activityLevel !== availLevel) return false;
+      if (availSearch) {
+        const hay = [g.groupTitle || '', ...(Array.isArray(tags.categories) ? tags.categories : [])]
+          .join(' ').toLowerCase();
+        if (!hay.includes(availSearch)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderAvailable() {
+    return `
+      <div class="filter-bar">
+        <input id="avail-search" type="text" placeholder="Search by name or category…" value="${escHtml(availSearch)}" />
+        <select id="avail-level">
+          <option value="">Any activity</option>
+          <option value="high" ${availLevel === 'high' ? 'selected' : ''}>High</option>
+          <option value="medium" ${availLevel === 'medium' ? 'selected' : ''}>Medium</option>
+          <option value="low" ${availLevel === 'low' ? 'selected' : ''}>Low</option>
+        </select>
+      </div>
+      <div id="avail-list">${renderAvailableRows()}</div>`;
+  }
+
+  function renderAvailableRows() {
+    const rows = filteredAvailable();
+    if (!rows.length) return `<div class="card empty-state">No groups match.</div>`;
+    return rows.map((g) => {
+      const tags = g.groupTags || {};
+      const joins = tags.estimatedMonthlyJoins != null ? `~${escHtml(tags.estimatedMonthlyJoins)} joins/mo · ` : '';
+      const bid = g.topBid != null ? `Top bid ${usd(g.topBid)}` : (g.minPrice != null ? `From ${usd(g.minPrice)}` : 'No bids yet');
+      return `
+        <div class="card">
+          <div class="avail-row">
+            <div style="flex:1;min-width:200px">
+              <div style="font-weight:600;margin-bottom:4px">${escHtml(g.groupTitle || 'Group #' + g.groupId)} ${activityBadge(tags)}</div>
+              ${tags.audienceDescription ? `<div class="profile-sub" style="margin:4px 0 6px">${escHtml(tags.audienceDescription)}</div>` : ''}
+              <div>${tagPills(tags)}</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px">${joins}${bid}</div>
+            </div>
+            <a href="${BOT}?start=buy" target="_blank"><button class="target-btn">Target this group</button></a>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function refreshAvailable() {
+    document.getElementById('avail-list').innerHTML = renderAvailableRows();
+  }
+
+  function logout() {
+    sessionStorage.removeItem(AUTH_KEY);
+    DATA = null;
+    dashView.style.display = 'none';
+    loginView.style.display = 'block';
+    clearError();
+  }
+</script>
+
+</body>
+</html>
