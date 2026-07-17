@@ -463,11 +463,7 @@ Canvas Protocol is a decentralized verification marketplace that replaces standa
 
 **Rohit Sarkar** (@_rosark, Toronto) — product, GTM, copywriting, investor relations. Background in protocol research and content across InfStones, Figment, Caldera, and 0x (Content Manager Jan–Jun 2026, laid off June 5). Statistics education. Can code SQL/Python/R, comfortable in terminal. Now fully focused on Canvas.
 
-**Alex V** (@alexvtheschulicbleader, Toronto) — technical advisor and key architectural contributor. MEng ECE, University of Toronto, Schulich Leader. Contributed the core insight behind the conversational captcha mechanic — cheap LLM probing thin answers to produce richer signal while keeping inference costs low. Candidate co-founder, currently being evaluated for Alliance DAO and YC applications alongside Rohit.
-
-**Mateo** (@0xteo, based in Asia) — smart contract development, backend infrastructure, complex state machine work. Builder of Basemate (Base Batches 002 alumnus). Introduced by Igor from the Bankr team. 50/50 equity split.
-
-Canvas was started as a clean separate project from Basemate — new repo, new entity — so both founders have clean ownership with no cap table entanglement.
+**Alex V** (@vicolalexander, GitHub: libritor, Toronto) — technical advisor and key architectural contributor. MEng ECE, University of Toronto, Schulich Leader. Contributed the core insight behind the conversational captcha mechanic — cheap LLM probing thin answers to produce richer signal while keeping inference costs low. Candidate co-founder, currently being evaluated for Alliance DAO and YC applications alongside Rohit.
 
 ---
 
