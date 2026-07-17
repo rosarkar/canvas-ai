@@ -76,10 +76,8 @@ async function finalize(
   );
   if (!claimed) return { outcome: "already_processed" };
 
-  // TODO for Mateo: the TTL recovery sweep must cover SCORING and RESPONSE_RECEIVED
-  // states, not just DEEP_LINK_SENT and TASK_SENT. If anything below throws (Kimi,
-  // the DB, a Telegram send), the row is stranded in SCORING and the user is muted
-  // forever with no retry path.
+  // If anything below throws (Kimi, the DB, a Telegram send), the TTL sweep picks the
+  // row up out of SCORING/RESPONSE_RECEIVED (expireStaleVerifications) and times it out.
   await transitionState(verification.verificationId, VerificationState.SCORING, {
     expectedState: VerificationState.RESPONSE_RECEIVED,
   });

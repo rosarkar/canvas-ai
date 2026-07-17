@@ -545,14 +545,20 @@ Alliance DAO, Base Batches, Bankr. Traditional seed VCs deferred until live reve
 
 ## Post-Launch TODOs (July 13 2026)
 
-### 1. SCORING-state stranding sweep
-If anything throws between a verification entering SCORING state and the final state transition, the row gets stuck in SCORING permanently with the user muted. The TTL sweep does not cover SCORING or RESPONSE_RECEIVED states. Fix: extend the TTL sweep in the existing recovery job to include both states, transitioning them to TIMED_OUT after a threshold (suggest 10 minutes). Reference: `src/telegram/services/process-text-response.ts:74`.
+### 1. SCORING-state stranding sweep — ✅ RESOLVED (July 17)
+`expireStaleVerifications` covers `RESPONSE_RECEIVED`/`SCORING` (2-minute grace past `expires_at` so an in-flight finalize can't race the sweep; the CAS in `transitionState` breaks any tie), transitions them to `TIMED_OUT`, and the minute sweep in `index.ts` unmutes/denies via `completeVerificationTimeout` and fires an admin alert for stranded rows. The stale TODO comment at the SCORING transition in `process-text-response.ts` was removed.
 
-### 2. KIMI_MODEL missing from .env.example
-`KIMI_MODEL` is read from env in `src/services/scoring.ts` and defaults to `moonshot-v1-8k` if absent, but it is not documented in `.env.example`. Add it with the default value and a comment explaining it controls the Kimi inference model used for response scoring.
+### 2. KIMI_MODEL missing from .env.example — ✅ RESOLVED (July 17)
+`.env.example` already existed (this TODO's "missing file" framing was wrong); it was missing the Kimi tuning vars. Added `KIMI_MODEL` (default `moonshot-v1-8k`), `KIMI_BASE_URL`, and `KIMI_PASS_THRESHOLD` with comments.
 
-### 3. campaignDepositor guard on V1 contract path
-There is a known TODO at `src/telegram/handlers/campaigns.ts:338` flagging that the V1 contract path does not enforce the `campaignDepositor` guard. This is acceptable for the current whitelisted phase but must be resolved before going permissionless. Log it here as a pre-permissionless blocker.
+### 3. campaignDepositor guard on V1 contract path — ✅ RESOLVED
+The first-depositor guard is live on-chain in the deployed escrow (`0xf808…101E`). No TODO remains in code — the comment at `campaigns.ts` refund flow is an explanatory note that DB-routed refunds stay the preferred path by choice.
+
+### Audit follow-ups (July 17 2026)
+- **FOR UPDATE SKIP LOCKED** — audited: already wrapped in an explicit BEGIN/COMMIT in `payout-batch.ts` spanning the SELECT + claim UPDATE (deliberately not the on-chain transfers). No change needed.
+- **ws vulnerability** — audited: `ws@8.21.0` (patched) is what's installed; no high-severity advisory exists. Remaining: one **low**-severity esbuild dev-server advisory (Windows-only, dev dependency under vite) that `npm audit fix` can't apply without a forced vitest major bump — accepted.
+- **Verification notice in group chat** — the "A new member is completing verification." welcome-gate message posted on *every* open join; it now posts only when the opening DM fails (alongside the existing deep-link "Verify to join →" fallback button, which was already conditional). `begin-verification.ts`.
+- **Advertiser notifications** — audited: already present. Deposit confirmation DMs the advertiser (`notifyCampaignPendingApproval` — worded for the approval gate, since a deposit moves the campaign to pending_approval, not straight to active), top-ups get a balance receipt DM, and owner approval (manual or 48h auto-accept) sends the "campaign is live" DM (`notifyAdvertiserActivated`). No change needed.
 
 ---
 

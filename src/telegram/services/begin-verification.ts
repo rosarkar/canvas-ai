@@ -131,9 +131,11 @@ export async function beginVerification(
 
   if (entryType === "open_join") {
     await restrictUserForCaptcha(api, group.tgGroupId, user.id);
-    await sendWelcomeGateMessage(api, Number(group.tgGroupId), group.groupId);
     captchaSentInDm = await sendTaskDm();
     if (!captchaSentInDm) {
+      // Only post in the group when the DM failed — a successful DM needs no
+      // public notice, and the gate message just added chat noise on every join.
+      await sendWelcomeGateMessage(api, Number(group.tgGroupId), group.groupId);
       await transitionState(verification.verificationId, VerificationState.DEEP_LINK_SENT);
       // The user has DMs disabled (or never started the bot) and is muted — without
       // this button in the group they would have no path to verification at all.
