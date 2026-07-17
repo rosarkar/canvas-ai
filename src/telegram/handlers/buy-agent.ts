@@ -31,12 +31,27 @@ interface BuyAgentSession {
   messages: KimiMessage[];
   intent: BuyAgentIntent;
   groups: GroupRow[];
+  lastActivityAt: number;
 }
 
 const sessions = new Map<number, BuyAgentSession>();
 
+/** A stale session would otherwise suppress verification-reply routing for this user forever. */
+const SESSION_IDLE_TTL_MS = 30 * 60_000;
+
+/** Lazy expiry: a session idle past the TTL is deleted at lookup time — no background sweep. */
+function getLiveSession(userId: number): BuyAgentSession | undefined {
+  const session = sessions.get(userId);
+  if (!session) return undefined;
+  if (Date.now() - session.lastActivityAt > SESSION_IDLE_TTL_MS) {
+    sessions.delete(userId);
+    return undefined;
+  }
+  return session;
+}
+
 export function hasActiveBuyAgentSession(userId: number): boolean {
-  return sessions.has(userId);
+  return getLiveSession(userId) !== undefined;
 }
 
 interface ValidatedCampaign {
@@ -302,7 +317,7 @@ export function registerBuyAgentHandler(bot: Bot): void {
       return;
     }
 
-    sessions.set(fromId, { messages: [], intent: emptyIntent(), groups });
+    sessions.set(fromId, { messages: [], intent: emptyIntent(), groups, lastActivityAt: Date.now() });
 
     await ctx.reply(
       "👋 I'm the Canvas buy agent. Tell me what you're trying to achieve with this campaign — your goal, your " +
@@ -318,11 +333,12 @@ export function registerBuyAgentHandler(bot: Bot): void {
       return;
     }
 
-    const session = sessions.get(fromId);
+    const session = getLiveSession(fromId);
     if (!session || ctx.message.text.startsWith("/")) {
       await next();
       return;
     }
+    session.lastActivityAt = Date.now();
 
     const text = ctx.message.text.trim();
 

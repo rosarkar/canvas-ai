@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { registerGroup } from "@/adapters/groups.adapter.js";
 import {
@@ -91,6 +91,52 @@ describe("parseRegisterResponse", () => {
       payoutWallet: VALID_WALLET,
       pricePerVerification: 0.25,
     });
+  });
+});
+
+describe("session idle expiry (30 min TTL)", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-17T12:00:00Z"));
+    endRegisterSession(USER_ID);
+    startRegisterSession(USER_ID);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("session active within 30 minutes routes correctly", async () => {
+    vi.advanceTimersByTime(29 * 60_000);
+    expect(hasActiveRegisterSession(USER_ID)).toBe(true);
+
+    mockedCallKimi.mockResolvedValueOnce(kimiReply({ groupLink: "@basefarmers" }));
+    const turn = await handleRegisterMessage(USER_ID, "group is @basefarmers", resolveGroup);
+    expect(turn.isComplete).toBe(false);
+    expect(mockedCallKimi).toHaveBeenCalledTimes(1);
+  });
+
+  it("session idle for more than 30 minutes expires silently so messages fall through", () => {
+    vi.advanceTimersByTime(31 * 60_000);
+    // message.ts gates routing on this check — false means the text falls through
+    // to the next handler exactly as if no session had ever existed.
+    expect(hasActiveRegisterSession(USER_ID)).toBe(false);
+    // Expiry deleted the entry; the check stays false on repeat lookups.
+    expect(hasActiveRegisterSession(USER_ID)).toBe(false);
+  });
+
+  it("activity timestamp resets on each message", async () => {
+    vi.advanceTimersByTime(20 * 60_000);
+    mockedCallKimi.mockResolvedValueOnce(kimiReply({ groupLink: "@basefarmers" }));
+    await handleRegisterMessage(USER_ID, "group is @basefarmers", resolveGroup);
+
+    // 45 min since session start, but only 25 min since last activity — still live.
+    vi.advanceTimersByTime(25 * 60_000);
+    expect(hasActiveRegisterSession(USER_ID)).toBe(true);
+
+    // 31 min after the last message it finally expires.
+    vi.advanceTimersByTime(6 * 60_000);
+    expect(hasActiveRegisterSession(USER_ID)).toBe(false);
   });
 });
 

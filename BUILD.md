@@ -9,6 +9,9 @@
 
 ## Changelog
 
+### July 17, 2026 — 30-minute idle TTL on in-memory sessions
+- Buy-agent and register-assistant session Maps now store `lastActivityAt`; entries idle >30 min are deleted lazily at lookup time (`getLiveSession` in `buy-agent.ts` / `register-assistant.ts`) — no background sweep. `hasActiveBuyAgentSession` / `hasActiveRegisterSession` perform the expiry, so `message.ts` routing falls through to verification exactly as if no session existed. Timestamp refreshes on every message that touches the session. Closes the "stale session suppresses verification replies" Must Fix item. 3 new TTL tests (57 passing); the buy-agent Map shares the identical pattern, unit-tested via register-assistant.
+
 ### July 17, 2026 — Conversational captcha flow
 
 **New services**
@@ -43,7 +46,7 @@
 
 ### Must fix before permissionless launch
 
-- **In-memory session TTL missing** — a user who starts /buy or /register and walks away never has their session cleaned up. Until process restart, their DM replies are routed to the stale session instead of any active verification. Fix: add an idle expiry (suggested: 30 minutes) to all in-memory session Maps in buy-agent.ts and register.ts. This is the only known issue that can silently suppress verification replies for a real user.
+- **In-memory session TTL missing — ✅ RESOLVED (July 17)** — 30-minute lazy idle expiry added to the buy-agent and register-assistant session Maps (the Maps live in `buy-agent.ts` and `register-assistant.ts`; `register.ts` only holds the wallet/rules prompt maps). Checked at lookup time, no background sweep. See the July 17 TTL changelog entry.
 
 ### Known gaps (not blocking)
 

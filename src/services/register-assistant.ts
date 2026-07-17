@@ -51,16 +51,31 @@ export interface RegisterFields {
 interface RegisterSession {
   messages: KimiMessage[];
   fields: RegisterFields;
+  lastActivityAt: number;
 }
 
 const sessions = new Map<number, RegisterSession>();
+
+/** A stale session would otherwise suppress verification-reply routing for this user forever. */
+const SESSION_IDLE_TTL_MS = 30 * 60_000;
+
+/** Lazy expiry: a session idle past the TTL is deleted at lookup time — no background sweep. */
+function getLiveSession(userId: number): RegisterSession | undefined {
+  const session = sessions.get(userId);
+  if (!session) return undefined;
+  if (Date.now() - session.lastActivityAt > SESSION_IDLE_TTL_MS) {
+    sessions.delete(userId);
+    return undefined;
+  }
+  return session;
+}
 
 export function emptyRegisterFields(): RegisterFields {
   return { groupLink: null, groupTopic: null, payoutWallet: null, pricePerVerification: null };
 }
 
 export function hasActiveRegisterSession(userId: number): boolean {
-  return sessions.has(userId);
+  return getLiveSession(userId) !== undefined;
 }
 
 export function endRegisterSession(userId: number): void {
@@ -69,7 +84,7 @@ export function endRegisterSession(userId: number): void {
 
 /** Starts (or restarts) a session and returns the opening message to send. */
 export function startRegisterSession(userId: number): string {
-  sessions.set(userId, { messages: [], fields: emptyRegisterFields() });
+  sessions.set(userId, { messages: [], fields: emptyRegisterFields(), lastActivityAt: Date.now() });
   return (
     "👋 Let's get your group registered on Canvas. I need four things: your group link, " +
     "what the group is about, your Base payout wallet, and your price per verification " +
@@ -210,11 +225,12 @@ export async function handleRegisterMessage(
   text: string,
   resolveGroup: ResolveGroupFn,
 ): Promise<RegisterTurnResult> {
-  let session = sessions.get(userId);
+  let session = getLiveSession(userId);
   if (!session) {
-    session = { messages: [], fields: emptyRegisterFields() };
+    session = { messages: [], fields: emptyRegisterFields(), lastActivityAt: Date.now() };
     sessions.set(userId, session);
   }
+  session.lastActivityAt = Date.now();
 
   if (CONFIRM_RE.test(text.trim())) {
     const missing = missingFields(session.fields);
