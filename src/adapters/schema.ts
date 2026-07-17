@@ -81,6 +81,9 @@ export async function createCanvasTables(): Promise<void> {
       -- Owner-stated price per verification (USDC microunits), collected by the
       -- conversational /register assistant.
       ALTER TABLE groups ADD COLUMN IF NOT EXISTS min_price_micro BIGINT;
+      -- Structured audience signals from the /register tagging phase (free-form
+      -- categories, audience description, language, activity, est. monthly joins).
+      ALTER TABLE groups ADD COLUMN IF NOT EXISTS group_tags JSONB NOT NULL DEFAULT '{}'::jsonb;
       -- Owner accept/decline gate: when the approval request was DM'd to the group
       -- owner (campaigns auto-accept 48h after this timestamp).
       ALTER TABLE advertiser_budgets ADD COLUMN IF NOT EXISTS approval_requested_at TIMESTAMPTZ;

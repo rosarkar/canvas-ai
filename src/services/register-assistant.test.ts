@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { registerGroup } from "@/adapters/groups.adapter.js";
+import { registerGroup, updateGroupTags } from "@/adapters/groups.adapter.js";
 import {
   endRegisterSession,
   handleRegisterMessage,
@@ -20,6 +20,7 @@ vi.mock("./scoring.js", () => ({
 
 vi.mock("@/adapters/groups.adapter.js", () => ({
   registerGroup: vi.fn(),
+  updateGroupTags: vi.fn(),
 }));
 
 // logger transitively requires the full .env config — stub it out for unit tests.
@@ -29,6 +30,7 @@ vi.mock("@/utils/logger.js", () => ({
 
 const mockedCallKimi = vi.mocked(callKimi);
 const mockedRegisterGroup = vi.mocked(registerGroup);
+const mockedUpdateGroupTags = vi.mocked(updateGroupTags);
 
 const USER_ID = 777;
 const VALID_WALLET = "0x1234567890abcdef1234567890abcdef12345678";
@@ -38,9 +40,14 @@ function kimiReply(fields: Record<string, unknown>, reply = "Noted!", readyToCon
   return JSON.stringify({ reply, extractedFields: fields, readyToConfirm });
 }
 
+function tagsReply(tags: Record<string, unknown>, reply = "Tell me more!", taggingComplete = false): string {
+  return JSON.stringify({ reply, extractedTags: tags, taggingComplete });
+}
+
 beforeEach(() => {
   mockedCallKimi.mockReset();
   mockedRegisterGroup.mockReset();
+  mockedUpdateGroupTags.mockReset();
   resolveGroup.mockClear();
   endRegisterSession(USER_ID);
 });
@@ -172,6 +179,21 @@ describe("handleRegisterMessage", () => {
     expect(mockedRegisterGroup).not.toHaveBeenCalled();
 
     mockedRegisterGroup.mockResolvedValueOnce({ groupId: 42 } as never);
+    // The tagging opener fires on the same confirm turn; here it infers everything
+    // at once so registration + tagging complete together.
+    mockedCallKimi.mockResolvedValueOnce(
+      tagsReply(
+        {
+          categories: ["defi", "base"],
+          audienceDescription: "Base DeFi users focused on yield",
+          primaryLanguage: "en",
+          activityLevel: "high",
+          estimatedMonthlyJoins: 100,
+        },
+        "You're all set!",
+        true,
+      ),
+    );
     turn = await handleRegisterMessage(USER_ID, "confirm", resolveGroup);
 
     expect(turn.isComplete).toBe(true);
@@ -261,3 +283,186 @@ describe("handleRegisterMessage", () => {
     expect(hasActiveRegisterSession(USER_ID)).toBe(true);
   });
 });
+
+describe("tagging phase", () => {
+  /** Runs core collection + confirm; the queued opener response starts the tagging phase. */
+  async function reachTaggingPhase(openerResponse: string) {
+    startRegisterSession(USER_ID);
+    mockedCallKimi.mockResolvedValueOnce(
+      kimiReply(
+        {
+          groupLink: "t.me/basefarmers",
+          groupTopic: "Base DeFi yield strategies",
+          payoutWallet: VALID_WALLET,
+          pricePerVerification: 0.25,
+        },
+        "All set — confirm?",
+        true,
+      ),
+    );
+    await handleRegisterMessage(USER_ID, "everything at once", resolveGroup);
+    mockedRegisterGroup.mockResolvedValueOnce({ groupId: 42 } as never);
+    mockedCallKimi.mockResolvedValueOnce(openerResponse);
+    return handleRegisterMessage(USER_ID, "confirm", resolveGroup);
+  }
+
+  it("full tag extraction across 2 turns for a crypto group", async () => {
+    const confirmTurn = await reachTaggingPhase(
+      tagsReply(
+        {
+          categories: ["defi", "base", "yield"],
+          audienceDescription: "Active DeFi traders on Base focused on yield strategies",
+          primaryLanguage: "en",
+          activityLevel: "high",
+        },
+        "Roughly how many new members join per month?",
+      ),
+    );
+    expect(confirmTurn.isComplete).toBe(false);
+    expect(confirmTurn.reply).toContain("Your group is registered");
+    expect(confirmTurn.reply).toContain("new members join per month");
+    expect(hasActiveRegisterSession(USER_ID)).toBe(true);
+
+    mockedCallKimi.mockResolvedValueOnce(
+      tagsReply(
+        {
+          categories: ["defi", "base", "yield"],
+          audienceDescription: "Active DeFi traders on Base focused on yield strategies",
+          primaryLanguage: "en",
+          activityLevel: "high",
+          estimatedMonthlyJoins: 200,
+        },
+        "Perfect, all done!",
+        true,
+      ),
+    );
+    const turn = await handleRegisterMessage(USER_ID, "around 200 a month", resolveGroup);
+
+    expect(turn.isComplete).toBe(true);
+    expect(turn.registeredGroupId).toBe(42);
+    expect(hasActiveRegisterSession(USER_ID)).toBe(false);
+    expect(mockedUpdateGroupTags).toHaveBeenCalledWith(42, {
+      categories: ["defi", "base", "yield"],
+      audienceDescription: "Active DeFi traders on Base focused on yield strategies",
+      primaryLanguage: "en",
+      activityLevel: "high",
+      estimatedMonthlyJoins: 200,
+    });
+  });
+
+  it("non-crypto group: categories are free-form strings, not validated against any list", async () => {
+    const confirmTurn = await reachTaggingPhase(
+      tagsReply(
+        {
+          categories: ["new york food", "restaurants", "influencer"],
+          audienceDescription: "Food enthusiasts in New York following restaurant recommendations",
+          primaryLanguage: "en",
+          activityLevel: "medium",
+        },
+        "About how many new members join each month?",
+      ),
+    );
+    expect(confirmTurn.isComplete).toBe(false);
+
+    mockedCallKimi.mockResolvedValueOnce(
+      tagsReply(
+        {
+          categories: ["new york food", "restaurants", "influencer"],
+          audienceDescription: "Food enthusiasts in New York following restaurant recommendations",
+          primaryLanguage: "en",
+          activityLevel: "medium",
+          estimatedMonthlyJoins: 50,
+        },
+        "Done!",
+        true,
+      ),
+    );
+    const turn = await handleRegisterMessage(USER_ID, "maybe 50", resolveGroup);
+
+    expect(turn.isComplete).toBe(true);
+    expect(mockedUpdateGroupTags).toHaveBeenCalledWith(
+      42,
+      expect.objectContaining({
+        categories: ["new york food", "restaurants", "influencer"],
+      }),
+    );
+  });
+
+  it("partial tags accepted when owner gives incomplete answers after 2 attempts", async () => {
+    await reachTaggingPhase(
+      tagsReply({ categories: ["fitness", "women"] }, "What's the vibe — busy chat or quieter?"),
+    );
+
+    mockedCallKimi.mockResolvedValueOnce(
+      tagsReply({ categories: ["fitness", "women"] }, "No worries — roughly how many join monthly?"),
+    );
+    let turn = await handleRegisterMessage(USER_ID, "not sure honestly", resolveGroup);
+    expect(turn.isComplete).toBe(false);
+
+    // Third agent turn hits the cap: finalize with whatever was collected.
+    mockedCallKimi.mockResolvedValueOnce(
+      tagsReply({ categories: ["fitness", "women"], primaryLanguage: "en" }, "All good!"),
+    );
+    turn = await handleRegisterMessage(USER_ID, "really don't know", resolveGroup);
+
+    expect(turn.isComplete).toBe(true);
+    expect(hasActiveRegisterSession(USER_ID)).toBe(false);
+    const stored = mockedUpdateGroupTags.mock.calls[0]![1];
+    expect(stored).toEqual({ categories: ["fitness", "women"], primaryLanguage: "en" });
+    expect(stored).not.toHaveProperty("estimatedMonthlyJoins");
+  });
+
+  it("invalid activityLevel re-asked once, then accepted as null on second failure", async () => {
+    await reachTaggingPhase(tagsReply({ categories: ["gaming"] }, "How active is the group?"));
+
+    mockedCallKimi.mockResolvedValueOnce(
+      tagsReply(
+        {
+          categories: ["gaming"],
+          audienceDescription: "Casual gamers",
+          primaryLanguage: "en",
+          activityLevel: "super active",
+          estimatedMonthlyJoins: 30,
+        },
+        "Noted!",
+        true,
+      ),
+    );
+    let turn = await handleRegisterMessage(USER_ID, "it's super active, 30 joins", resolveGroup);
+    // Invalid value → one re-ask, completion blocked even though the model said complete.
+    expect(turn.isComplete).toBe(false);
+    expect(turn.reply).toContain("high, medium, or low");
+
+    // Second failure: accepted as null, registration completes without activityLevel.
+    mockedCallKimi.mockResolvedValueOnce(
+      tagsReply(
+        {
+          categories: ["gaming"],
+          audienceDescription: "Casual gamers",
+          primaryLanguage: "en",
+          activityLevel: "extremely active",
+          estimatedMonthlyJoins: 30,
+        },
+        "Got it!",
+        true,
+      ),
+    );
+    turn = await handleRegisterMessage(USER_ID, "like I said, super active", resolveGroup);
+
+    expect(turn.isComplete).toBe(true);
+    const stored = mockedUpdateGroupTags.mock.calls[0]![1];
+    expect(stored).not.toHaveProperty("activityLevel");
+    expect(stored).toMatchObject({ categories: ["gaming"], estimatedMonthlyJoins: 30 });
+  });
+
+  it("malformed tagging JSON: registration completes, empty tags, no write", async () => {
+    const turn = await reachTaggingPhase("Sure! Let me ask about your audience...");
+
+    expect(turn.isComplete).toBe(true);
+    expect(turn.registeredGroupId).toBe(42);
+    expect(turn.reply).toContain("Your group is registered");
+    expect(hasActiveRegisterSession(USER_ID)).toBe(false);
+    expect(mockedUpdateGroupTags).not.toHaveBeenCalled();
+  });
+});
+

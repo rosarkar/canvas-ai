@@ -1,4 +1,4 @@
-import { registerGroup } from "@/adapters/groups.adapter.js";
+import { registerGroup, updateGroupTags } from "@/adapters/groups.adapter.js";
 import { callKimi, type KimiMessage } from "@/services/scoring.js";
 import { toMicroUnits } from "@/utils/usdc.js";
 import { logger } from "@/utils/logger.js";
@@ -48,10 +48,53 @@ export interface RegisterFields {
   pricePerVerification: number | null;
 }
 
+/** Audience signals collected by the post-confirmation tagging phase. All fields optional — partial tags never block registration. */
+export interface GroupTags {
+  /** Free-form: Canvas groups are any interest community, not just crypto — no fixed list. */
+  categories: string[] | null;
+  audienceDescription: string | null;
+  /** ISO 639-1 code, e.g. "en", "es", "pt". */
+  primaryLanguage: string | null;
+  activityLevel: "high" | "medium" | "low" | null;
+  estimatedMonthlyJoins: number | null;
+}
+
+export function emptyGroupTags(): GroupTags {
+  return {
+    categories: null,
+    audienceDescription: null,
+    primaryLanguage: null,
+    activityLevel: null,
+    estimatedMonthlyJoins: null,
+  };
+}
+
 interface RegisterSession {
   messages: KimiMessage[];
   fields: RegisterFields;
   lastActivityAt: number;
+  /** "core" collects the four registration fields; "tagging" is the post-confirm audience-signal conversation. */
+  phase: "core" | "tagging";
+  tags: GroupTags;
+  taggingMessages: KimiMessage[];
+  /** Agent turns spent tagging (opening question included) — capped at 3; partial tags are accepted at the cap. */
+  taggingTurns: number;
+  /** Invalid activityLevel values get exactly one re-ask; a second failure is accepted as null. */
+  activityRejections: number;
+  registeredGroupId?: number;
+}
+
+function newSession(): RegisterSession {
+  return {
+    messages: [],
+    fields: emptyRegisterFields(),
+    lastActivityAt: Date.now(),
+    phase: "core",
+    tags: emptyGroupTags(),
+    taggingMessages: [],
+    taggingTurns: 0,
+    activityRejections: 0,
+  };
 }
 
 const sessions = new Map<number, RegisterSession>();
@@ -84,7 +127,7 @@ export function endRegisterSession(userId: number): void {
 
 /** Starts (or restarts) a session and returns the opening message to send. */
 export function startRegisterSession(userId: number): string {
-  sessions.set(userId, { messages: [], fields: emptyRegisterFields(), lastActivityAt: Date.now() });
+  sessions.set(userId, newSession());
   return (
     "👋 Let's get your group registered on Canvas. I need four things: your group link, " +
     "what the group is about, your Base payout wallet, and your price per verification " +
@@ -216,6 +259,254 @@ export type ResolveGroupFn = (
 
 const CONFIRM_RE = /^(confirm|yes)[.!]?$/i;
 
+// --- Post-confirmation audience-tagging phase ---------------------------------
+
+const TAGGING_SYSTEM_PROMPT = `You are the Canvas Protocol registration agent, continuing a conversation with a group owner whose group was just registered. Now you are collecting audience signals that help advertisers find the right groups. Canvas groups can be ANY interest community — crypto, food influencers, fashion, fitness, gaming, local city communities, sports, music, anything.
+
+Collect these five signals through a flowing, natural conversation — never as a form or a list of questions. You will be given what is already known about the group (link, topic); INFER everything you can from it and only ask about what you genuinely cannot infer. Keep it to at most 2-3 short messages, one or two questions per message.
+
+1. categories — free-form lowercase tags describing what the group is about, e.g. ["defi", "base"] or ["new york food", "restaurants", "influencer"] or ["fashion", "toronto", "streetwear"]. Infer these; there is no fixed list.
+2. audienceDescription — ONE plain-English sentence you write yourself describing who is in the group, e.g. "Active DeFi traders on Base focused on yield strategies".
+3. primaryLanguage — ISO 639-1 code ("en", "es", "pt", "tr"…). Infer from the link/topic/conversation; only ask if genuinely unclear.
+4. activityLevel — exactly "high", "medium", or "low". Infer if possible (live discussion group = high, announcement channel = low); ask if unclear.
+5. estimatedMonthlyJoins — the owner's rough integer estimate of new members per month. Always ask this directly; it cannot be inferred.
+
+Set taggingComplete to true once every field is filled, or once you have asked twice and the owner still hasn't provided the rest — partial data is fine, never keep pushing.
+
+OUTPUT CONTRACT — every reply, with no exceptions, must be ONLY a JSON object of this exact shape, no markdown fences, no text outside the JSON:
+{
+  "reply": "<the conversational message to show the owner>",
+  "extractedTags": {
+    "categories": <array of strings or null>,
+    "audienceDescription": <string or null>,
+    "primaryLanguage": <string or null>,
+    "activityLevel": <"high" | "medium" | "low" | null>,
+    "estimatedMonthlyJoins": <number or null>
+  },
+  "taggingComplete": <true|false>
+}
+
+"extractedTags" must reflect everything gathered across the whole tagging conversation so far. Use null only for signals not yet known.`;
+
+const ACTIVITY_LEVELS = ["high", "medium", "low"] as const;
+
+interface ParsedTagsResponse {
+  reply: string;
+  tags: GroupTags;
+  /** activityLevel was present but not high/medium/low — triggers one re-ask. */
+  invalidActivity: boolean;
+  taggingComplete: boolean;
+}
+
+/** Structure/type validation only — categories are free-form by design; activityLevel is the sole constrained field. */
+export function parseTagsResponse(content: string): ParsedTagsResponse {
+  const parsed = JSON.parse(content) as {
+    reply?: unknown;
+    extractedTags?: unknown;
+    taggingComplete?: unknown;
+  };
+  const reply =
+    typeof parsed.reply === "string" && parsed.reply.trim() ? parsed.reply.trim() : "Got it.";
+  const raw = (
+    parsed.extractedTags && typeof parsed.extractedTags === "object" ? parsed.extractedTags : {}
+  ) as Record<string, unknown>;
+
+  const categories = Array.isArray(raw.categories)
+    ? raw.categories.filter((x): x is string => typeof x === "string" && x.trim().length > 0).map((x) => x.trim())
+    : null;
+  const audienceDescription =
+    typeof raw.audienceDescription === "string" && raw.audienceDescription.trim()
+      ? raw.audienceDescription.trim()
+      : null;
+  const primaryLanguage =
+    typeof raw.primaryLanguage === "string" && raw.primaryLanguage.trim()
+      ? raw.primaryLanguage.trim().toLowerCase()
+      : null;
+
+  let activityLevel: GroupTags["activityLevel"] = null;
+  let invalidActivity = false;
+  if (raw.activityLevel != null) {
+    if ((ACTIVITY_LEVELS as readonly string[]).includes(raw.activityLevel as string)) {
+      activityLevel = raw.activityLevel as GroupTags["activityLevel"];
+    } else {
+      invalidActivity = true;
+    }
+  }
+
+  const estimatedMonthlyJoins =
+    typeof raw.estimatedMonthlyJoins === "number" && Number.isFinite(raw.estimatedMonthlyJoins)
+      ? Math.round(raw.estimatedMonthlyJoins)
+      : null;
+
+  return {
+    reply,
+    tags: {
+      categories: categories && categories.length > 0 ? categories : null,
+      audienceDescription,
+      primaryLanguage,
+      activityLevel,
+      estimatedMonthlyJoins,
+    },
+    invalidActivity,
+    taggingComplete: parsed.taggingComplete === true,
+  };
+}
+
+export function mergeGroupTags(previous: GroupTags, next: GroupTags): GroupTags {
+  return {
+    categories: pickNonNull(previous.categories, next.categories),
+    audienceDescription: pickNonNull(previous.audienceDescription, next.audienceDescription),
+    primaryLanguage: pickNonNull(previous.primaryLanguage, next.primaryLanguage),
+    activityLevel: pickNonNull(previous.activityLevel, next.activityLevel),
+    estimatedMonthlyJoins: pickNonNull(previous.estimatedMonthlyJoins, next.estimatedMonthlyJoins),
+  };
+}
+
+function allTagsPresent(tags: GroupTags): boolean {
+  return (
+    tags.categories != null &&
+    tags.audienceDescription != null &&
+    tags.primaryLanguage != null &&
+    tags.activityLevel != null &&
+    tags.estimatedMonthlyJoins != null
+  );
+}
+
+function taggingContextMessage(fields: RegisterFields): KimiMessage {
+  return {
+    role: "system",
+    content:
+      `KNOWN GROUP CONTEXT (infer signals from this before asking anything):\n` +
+      `Group link: ${fields.groupLink ?? "unknown"}\n` +
+      `Topic (owner's words): ${fields.groupTopic ?? "unknown"}`,
+  };
+}
+
+/** Writes whatever was collected (partial is fine), ends the session, and never blocks completion on a DB error. */
+async function finalizeTagging(
+  userId: number,
+  session: RegisterSession,
+  reply: string,
+): Promise<RegisterTurnResult> {
+  const collected = Object.fromEntries(
+    Object.entries(session.tags).filter(([, v]) => v != null),
+  );
+  if (session.registeredGroupId != null && Object.keys(collected).length > 0) {
+    try {
+      await updateGroupTags(session.registeredGroupId, collected);
+      logger.info(
+        { groupId: session.registeredGroupId, tags: collected },
+        "Group tags saved from /register tagging phase",
+      );
+    } catch (err) {
+      logger.error({ err, groupId: session.registeredGroupId }, "Failed to save group tags");
+    }
+  }
+  const registeredGroupId = session.registeredGroupId;
+  sessions.delete(userId);
+  return { reply, isComplete: true, registeredGroupId };
+}
+
+const TAGGING_DONE_NOTE = "That's everything — your group is live on Canvas. 🎉";
+
+async function handleTaggingTurn(
+  userId: number,
+  session: RegisterSession,
+  text: string,
+): Promise<RegisterTurnResult> {
+  session.taggingMessages.push({ role: "user", content: text });
+
+  let parsed: ParsedTagsResponse;
+  try {
+    const content = await callKimi(
+      [
+        { role: "system", content: TAGGING_SYSTEM_PROMPT },
+        taggingContextMessage(session.fields),
+        ...session.taggingMessages,
+      ],
+      { temperature: 0.4, timeoutMs: 12_000 },
+    );
+    parsed = parseTagsResponse(content);
+  } catch (err) {
+    logger.warn({ err, userId }, "register assistant: tagging turn failed — completing with partial tags");
+    // Tagging is best-effort and must never block a finished registration.
+    return finalizeTagging(userId, session, TAGGING_DONE_NOTE);
+  }
+
+  session.taggingTurns += 1;
+  session.tags = mergeGroupTags(session.tags, parsed.tags);
+
+  let reply = parsed.reply;
+  let blockCompletion = false;
+  if (parsed.invalidActivity && session.tags.activityLevel == null) {
+    session.activityRejections += 1;
+    if (session.activityRejections === 1) {
+      reply += "\n\n(One check: would you call the group's activity high, medium, or low?)";
+      blockCompletion = true;
+    }
+    // Second failure: accept null and move on.
+  }
+
+  const done =
+    !blockCompletion &&
+    (parsed.taggingComplete || allTagsPresent(session.tags) || session.taggingTurns >= 3);
+  if (done || session.taggingTurns >= 3) {
+    return finalizeTagging(userId, session, done ? reply : `${reply}\n\n${TAGGING_DONE_NOTE}`);
+  }
+
+  session.taggingMessages.push({
+    role: "assistant",
+    content: JSON.stringify({ reply: parsed.reply, extractedTags: session.tags }),
+  });
+  return { reply, isComplete: false, registeredGroupId: session.registeredGroupId };
+}
+
+/** Opens the tagging conversation right after a successful registration write. */
+async function beginTaggingPhase(
+  userId: number,
+  session: RegisterSession,
+  registeredReply: string,
+): Promise<RegisterTurnResult> {
+  session.phase = "tagging";
+
+  let parsed: ParsedTagsResponse;
+  try {
+    const content = await callKimi(
+      [
+        { role: "system", content: TAGGING_SYSTEM_PROMPT },
+        taggingContextMessage(session.fields),
+        {
+          role: "user",
+          content:
+            "[The registration just completed. Open the audience-tagging conversation now: state briefly what you've inferred and ask your first question. Respond with the JSON object only.]",
+        },
+      ],
+      { temperature: 0.4, timeoutMs: 12_000 },
+    );
+    parsed = parseTagsResponse(content);
+  } catch (err) {
+    logger.warn({ err, userId }, "register assistant: tagging opening failed — skipping tagging");
+    return finalizeTagging(userId, session, registeredReply);
+  }
+
+  session.taggingTurns = 1;
+  session.tags = mergeGroupTags(session.tags, parsed.tags);
+
+  if (parsed.taggingComplete || allTagsPresent(session.tags)) {
+    return finalizeTagging(userId, session, `${registeredReply}\n\n${parsed.reply}`);
+  }
+
+  session.taggingMessages.push({
+    role: "assistant",
+    content: JSON.stringify({ reply: parsed.reply, extractedTags: session.tags }),
+  });
+  return {
+    reply: `${registeredReply}\n\n${parsed.reply}`,
+    isComplete: false,
+    registeredGroupId: session.registeredGroupId,
+  };
+}
+
 /**
  * One turn of the registration conversation. The DB write fires only when the
  * user sends an explicit confirmation AND all four fields have passed TS validation.
@@ -227,10 +518,16 @@ export async function handleRegisterMessage(
 ): Promise<RegisterTurnResult> {
   let session = getLiveSession(userId);
   if (!session) {
-    session = { messages: [], fields: emptyRegisterFields(), lastActivityAt: Date.now() };
+    session = newSession();
     sessions.set(userId, session);
   }
   session.lastActivityAt = Date.now();
+
+  // Tagging phase owns every message after confirmation — including "confirm"/"yes",
+  // which are ordinary answers here, not a re-registration trigger.
+  if (session.phase === "tagging") {
+    return handleTaggingTurn(userId, session, text);
+  }
 
   if (CONFIRM_RE.test(text.trim())) {
     const missing = missingFields(session.fields);
@@ -261,16 +558,18 @@ export async function handleRegisterMessage(
         minPriceMicro: toMicroUnits(session.fields.pricePerVerification!),
       });
       const groupLink = session.fields.groupLink!;
-      sessions.delete(userId);
+      session.registeredGroupId = group.groupId;
       logger.info(
         { groupId: group.groupId, ownerTgId: userId },
         "Group registered via conversational /register",
       );
-      return {
-        reply: `Your group is registered. Add @CanvasVerificationBot as an admin to ${groupLink} to go live.`,
-        isComplete: true,
-        registeredGroupId: group.groupId,
-      };
+      // Registration is done; the session continues into the audience-tagging
+      // phase. If the tagging opener fails, the session ends here gracefully.
+      return beginTaggingPhase(
+        userId,
+        session,
+        `Your group is registered. Add @CanvasVerificationBot as an admin to ${groupLink} to go live.`,
+      );
     } catch (err) {
       logger.error({ err, userId }, "register assistant: registerGroup failed");
       return {

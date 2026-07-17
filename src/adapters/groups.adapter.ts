@@ -16,6 +16,8 @@ export interface GroupRow {
   rules: string[];
   /** Owner-stated price per verification in USDC microunits (conversational /register). */
   minPriceMicro: bigint | null;
+  /** Audience signals from the /register tagging phase (free-form; {} = never tagged). */
+  groupTags: Record<string, unknown>;
 }
 
 function mapGroup(r: Record<string, unknown>): GroupRow {
@@ -35,7 +37,19 @@ function mapGroup(r: Record<string, unknown>): GroupRow {
     portalInviteLink: (r.portal_invite_link as string | null) ?? null,
     rules: (r.rules as string[] | null) ?? [],
     minPriceMicro: r.min_price_micro != null ? BigInt(r.min_price_micro as string | bigint) : null,
+    groupTags: (r.group_tags as Record<string, unknown> | null) ?? {},
   };
+}
+
+/** Writes the audience tags collected by the /register tagging phase. Partial objects are fine. */
+export async function updateGroupTags(
+  groupId: number,
+  tags: Record<string, unknown>,
+): Promise<void> {
+  await db.query(`UPDATE groups SET group_tags = $2 WHERE group_id = $1`, [
+    groupId,
+    JSON.stringify(tags),
+  ]);
 }
 
 export async function registerGroup(input: {

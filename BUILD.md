@@ -9,6 +9,11 @@
 
 ## Changelog
 
+### July 17, 2026 — audience tagging phase in conversational /register
+- After the four core fields are confirmed and `registerGroup` fires, the register-assistant session continues into a Kimi-driven tagging phase (2–3 natural turns, capped at 3 agent turns) collecting audience signals for advertiser targeting: free-form `categories` (Canvas groups are any interest community — food, fashion, fitness, gaming, local, not just crypto; no fixed list), a Kimi-written `audienceDescription` sentence, `primaryLanguage` (ISO 639-1), `activityLevel` (the only constrained field — high/medium/low, one re-ask on an invalid value then null accepted), and `estimatedMonthlyJoins`. Kimi infers what it can from the link/topic and only asks the rest.
+- Stored in new `groups.group_tags` JSONB (default `{}`) — `migrations/2026-07-17-group-tags.sql` + idempotent equivalent in `schema.ts`; partial objects are stored as-is and tagging never blocks registration (Kimi failure or malformed JSON at any tagging turn completes the registration gracefully with whatever was collected).
+- `GroupRow.groupTags` exposed via `mapGroup`, so every group query (including the buy flow's `listActiveGroups`) carries the tags; new `updateGroupTags` adapter write. 5 new tests (62 passing).
+
 ### July 17, 2026 — 30-minute idle TTL on in-memory sessions
 - Buy-agent and register-assistant session Maps now store `lastActivityAt`; entries idle >30 min are deleted lazily at lookup time (`getLiveSession` in `buy-agent.ts` / `register-assistant.ts`) — no background sweep. `hasActiveBuyAgentSession` / `hasActiveRegisterSession` perform the expiry, so `message.ts` routing falls through to verification exactly as if no session existed. Timestamp refreshes on every message that touches the session. Closes the "stale session suppresses verification replies" Must Fix item. 3 new TTL tests (57 passing); the buy-agent Map shares the identical pattern, unit-tested via register-assistant.
 
