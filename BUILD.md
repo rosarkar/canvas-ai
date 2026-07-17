@@ -9,22 +9,24 @@
 
 ## Changelog
 
-### July 17, 2026 — unified wallet dashboard (`/dashboard`)
+### July 17, 2026
+
+#### Unified dashboard (`/dashboard`)
 - New single-page dashboard at `public/dashboard/index.html` serving both roles from one wallet login; new `GET /api/dashboard` (behind the existing `requireWalletAuth` signature check) returns `{roles, groups, campaigns, availableGroups, completionFeed, spendSummary}` via `src/adapters/dashboard.adapter.ts` — batched queries (`= ANY(group_ids)`, window function for per-group recents), no N+1.
 - Roles derived server-side: groups-only wallets land on the owner view, campaigns-only on the advertiser view, both get a JS role switcher (no reload), neither gets a get-started empty state deep-linking `?start=register` / `?start=buy`.
 - Owner view (per selected group, tab row when multiple, default most recent): profile card with `group_tags` (category pills, audience subtitle, activity badge, est. monthly joins), earnings (all-time / month / week / pending, net of platform fee), 30-day pass/fail activity, active campaigns targeting the group (truncated advertiser wallet, bid, budget left, `task_template.openingPrompt` else `task_text`), last-10 verifications (no user identity), quick-action deep links.
 - Advertiser view: spend summary (incl. avg Kimi score), expandable campaign cards with structured brief, last-20 completion feed, and a browsable "available groups" list (untargeted active groups with tags + top bid, keyword/activity filters, "Target this group" → `?start=buy`).
 - Old `/advertiser` and `/group-owner` pages left in place for backward compat; `/dashboard` is the primary going forward. Light/dark theming via `prefers-color-scheme`, no external CSS. No auth changes, no bot-handler changes.
 
-### July 17, 2026 — audience tagging phase in conversational /register
+#### Audience tagging in /register
 - After the four core fields are confirmed and `registerGroup` fires, the register-assistant session continues into a Kimi-driven tagging phase (2–3 natural turns, capped at 3 agent turns) collecting audience signals for advertiser targeting: free-form `categories` (Canvas groups are any interest community — food, fashion, fitness, gaming, local, not just crypto; no fixed list), a Kimi-written `audienceDescription` sentence, `primaryLanguage` (ISO 639-1), `activityLevel` (the only constrained field — high/medium/low, one re-ask on an invalid value then null accepted), and `estimatedMonthlyJoins`. Kimi infers what it can from the link/topic and only asks the rest.
 - Stored in new `groups.group_tags` JSONB (default `{}`) — `migrations/2026-07-17-group-tags.sql` + idempotent equivalent in `schema.ts`; partial objects are stored as-is and tagging never blocks registration (Kimi failure or malformed JSON at any tagging turn completes the registration gracefully with whatever was collected).
 - `GroupRow.groupTags` exposed via `mapGroup`, so every group query (including the buy flow's `listActiveGroups`) carries the tags; new `updateGroupTags` adapter write. 5 new tests (62 passing).
 
-### July 17, 2026 — 30-minute idle TTL on in-memory sessions
+#### 30-minute session TTL
 - Buy-agent and register-assistant session Maps now store `lastActivityAt`; entries idle >30 min are deleted lazily at lookup time (`getLiveSession` in `buy-agent.ts` / `register-assistant.ts`) — no background sweep. `hasActiveBuyAgentSession` / `hasActiveRegisterSession` perform the expiry, so `message.ts` routing falls through to verification exactly as if no session existed. Timestamp refreshes on every message that touches the session. Closes the "stale session suppresses verification replies" Must Fix item. 3 new TTL tests (57 passing); the buy-agent Map shares the identical pattern, unit-tested via register-assistant.
 
-### July 17, 2026 — Conversational captcha flow
+#### Conversational captcha flow
 
 **New services**
 - captcha-agent.ts — multi-turn Kimi conversation agent for end-user verification. Generates opening question from advertiser brief, probes thin responses, closes after 2–4 turns, sends full transcript to Kimi scorer. Hard cap of 3 agent turns enforced in code, not just prompt. Fails closed on any parse error or Kimi failure.
@@ -52,22 +54,25 @@
 
 **Test count: 54 passing**
 
----
+- Single-shot captcha replaced with a multi-turn conversation: a dialogue agent (new `src/services/captcha-agent.ts`, tested in `captcha-agent.test.ts`) drives the DM exchange; the Kimi quality gate is unchanged and scores the full transcript at close.
+- Agent opens with a natural question generated from the advertiser brief (template prompt → campaign task_text → group topic fallback), probes once or twice on vague/thin/pattern-like answers, and is hard-capped at 3 agent turns. JSON parse failures fail closed.
+- New `verifications` columns: `conversation_history` JSONB (full agent/user log) and `conversation_turn` INT — `migrations/2026-07-17-conversational-captcha.sql` for the live DB, idempotent equivalents in `schema.ts` for fresh DBs (migrations/ folder is new; schema.ts remains the boot-time mechanism).
+- Flow: join handler (`begin-verification.ts`) stores the opening as turn 1 and DMs it (legacy static task DM is the fallback if the agent errors); the DM reply handler (`process-text-response.ts`) appends each user reply, increments the turn, and closes at turn ≥ 4 or when the agent says so — row stays in TASK_SENT/DEEP_LINK_SENT between probes. Scoring threshold, payout logic, and terminal states untouched.
 
-## Known Issues
+#### Conversational /register
+- DM `/register` (which previously just printed instructions) now runs a Kimi-driven conversation via new `src/services/register-assistant.ts` (tested in `register-assistant.test.ts`), collecting group link, topic, Base payout wallet, and price per verification in any order. In-group `/register` and auto-registration are unchanged.
+- All validation is TypeScript-side (Kimi only extracts): link must be `t.me/`/`@`, wallet must be a 42-char 0x hex address, price ≥ $0.10. The `registerGroup` write fires only on an explicit "confirm"/"yes" with all four fields valid; malformed Kimi JSON gets a retry reply without advancing session state.
+- Group links resolve to a real chat id via `getChat` (`buildResolveGroupFn` in `register.ts`); unresolvable/private-hash links fall back to the in-group `/register` instruction.
+- New `groups.min_price_micro` column (owner-stated price, USDC microunits) — `migrations/2026-07-17-group-min-price.sql` + idempotent equivalent in `schema.ts`.
+- DM routing in `message.ts`: verification replies keep priority; only when no active verification claims the text does an open registration session receive it.
 
-### Must fix before permissionless launch
+#### Enriched task_template brief
+- Buy agent now produces a structured task-design brief — `{goal, targetSignal, openingPrompt, thinResponseExamples}` — stored in new JSONB column `advertiser_budgets.task_template` (`migrations/2026-07-17-task-template-jsonb.sql`; the spec's "campaigns" table is advertiser_budgets here). `task_text` intentionally stays TEXT: it is read as a plain string in 8 call sites, so the enriched object got its own column instead of a type conversion; legacy rows (NULL) fall back to task_text unchanged.
+- TS-validated in `buildTaskTemplate()` (buy-assistant.ts): openingPrompt required, else falls back to `{openingPrompt: <raw text>}`.
+- captcha-agent's `advertiserBrief` stays `string`; it internally JSON.parses and, when structured fields are present, feeds them to the model as labeled context (goal / good-response shape / suggested opening to vary / probe-trigger examples) instead of a raw blob.
+- The verification task payload keeps a human-readable `prompt` (scorer + resend-DM fallback) alongside the serialized `brief` used on later agent turns.
 
-- **In-memory session TTL missing — ✅ RESOLVED (July 17)** — 30-minute lazy idle expiry added to the buy-agent and register-assistant session Maps (the Maps live in `buy-agent.ts` and `register-assistant.ts`; `register.ts` only holds the wallet/rules prompt maps). Checked at lookup time, no background sweep. See the July 17 TTL changelog entry.
-
-### Known gaps (not blocking)
-
-- Concurrent join shadowing — if a user joins two groups in quick succession, DM replies route to the most recent verification. The older verification becomes reachable again after the newer one closes or expires. Fixing this would require group disambiguation in DMs, which requires UX design.
-- No abandonment flow for /buy — a user who confirms a campaign but never funds escrow has a campaign row that stays open. No timeout or expiry currently exists.
-
----
-
-### July 17, 2026 — demo-hardening audit (edge-case DM handling)
+#### Demo-hardening audit
 - Non-text DMs (photo/sticker/voice/file) and whitespace-only replies during an active verification now get a plain text nudge instead of silence; neither reaches Kimi (`message.ts`).
 - Group deleted mid-verification fails closed with "This verification is no longer active." instead of silently dropping the reply.
 - Already-verified users (PASSED/ADMITTED, new `hasAnyCompletedVerification`) who DM the bot with no active flow get "You're already verified" instead of silence.
@@ -76,24 +81,17 @@
 - captcha-agent falls back to a generic experience question if the advertiser brief is ever empty.
 - Audited as already-correct: edited_message updates are ignored (no handler registered), legacy `conversation_turn = 0` rows route through the single-shot path, and every Telegram mute/unmute/kick call is try/caught + logged.
 
-### July 17, 2026 — enriched task_template brief for the captcha agent
-- Buy agent now produces a structured task-design brief — `{goal, targetSignal, openingPrompt, thinResponseExamples}` — stored in new JSONB column `advertiser_budgets.task_template` (`migrations/2026-07-17-task-template-jsonb.sql`; the spec's "campaigns" table is advertiser_budgets here). `task_text` intentionally stays TEXT: it is read as a plain string in 8 call sites, so the enriched object got its own column instead of a type conversion; legacy rows (NULL) fall back to task_text unchanged.
-- TS-validated in `buildTaskTemplate()` (buy-assistant.ts): openingPrompt required, else falls back to `{openingPrompt: <raw text>}`.
-- captcha-agent's `advertiserBrief` stays `string`; it internally JSON.parses and, when structured fields are present, feeds them to the model as labeled context (goal / good-response shape / suggested opening to vary / probe-trigger examples) instead of a raw blob.
-- The verification task payload keeps a human-readable `prompt` (scorer + resend-DM fallback) alongside the serialized `brief` used on later agent turns.
+#### Bug fixes (campaign status, group join message, .env.example, SCORING sweep)
+- **Campaign status derived from budget vs. bid** — dashboard now derives displayed status from `remaining_budget` vs. `bid_per_verification` rather than passing the raw DB value through. A campaign with `remaining >= bid` shows as active even if the DB row says exhausted (e.g. after a topup), and vice versa. `paused` and other statuses pass through unchanged.
+- **Verification notice in group chat suppressed on successful DM** — the "A new member is completing verification." welcome-gate message was posted on every open join; it now posts only when the opening DM fails (alongside the existing deep-link "Verify to join →" fallback button). `begin-verification.ts`.
+- **SCORING-state stranding sweep** — `expireStaleVerifications` covers `RESPONSE_RECEIVED`/`SCORING` (2-minute grace past `expires_at` so an in-flight finalize can't race the sweep; the CAS in `transitionState` breaks any tie), transitions them to `TIMED_OUT`, and the minute sweep in `index.ts` unmutes/denies via `completeVerificationTimeout` and fires an admin alert for stranded rows. The stale TODO comment at the SCORING transition in `process-text-response.ts` was removed.
+- **.env.example Kimi vars** — `.env.example` was missing the Kimi tuning vars. Added `KIMI_MODEL` (default `moonshot-v1-8k`), `KIMI_BASE_URL`, and `KIMI_PASS_THRESHOLD` with comments.
+- **FOR UPDATE SKIP LOCKED** — audited: already wrapped in an explicit BEGIN/COMMIT in `payout-batch.ts` spanning the SELECT + claim UPDATE (deliberately not the on-chain transfers). No change needed.
+- **ws vulnerability** — audited: `ws@8.21.0` (patched) is what's installed; no high-severity advisory exists. Remaining: one **low**-severity esbuild dev-server advisory (Windows-only, dev dependency under vite) that `npm audit fix` can't apply without a forced vitest major bump — accepted.
+- **Advertiser notifications** — audited: already present. Deposit confirmation DMs the advertiser (`notifyCampaignPendingApproval` — worded for the approval gate, since a deposit moves the campaign to pending_approval, not straight to active), top-ups get a balance receipt DM, and owner approval (manual or 48h auto-accept) sends the "campaign is live" DM (`notifyAdvertiserActivated`). No change needed.
+- **campaignDepositor guard** — the first-depositor guard is live on-chain in the deployed escrow (`0xf808…101E`). No TODO remains in code — the comment at `campaigns.ts` refund flow is an explanatory note that DB-routed refunds stay the preferred path by choice.
 
-### July 17, 2026 — conversational /register (Kimi-powered owner onboarding)
-- DM `/register` (which previously just printed instructions) now runs a Kimi-driven conversation via new `src/services/register-assistant.ts` (tested in `register-assistant.test.ts`), collecting group link, topic, Base payout wallet, and price per verification in any order. In-group `/register` and auto-registration are unchanged.
-- All validation is TypeScript-side (Kimi only extracts): link must be `t.me/`/`@`, wallet must be a 42-char 0x hex address, price ≥ $0.10. The `registerGroup` write fires only on an explicit "confirm"/"yes" with all four fields valid; malformed Kimi JSON gets a retry reply without advancing session state.
-- Group links resolve to a real chat id via `getChat` (`buildResolveGroupFn` in `register.ts`); unresolvable/private-hash links fall back to the in-group `/register` instruction.
-- New `groups.min_price_micro` column (owner-stated price, USDC microunits) — `migrations/2026-07-17-group-min-price.sql` + idempotent equivalent in `schema.ts`.
-- DM routing in `message.ts`: verification replies keep priority; only when no active verification claims the text does an open registration session receive it.
-
-### July 17, 2026 — conversational captcha (multi-turn dialogue agent)
-- Single-shot captcha replaced with a multi-turn conversation: a dialogue agent (new `src/services/captcha-agent.ts`, tested in `captcha-agent.test.ts`) drives the DM exchange; the Kimi quality gate is unchanged and scores the full transcript at close.
-- Agent opens with a natural question generated from the advertiser brief (template prompt → campaign task_text → group topic fallback), probes once or twice on vague/thin/pattern-like answers, and is hard-capped at 3 agent turns. JSON parse failures fail closed.
-- New `verifications` columns: `conversation_history` JSONB (full agent/user log) and `conversation_turn` INT — `migrations/2026-07-17-conversational-captcha.sql` for the live DB, idempotent equivalents in `schema.ts` for fresh DBs (migrations/ folder is new; schema.ts remains the boot-time mechanism).
-- Flow: join handler (`begin-verification.ts`) stores the opening as turn 1 and DMs it (legacy static task DM is the fallback if the agent errors); the DM reply handler (`process-text-response.ts`) appends each user reply, increments the turn, and closes at turn ≥ 4 or when the agent says so — row stays in TASK_SENT/DEEP_LINK_SENT between probes. Scoring threshold, payout logic, and terminal states untouched.
+---
 
 ### July 7, 2026 — UX audit fixes (commits 6ca18bf → 8d4d791)
 
@@ -278,7 +276,7 @@ A Fable 5 repo audit surfaced six bugs not previously tracked. All six were fixe
 
 ---
 
-## Current State (as of July 2, 2026)
+## Current State (as of July 17, 2026)
 
 ### Working
 - Join interception and mute
@@ -291,6 +289,9 @@ A Fable 5 repo audit surfaced six bugs not previously tracked. All six were fixe
 - Group picker for multi-group owners
 - Dual-identity mode selector
 - Conversational /register in DM — Kimi collects link/topic/wallet/price, TS validates, explicit confirm gates the DB write (July 17, 2026; in-group /register unchanged)
+- Audience tagging phase in /register — Kimi collects free-form group_tags (categories, audienceDescription, primaryLanguage, activityLevel, estimatedMonthlyJoins) after registration confirms; partial tags stored, never blocks registration
+- Unified dashboard at `/dashboard` — multi-role, multi-group, wallet-signed auth; owner earnings/activity/campaigns panels, advertiser spend/campaigns/feed/available-groups browser
+- 30-minute idle TTL on buy-agent and register-assistant in-memory sessions (lazy expiry at lookup time)
 - Advertiser buy flow (guided button flow)
 - Campaigns list with withdraw/pause/resume/top-up
 - `/start` escape hint on all flow screens
@@ -393,6 +394,19 @@ A Fable 5 repo audit surfaced six bugs not previously tracked. All six were fixe
 
 ---
 
+## Known Issues
+
+### Must fix before permissionless launch
+
+- **In-memory session TTL missing — ✅ RESOLVED (July 17)** — 30-minute lazy idle expiry added to the buy-agent and register-assistant session Maps (the Maps live in `buy-agent.ts` and `register-assistant.ts`; `register.ts` only holds the wallet/rules prompt maps). Checked at lookup time, no background sweep. See the July 17 TTL changelog entry.
+
+### Known gaps (not blocking)
+
+- Concurrent join shadowing — if a user joins two groups in quick succession, DM replies route to the most recent verification. The older verification becomes reachable again after the newer one closes or expires. Fixing this would require group disambiguation in DMs, which requires UX design.
+- No abandonment flow for /buy — a user who confirms a campaign but never funds escrow has a campaign row that stays open. No timeout or expiry currently exists.
+
+---
+
 ## Planned Features
 
 ### Group owner abuse detection (Phase 2)
@@ -448,6 +462,8 @@ Canvas Protocol is a decentralized verification marketplace that replaces standa
 ### Team
 
 **Rohit Sarkar** (@_rosark, Toronto) — product, GTM, copywriting, investor relations. Background in protocol research and content across InfStones, Figment, Caldera, and 0x (Content Manager Jan–Jun 2026, laid off June 5). Statistics education. Can code SQL/Python/R, comfortable in terminal. Now fully focused on Canvas.
+
+**Alex V** (@alexvtheschulicbleader, Toronto) — technical advisor and key architectural contributor. MEng ECE, University of Toronto, Schulich Leader. Contributed the core insight behind the conversational captcha mechanic — cheap LLM probing thin answers to produce richer signal while keeping inference costs low. Candidate co-founder, currently being evaluated for Alliance DAO and YC applications alongside Rohit.
 
 **Mateo** (@0xteo, based in Asia) — smart contract development, backend infrastructure, complex state machine work. Builder of Basemate (Base Batches 002 alumnus). Introduced by Igor from the Bankr team. 50/50 equity split.
 
@@ -543,22 +559,7 @@ Alliance DAO, Base Batches, Bankr. Traditional seed VCs deferred until live reve
 
 ---
 
-## Post-Launch TODOs (July 13 2026)
-
-### 1. SCORING-state stranding sweep — ✅ RESOLVED (July 17)
-`expireStaleVerifications` covers `RESPONSE_RECEIVED`/`SCORING` (2-minute grace past `expires_at` so an in-flight finalize can't race the sweep; the CAS in `transitionState` breaks any tie), transitions them to `TIMED_OUT`, and the minute sweep in `index.ts` unmutes/denies via `completeVerificationTimeout` and fires an admin alert for stranded rows. The stale TODO comment at the SCORING transition in `process-text-response.ts` was removed.
-
-### 2. KIMI_MODEL missing from .env.example — ✅ RESOLVED (July 17)
-`.env.example` already existed (this TODO's "missing file" framing was wrong); it was missing the Kimi tuning vars. Added `KIMI_MODEL` (default `moonshot-v1-8k`), `KIMI_BASE_URL`, and `KIMI_PASS_THRESHOLD` with comments.
-
-### 3. campaignDepositor guard on V1 contract path — ✅ RESOLVED
-The first-depositor guard is live on-chain in the deployed escrow (`0xf808…101E`). No TODO remains in code — the comment at `campaigns.ts` refund flow is an explanatory note that DB-routed refunds stay the preferred path by choice.
-
-### Audit follow-ups (July 17 2026)
-- **FOR UPDATE SKIP LOCKED** — audited: already wrapped in an explicit BEGIN/COMMIT in `payout-batch.ts` spanning the SELECT + claim UPDATE (deliberately not the on-chain transfers). No change needed.
-- **ws vulnerability** — audited: `ws@8.21.0` (patched) is what's installed; no high-severity advisory exists. Remaining: one **low**-severity esbuild dev-server advisory (Windows-only, dev dependency under vite) that `npm audit fix` can't apply without a forced vitest major bump — accepted.
-- **Verification notice in group chat** — the "A new member is completing verification." welcome-gate message posted on *every* open join; it now posts only when the opening DM fails (alongside the existing deep-link "Verify to join →" fallback button, which was already conditional). `begin-verification.ts`.
-- **Advertiser notifications** — audited: already present. Deposit confirmation DMs the advertiser (`notifyCampaignPendingApproval` — worded for the approval gate, since a deposit moves the campaign to pending_approval, not straight to active), top-ups get a balance receipt DM, and owner approval (manual or 48h auto-accept) sends the "campaign is live" DM (`notifyAdvertiserActivated`). No change needed.
+All post-launch TODOs resolved — see July 17 changelog.
 
 ---
 
