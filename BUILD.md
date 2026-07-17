@@ -1,5 +1,5 @@
 # Canvas Protocol — Build Log
-**Last updated:** July 7, 2026  
+**Last updated:** July 17, 2026  
 **Repo:** `rosarkar/canvas-ai` · **Branch:** `main` (auto-deploys to Railway)  
 **Infrastructure:** Railway — Rohit's workspace (canvas-ai + Postgres, `canvas-ai-production-eae7.up.railway.app`) · Base mainnet · `@CanvasVerificationBot`  
 **Smart contract:** `CanvasEscrowV0.sol` at `0xf808b264E13Bf809C8e86afaF4e14c200931101E` (verified on Basescan; relayer `0xbD5f…56d9`; includes the first-depositor guard)  
