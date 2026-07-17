@@ -290,6 +290,15 @@ async function loadAdvertiserSide(wallet: string): Promise<{
     const remaining = fromMicroUnits(BigInt(row.remaining_budget as string));
     const passed = Number(row.passed);
     const attempts = Number(row.attempts);
+    // Exhausted means the budget can no longer cover one verification; the DB status
+    // can lag (e.g. after a topup), so derive it from remaining vs bid for display.
+    const dbStatus = row.campaign_status as string;
+    const status =
+      dbStatus === "active" || dbStatus === "exhausted"
+        ? remaining >= bid
+          ? "active"
+          : "exhausted"
+        : dbStatus;
     return {
       advertiserId: row.advertiser_id as number,
       groupId: row.group_id as number,
@@ -302,7 +311,7 @@ async function loadAdvertiserSide(wallet: string): Promise<{
       remainingBudget: remaining,
       completions: passed,
       passRatePct: attempts > 0 ? Math.round((passed / attempts) * 100) : null,
-      status: row.campaign_status as string,
+      status,
       createdAt: (row.created_at as Date).toISOString(),
       brief: briefFromTemplate(row.task_template, (row.task_text as string | null) ?? null),
       taskText: (row.task_text as string | null) ?? null,
