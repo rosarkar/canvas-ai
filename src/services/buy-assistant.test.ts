@@ -2,6 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   buildLiveContextMessage,
+  buildPhaseContextMessage,
+  CAPTCHA_ARCHETYPES,
+  derivePhase,
   buildTaskTemplate,
   emptyIntent,
   interpretAdvertiserMessage,
@@ -156,6 +159,7 @@ describe("interpretAdvertiserMessage", () => {
     const result = await interpretAdvertiserMessage(
       [{ role: "user", content: "I want group 3" }],
       "LIVE CANVAS DATA...",
+      "archetype",
     );
 
     expect(result.reply).toBe("Sounds good!");
@@ -165,7 +169,8 @@ describe("interpretAdvertiserMessage", () => {
     const messages = callArgs[0];
     expect(messages[0]).toEqual({ role: "system", content: expect.stringContaining("Canvas Protocol buy agent") });
     expect(messages[1]).toEqual({ role: "system", content: "LIVE CANVAS DATA..." });
-    expect(messages[2]).toEqual({ role: "user", content: "I want group 3" });
+    expect(messages[2]).toEqual({ role: "system", content: expect.stringContaining('"archetype" design phase') });
+    expect(messages[3]).toEqual({ role: "user", content: "I want group 3" });
   });
 
   it("throws when callKimi fails so the caller can show a retry message", async () => {
@@ -173,5 +178,104 @@ describe("interpretAdvertiserMessage", () => {
     vi.mocked(callKimi).mockRejectedValueOnce(new Error("Kimi HTTP 500"));
 
     await expect(interpretAdvertiserMessage([], "LIVE CANVAS DATA...")).rejects.toThrow();
+  });
+});
+
+const SIM = {
+  opener: "What was the most confusing part of your first DEX trade?",
+  thinResponse: "gas fees",
+  probe: "What specifically about gas fees tripped you up?",
+  goodResponse: "I approved USDC twice on Uniswap because the first tx looked stuck — cost me $30 extra.",
+};
+
+describe("archetype phase flow", () => {
+  it("starts in goal phase and advances to archetype once a goal is stated", () => {
+    expect(derivePhase(emptyIntent())).toBe("goal");
+    const afterGoal = mergeIntent(emptyIntent(), normalizeIntent({ goal: "Understand DEX friction" }));
+    expect(derivePhase(afterGoal)).toBe("archetype");
+  });
+
+  it("advances to simulation when the advertiser selects an archetype", () => {
+    const withGoal = normalizeIntent({ goal: "Understand DEX friction" });
+    // Kimi recommends archetypes in phase 2; the advertiser picks product_feedback.
+    const picked = mergeIntent(withGoal, normalizeIntent({ selectedArchetypeId: "product_feedback" }));
+    expect(derivePhase(picked)).toBe("simulation");
+  });
+
+  it("rejects an archetype id not in the library", () => {
+    expect(normalizeIntent({ selectedArchetypeId: "made_up" }).selectedArchetypeId).toBeNull();
+    for (const a of CAPTCHA_ARCHETYPES) {
+      expect(normalizeIntent({ selectedArchetypeId: a.id }).selectedArchetypeId).toBe(a.id);
+    }
+  });
+
+  it("phase context message names the current phase", () => {
+    expect(buildPhaseContextMessage("simulation")).toContain('"simulation"');
+  });
+});
+
+describe("simulation phase flow", () => {
+  it("stores a generated simulation and stays in simulation phase for iteration", () => {
+    const base = normalizeIntent({ goal: "g", selectedArchetypeId: "product_feedback" });
+    const withSim = mergeIntent(base, normalizeIntent({ simulation: SIM }));
+    expect(withSim.simulation).toEqual(SIM);
+    expect(derivePhase(withSim)).toBe("simulation");
+  });
+
+  it("a regenerated simulation replaces the previous one on iteration", () => {
+    const first = mergeIntent(emptyIntent(), normalizeIntent({ goal: "g", selectedArchetypeId: "product_feedback", simulation: SIM }));
+    const revised = { ...SIM, opener: "What's the hardest part of bridging for you?" };
+    const second = mergeIntent(first, normalizeIntent({ simulation: revised }));
+    expect(second.simulation?.opener).toBe("What's the hardest part of bridging for you?");
+    expect(derivePhase(second)).toBe("simulation");
+  });
+
+  it("a partial simulation object is rejected rather than stored half-formed", () => {
+    const intent = normalizeIntent({ simulation: { opener: "q", thinResponse: "meh" } });
+    expect(intent.simulation).toBeNull();
+  });
+
+  it("advertiser confirmation advances to confirmed and the brief uses simulation thin responses", () => {
+    const inSim = mergeIntent(emptyIntent(), normalizeIntent({ goal: "Understand DEX friction", selectedArchetypeId: "product_feedback", simulation: SIM }));
+    const confirmed = mergeIntent(
+      inSim,
+      normalizeIntent({ designConfirmed: true, payload: { prompt: SIM.opener }, targetSignal: "specific first-hand friction" }),
+    );
+    expect(derivePhase(confirmed)).toBe("confirmed");
+
+    const brief = buildTaskTemplate(confirmed, "fallback");
+    expect(brief.openingPrompt).toBe(SIM.opener);
+    expect(brief.thinResponseExamples).toEqual([SIM.thinResponse]);
+    expect(brief.goal).toBe("Understand DEX friction");
+  });
+
+  it("falls back to the simulation opener when no payload prompt was set", () => {
+    const intent = normalizeIntent({ simulation: SIM, designConfirmed: true });
+    expect(buildTaskTemplate(intent, "fallback").openingPrompt).toBe(SIM.opener);
+  });
+
+  it("explicit thinResponseExamples take precedence over the simulation's", () => {
+    const intent = normalizeIntent({ payload: { prompt: "q" }, simulation: SIM, thinResponseExamples: ["idk"] });
+    expect(buildTaskTemplate(intent, "f").thinResponseExamples).toEqual(["idk"]);
+  });
+});
+
+describe("malformed Kimi JSON at any phase", () => {
+  it("throws on non-JSON so the caller retries without touching session intent", async () => {
+    const { callKimi } = await import("./scoring.js");
+    vi.mocked(callKimi).mockResolvedValueOnce("Sure! Here are some options...");
+
+    const before = mergeIntent(emptyIntent(), normalizeIntent({ goal: "g", selectedArchetypeId: "code_review" }));
+    await expect(interpretAdvertiserMessage([], "LIVE", derivePhase(before))).rejects.toThrow();
+    // The caller only merges on success, so the pre-turn intent/phase are untouched.
+    expect(derivePhase(before)).toBe("simulation");
+  });
+
+  it("garbage field types inside valid JSON degrade to nulls, never corrupt phase state", () => {
+    const intent = normalizeIntent({ designConfirmed: "yes", selectedArchetypeId: 7, simulation: "a chat" });
+    expect(intent.designConfirmed).toBe(false);
+    expect(intent.selectedArchetypeId).toBeNull();
+    expect(intent.simulation).toBeNull();
+    expect(derivePhase(intent)).toBe("goal");
   });
 });

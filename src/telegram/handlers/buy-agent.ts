@@ -8,10 +8,12 @@ import { config } from "@/config/index.js";
 import {
   buildLiveContextMessage,
   buildTaskTemplate,
+  derivePhase,
   emptyIntent,
   interpretAdvertiserMessage,
   mergeIntent,
   type BuyAgentIntent,
+  type BuyPhase,
   type GroupContext,
   type TaskTemplateBrief,
 } from "@/services/buy-assistant.js";
@@ -32,6 +34,8 @@ interface BuyAgentSession {
   intent: BuyAgentIntent;
   groups: GroupRow[];
   lastActivityAt: number;
+  /** Design phase derived from the cumulative intent: goal → archetype → simulation → confirmed. */
+  phase: BuyPhase;
 }
 
 const sessions = new Map<number, BuyAgentSession>();
@@ -317,7 +321,7 @@ export function registerBuyAgentHandler(bot: Bot): void {
       return;
     }
 
-    sessions.set(fromId, { messages: [], intent: emptyIntent(), groups, lastActivityAt: Date.now() });
+    sessions.set(fromId, { messages: [], intent: emptyIntent(), groups, lastActivityAt: Date.now(), phase: "goal" });
 
     await ctx.reply(
       "👋 I'm the Canvas buy agent. Tell me what you're trying to achieve with this campaign — your goal, your " +
@@ -358,7 +362,7 @@ export function registerBuyAgentHandler(bot: Bot): void {
     let interpreted;
     try {
       const liveContext = await buildLiveContextForSession(session.groups);
-      interpreted = await interpretAdvertiserMessage(session.messages, liveContext);
+      interpreted = await interpretAdvertiserMessage(session.messages, liveContext, session.phase);
     } catch (err) {
       logger.warn({ err, fromId }, "buy agent: Kimi turn failed");
       await ctx.reply("Sorry, I'm having trouble thinking right now — try sending that again in a moment.");
@@ -370,9 +374,12 @@ export function registerBuyAgentHandler(bot: Bot): void {
       content: JSON.stringify({ reply: interpreted.reply, intent: interpreted.intent }),
     });
     session.intent = mergeIntent(session.intent, interpreted.intent);
+    session.phase = derivePhase(session.intent);
     sessions.set(fromId, session);
 
     await ctx.reply(interpreted.reply);
+
+    if (session.phase !== "confirmed") return;
 
     const validated = await validateIntent(session.intent, session.groups);
     if (!("issues" in validated)) {

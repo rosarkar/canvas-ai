@@ -1,5 +1,5 @@
 # Canvas Protocol — Build Log
-**Last updated:** July 17, 2026  
+**Last updated:** July 18, 2026  
 **Repo:** `rosarkar/canvas-ai` · **Branch:** `main` (auto-deploys to Railway)  
 **Infrastructure:** Railway — Rohit's workspace (canvas-ai + Postgres, `canvas-ai-production-eae7.up.railway.app`) · Base mainnet · `@CanvasVerificationBot`  
 **Smart contract:** `CanvasEscrowV0.sol` at `0xf808b264E13Bf809C8e86afaF4e14c200931101E` (verified on Basescan; relayer `0xbD5f…56d9`; includes the first-depositor guard)  
@@ -8,6 +8,15 @@
 ---
 
 ## Changelog
+
+### July 18, 2026
+
+#### Guided captcha design in the /buy agent (archetypes → simulation → iterate)
+- The buy agent now walks advertisers through a four-phase design flow instead of goal → task in one step: **goal** (unchanged 1-2 turn collection) → **archetype** (Kimi recommends 2-3 of 5 captcha archetypes conversationally, each with a one-line fit reason and its example opener) → **simulation** (a mock 4-line verification conversation — opening question, realistic thin response, agent probe, passing good response — with 1-2 rounds of "make it more technical"-style iteration) → **confirmed** (existing structured brief finalization).
+- New `CAPTCHA_ARCHETYPES` library in `buy-assistant.ts` (rlhf_ranking, preference_signal, product_feedback, code_review, open_research) with prompt-side mapping onto the four verification formats.
+- Kimi's output contract gains `selectedArchetypeId` (validated against the library), `simulation` (all four lines required or the object is dropped), and `designConfirmed`; the phase is **derived in TS from the cumulative intent** (`derivePhase`), never trusted from the model, and passed back each turn as a phase-context system message. Session state in `buy-agent.ts` carries `phase`; the confirm summary only auto-appends once the design is confirmed.
+- `buildTaskTemplate` falls back to the simulation's opener when no payload prompt was set and populates `thinResponseExamples` from the simulated thin response when Kimi didn't supply explicit examples. Malformed Kimi JSON still throws pre-merge, so a bad turn never corrupts phase or intent.
+- captcha-agent, register-assistant, payout, scoring, and all verification flows untouched. 20 new tests (74 passing), tsc clean.
 
 ### July 17, 2026
 
