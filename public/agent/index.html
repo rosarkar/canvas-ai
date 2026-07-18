@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canvas Edge — Autonomous Sports-Trading Agent</title>
+  <meta name="description" content="An autonomous, risk-managed World Cup trading agent: live TxLINE odds + on-chain-verified goals, Kelly-sized, executed via Bankr." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#08080B;--surface:#0E0E14;--surface-2:#131319;--border:#1C1C28;--text:#F0EDE8;--muted:#9694A4;--muted-2:#66637A;--accent:#E9A84C;--accent-bg:rgba(233,168,76,.08);--green:#4ADE80;--red:#ef4444;--blue:#6ea8fe;--sans:'Inter',-apple-system,sans-serif;--serif:'Cormorant Garamond',Georgia,serif;}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;scrollbar-width:thin;scrollbar-color:#2b2b38 transparent}
+    ::-webkit-scrollbar{width:12px;height:12px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:#23232e;border:3px solid var(--bg);border-radius:10px}
+    ::-webkit-scrollbar-thumb:hover{background:#33333f}
+    ::-webkit-scrollbar-corner{background:transparent}
+    .wrap{max-width:1240px;margin:0 auto;padding:20px}
+    header.top{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+    .brand{font-family:var(--serif);font-size:30px;font-weight:600}
+    .brand em{font-style:italic;color:var(--accent)}
+    .tagline{color:var(--muted);font-size:13.5px;max-width:620px;margin-top:4px}
+    .badges{display:flex;gap:8px;flex-wrap:wrap}
+    .badge{font-size:11.5px;padding:4px 9px;border:1px solid var(--border);border-radius:999px;color:var(--muted);background:var(--surface);white-space:nowrap}
+    .badge b{color:var(--text)} .badge.on{color:var(--green);border-color:rgba(74,222,128,.3)} .badge.off{color:var(--muted-2)}
+    .badge.sim{color:var(--accent);border-color:rgba(233,168,76,.3)} .badge.live{color:var(--red);border-color:rgba(239,68,68,.35)}
+    .panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:16px}
+    .panel h2{font-family:var(--serif);font-size:20px;font-weight:600;margin-bottom:10px}
+    .eyebrow{text-transform:uppercase;letter-spacing:1.4px;font-size:10.5px;color:var(--muted-2);font-weight:600}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    button{cursor:pointer;font-family:var(--sans);font-weight:600;font-size:13px;border-radius:9px;padding:8px 13px;border:1px solid var(--accent);background:var(--accent);color:#1a1206;transition:opacity .12s}
+    button.ghost{background:transparent;color:var(--accent)} button.danger{border-color:var(--red);background:transparent;color:var(--red)}
+    button:hover{opacity:.9} button:disabled{opacity:.4;cursor:not-allowed}
+    input,select{background:var(--surface-2);border:1px solid var(--border);border-radius:9px;color:var(--text);padding:8px 10px;font-family:var(--sans);font-size:13px}
+    input:focus,select:focus{outline:none;border-color:var(--accent)}
+    .grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+    .stat{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px}
+    .stat .k{font-size:11px;color:var(--muted)} .stat .v{font-size:24px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+    .pos{color:var(--green)} .neg{color:var(--red)}
+    .risk-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:12px}
+    .risk-row label{font-size:11.5px;color:var(--muted);display:block;margin-bottom:5px}
+    .risk-row input[type=range]{width:100%;accent-color:var(--accent)}
+    .two{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+    @media(max-width:920px){.two{grid-template-columns:1fr}}
+    table{width:100%;border-collapse:collapse;font-size:12.5px}
+    th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums;white-space:nowrap}
+    th{color:var(--muted);font-weight:500;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px}
+    .tag{font-size:10px;padding:2px 6px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+    .tag.val{color:var(--blue);border-color:rgba(110,168,254,.3)} .tag.goal{color:var(--accent);border-color:rgba(233,168,76,.3)}
+    .act-bet{color:var(--green);font-weight:600} .act-skip{color:var(--muted-2)} .act-blocked{color:var(--red);font-weight:600}
+    .st-open{color:var(--blue)} .st-won{color:var(--green)} .st-lost{color:var(--red)}
+    .proof{font-size:10px;color:var(--green)} .proof.pend{color:var(--muted-2)}
+    .scroll{max-height:340px;overflow:auto;scrollbar-width:thin;scrollbar-color:#2c2c38 transparent;padding-right:4px}
+    .scroll::-webkit-scrollbar{width:8px;height:8px}
+    .scroll::-webkit-scrollbar-track{background:transparent;margin:4px 0}
+    .scroll::-webkit-scrollbar-thumb{background:#26262f;border:2px solid var(--surface);border-radius:8px}
+    .scroll::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+    .scroll::-webkit-scrollbar-corner{background:transparent}
+    .blocked{margin-top:12px;padding:10px 13px;border-left:2px solid var(--red);background:rgba(239,68,68,.08);border-radius:0 8px 8px 0;font-size:13px;color:var(--red)}
+    svg{display:block;width:100%;height:auto}
+    .muted{color:var(--muted)} .disclaimer{color:var(--muted-2);font-size:11.5px;margin-top:20px;padding-top:14px;border-top:1px solid var(--border)}
+    .hide{display:none}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="brand">Canvas <em>Edge</em></div>
+      <div class="tagline">An autonomous, <b style="color:var(--text)">risk-managed</b> World Cup trading agent. Live TxLINE odds + <b style="color:var(--text)">on-chain-verified goals</b> → Kelly-sized, ruin-capped → executed via <b style="color:var(--text)">Bankr</b> on Polymarket.</div>
+    </div>
+    <div class="badges" id="badges"></div>
+  </header>
+
+  <div class="panel">
+    <div class="eyebrow">Controls</div>
+    <div class="controls" style="margin-top:8px">
+      <button id="startBtn">▶ Start agent</button>
+      <button id="stopBtn" class="ghost">⏸ Stop</button>
+      <button id="tickBtn" class="ghost">Step once</button>
+      <span class="muted" style="margin:0 4px">bankroll</span>
+      <input type="number" id="bankroll" value="1000" style="width:90px" />
+      <button id="resetBtn" class="danger">Reset</button>
+      <span style="flex:1"></span>
+      <select id="goalMatch" style="max-width:220px"></select>
+      <select id="goalOutcome" style="width:110px"></select>
+      <button id="goalBtn" class="ghost">⚽ Inject goal</button>
+    </div>
+    <div class="risk-row">
+      <div><label>Min edge <b id="minEdgeV">3%</b></label><input type="range" id="minEdge" min="0" max="0.15" step="0.005" value="0.03" /></div>
+      <div><label>Kelly fraction <b id="kellyV">0.50×</b></label><input type="range" id="kelly" min="0.1" max="1.5" step="0.05" value="0.5" /></div>
+      <div><label>Max stake <b id="maxStakeV">$100</b></label><input type="range" id="maxStake" min="10" max="300" step="10" value="100" /></div>
+      <div><label>Daily loss cap <b id="lossCapV">$300</b></label><input type="range" id="lossCap" min="50" max="1000" step="50" value="300" /></div>
+      <div><label>Ruin stop <b id="ruinV">50%</b></label><input type="range" id="ruin" min="0.1" max="0.9" step="0.05" value="0.5" /></div>
+    </div>
+    <div id="blocked" class="blocked hide"></div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">Book</div>
+    <div class="grid-stats" style="margin-top:8px">
+      <div class="stat"><div class="k">Bankroll</div><div class="v" id="s-bankroll">—</div></div>
+      <div class="stat"><div class="k">Realized P&amp;L</div><div class="v" id="s-pnl">—</div></div>
+      <div class="stat"><div class="k">Open positions</div><div class="v" id="s-open">—</div></div>
+      <div class="stat"><div class="k">Decisions</div><div class="v" id="s-dec">—</div></div>
+      <div class="stat"><div class="k">Last tick</div><div class="v" id="s-tick" style="font-size:15px">—</div></div>
+    </div>
+    <div style="margin-top:14px"><div class="eyebrow">Realized equity</div><div id="equity"></div></div>
+  </div>
+
+  <div class="two">
+    <div class="panel">
+      <h2>Decision feed</h2>
+      <div class="sub muted" style="font-size:12.5px;margin-bottom:8px">Every evaluation — value-edge + on-chain-verified goal triggers. The agent only bets positive-EV, risk-cleared edges.</div>
+      <div class="scroll"><table id="decisions"><thead><tr><th>time</th><th>strat</th><th>match</th><th>pick</th><th>edge</th><th>action</th><th>note</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="panel">
+      <h2>Positions</h2>
+      <div class="sub muted" style="font-size:12.5px;margin-bottom:8px">Each order is composed for Bankr (cross-chain swap → Polymarket). Simulated by default.</div>
+      <div class="scroll"><table id="positions"><thead><tr><th>pick</th><th>strat</th><th>stake</th><th>odds</th><th>status</th><th>P&amp;L</th><th>mode</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    Data source and settlement mode are shown in the badges above. On sample fixtures with simulated settlement, position outcomes are drawn from the fair probability to illustrate bankroll dynamics — clearly labelled, never presented as real returns. With <code>USE_TXLINE=true</code> (funded Solana wallet) the agent trades on real on-chain-verified TxLINE data; with <code>EXECUTION_MODE=live</code> + a Bankr key it places real orders. Not financial advice.
+  </div>
+</div>
+
+<script type="module">
+const $=(id)=>document.getElementById(id);
+const usd=(x)=>`${x<0?'-':''}$${Math.abs(Number(x)).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+const pct=(x)=>`${(x*100).toFixed(1)}%`;
+const COL={accent:'#E9A84C',green:'#4ADE80',red:'#ef4444',muted:'#66637A'};
+let equityHist=[];let lastTickSeen=null;
+
+async function api(path,method='GET',body){const r=await fetch(path,{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});return r.json();}
+
+// controls
+$('startBtn').onclick=()=>api('/api/agent/start','POST',{intervalMs:8000}).then(refresh);
+$('stopBtn').onclick=()=>api('/api/agent/stop','POST',{}).then(refresh);
+$('tickBtn').onclick=()=>api('/api/agent/tick','POST',{}).then(refresh);
+$('resetBtn').onclick=()=>{equityHist=[];api('/api/agent/reset','POST',{bankroll:Number($('bankroll').value)||1000}).then(refresh);};
+$('goalBtn').onclick=()=>{const m=$('goalMatch').value,o=$('goalOutcome').value;if(m&&o)api('/api/agent/goal','POST',{matchId:m,outcome:o}).then(refresh);};
+
+function riskPush(){api('/api/agent/risk','POST',{minEdge:+$('minEdge').value,kellyFraction:+$('kelly').value,maxStakeUsd:+$('maxStake').value,dailyLossCapUsd:+$('lossCap').value,ruinStopFraction:+$('ruin').value});}
+const rk=[['minEdge','minEdgeV',v=>pct(+v)],['kelly','kellyV',v=>(+v).toFixed(2)+'×'],['maxStake','maxStakeV',v=>'$'+v],['lossCap','lossCapV',v=>'$'+v],['ruin','ruinV',v=>pct(+v)]];
+rk.forEach(([id,lab,f])=>{$(id).oninput=()=>{$(lab).textContent=f($(id).value);riskPush();};});
+
+async function loadMatches(){
+  const d=await api('/api/agent/matches');
+  $('goalMatch').innerHTML=d.matches.map(m=>`<option value="${m.id}">${m.home} v ${m.away}</option>`).join('');
+  syncOutcomes(d.matches);
+  $('goalMatch').onchange=()=>syncOutcomes(d.matches);
+}
+function syncOutcomes(matches){const m=matches.find(x=>x.id===$('goalMatch').value)||matches[0];$('goalOutcome').innerHTML=(m?.outcomes||[]).map(o=>`<option value="${o.key}">${o.label}</option>`).join('');}
+
+function badges(s){
+  $('badges').innerHTML=
+    `<span class="badge ${s.running?'on':'off'}">${s.running?'● running':'○ idle'}</span>`+
+    `<span class="badge ${s.mode==='live'?'live':'sim'}">exec: <b>${s.mode}</b></span>`+
+    `<span class="badge">data: <b>${s.source==='txodds-live'?'TxLINE live':'sample fixtures'}</b></span>`;
+}
+
+function decisionRow(d){
+  const t=new Date(d.ts).toISOString().slice(11,19);
+  const strat=d.strategy==='goal-trigger'?'<span class="tag goal">goal</span>':'<span class="tag val">value</span>';
+  const act=d.action==='bet'?'<span class="act-bet">BET</span>':d.action==='blocked'?'<span class="act-blocked">BLOCKED</span>':'<span class="act-skip">skip</span>';
+  const proof=proofBadge(d);
+  return `<tr><td class="muted">${t}</td><td>${strat}</td><td>${d.matchLabel}</td><td>${d.selectionLabel}</td><td class="${d.edge>0?'pos':'muted'}">${d.edge>0?'+':''}${pct(d.edge)}</td><td>${act}</td><td class="muted">${d.reason}${proof}</td></tr>`;
+}
+const TIER_TXT={'verified-onchain':'✓ verified on-chain','root-anchored':'✓ root anchored on Solana','demonstration':'✓ Merkle proof demonstrated'};
+function proofBadge(d){
+  if(d.strategy!=='goal-trigger'||!d.proof)return '';
+  const p=d.proof;
+  const link=p.rootPdaExplorerUrl?` · <a href="${p.rootPdaExplorerUrl}" target="_blank" rel="noopener" style="color:var(--accent)">day-root on Solana ↗</a>`:'';
+  const tx=p.txExplorerUrl?` · <a href="${p.txExplorerUrl}" target="_blank" rel="noopener" style="color:var(--accent)">tx ↗</a>`:'';
+  return `<div class="proof ${p.verified?'':'pend'}">${TIER_TXT[p.tier]||p.tier}${link}${tx}</div>`;
+}
+function positionRow(p){
+  const st=`<span class="st-${p.status}">${p.status}</span>`;
+  const pnl=p.status==='open'?'<span class="muted">—</span>':`<span class="${p.pnl>=0?'pos':'neg'}">${usd(p.pnl)}</span>`;
+  const strat=p.strategy==='goal-trigger'?'<span class="tag goal">goal</span>':'<span class="tag val">value</span>';
+  return `<tr><td>${p.selectionLabel}</td><td>${strat}</td><td>${usd(p.stake)}</td><td>${p.decimalOdds.toFixed(2)}</td><td>${st}</td><td>${pnl}</td><td class="muted">${p.mode}</td></tr>`;
+}
+
+function equityChart(){
+  const W=1000,H=150,pL=44,pR=10,pT=10,pB=18;
+  if(equityHist.length<2)return `<svg viewBox="0 0 ${W} ${H}"><text x="${W/2}" y="${H/2}" fill="${COL.muted}" font-size="13" text-anchor="middle">start the agent to plot equity…</text></svg>`;
+  const ys=equityHist.map(e=>e.v);const lo=Math.min(...ys),hi=Math.max(...ys);const pad=(hi-lo)*0.1||10;
+  const yMin=lo-pad,yMax=hi+pad;const n=equityHist.length;
+  const X=i=>pL+(W-pL-pR)*(i/(n-1));const Y=v=>(H-pB)-(H-pT-pB)*((v-yMin)/(yMax-yMin));
+  const start=equityHist[0].v;const line=equityHist.map((e,i)=>`${X(i).toFixed(1)},${Y(e.v).toFixed(1)}`).join(' ');
+  const last=ys[ys.length-1];const col=last>=start?COL.green:COL.red;
+  const zeroY=Y(start);
+  return `<svg viewBox="0 0 ${W} ${H}">
+    <line x1="${pL}" y1="${zeroY.toFixed(1)}" x2="${W-pR}" y2="${zeroY.toFixed(1)}" stroke="rgba(240,237,232,.2)" stroke-dasharray="3 3"/>
+    <text x="4" y="${(zeroY+3).toFixed(1)}" fill="${COL.muted}" font-size="10">${usd(start)}</text>
+    <polyline points="${line}" fill="none" stroke="${col}" stroke-width="2"/>
+    <text x="4" y="${(Y(yMax)+8).toFixed(1)}" fill="${COL.muted}" font-size="10">${usd(yMax)}</text>
+  </svg>`;
+}
+
+async function refresh(){
+  const s=await api('/api/agent/state');
+  badges(s);
+  $('s-bankroll').textContent=usd(s.bankroll);
+  $('s-pnl').innerHTML=`<span class="${s.realizedPnl>=0?'pos':'neg'}">${usd(s.realizedPnl)}</span>`;
+  $('s-open').textContent=s.openPositions;
+  $('s-dec').textContent=s.decisions.length;
+  $('s-tick').textContent=s.lastTickTs?new Date(s.lastTickTs).toISOString().slice(11,19):'—';
+  $('blocked').className='blocked'+(s.blockedReason?'':' hide');
+  if(s.blockedReason)$('blocked').textContent='⛔ Trading halted — '+s.blockedReason;
+  $('decisions').querySelector('tbody').innerHTML=s.decisions.slice(0,40).map(decisionRow).join('')||'<tr><td colspan="7" class="muted">no decisions yet — start the agent</td></tr>';
+  $('positions').querySelector('tbody').innerHTML=s.positions.slice(0,40).map(positionRow).join('')||'<tr><td colspan="7" class="muted">no positions yet</td></tr>';
+  const eq=s.startingBankroll+s.realizedPnl;
+  const lastEq=equityHist[equityHist.length-1];
+  // Record a point only when equity actually moved OR a genuinely new tick landed —
+  // not on every 2.5s poll (which flat-padded and time-distorted the curve).
+  const newTick=s.lastTickTs&&s.lastTickTs!==lastTickSeen;
+  if(!lastEq||lastEq.v!==eq||newTick){equityHist.push({t:s.lastTickTs||Date.now(),v:eq});if(equityHist.length>120)equityHist.shift();lastTickSeen=s.lastTickTs;}
+  $('equity').innerHTML=equityChart();
+}
+
+loadMatches();
+refresh();
+setInterval(refresh,2500);
+</script>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canvas Markets — World Cup Risk Desk</title>
+  <meta name="description" content="A risk-managed prediction-market copilot for the World Cup. Sharp TxODDS pricing, Kelly-sized stakes, Monte-Carlo ruin analysis, and one-tap hedging — settled on-chain via Bankr." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #08080B; --surface: #0E0E14; --surface-2: #131319; --border: #1C1C28;
+      --text: #F0EDE8; --muted: #9694A4; --muted-2: #66637A;
+      --accent: #E9A84C; --accent-bg: rgba(233,168,76,0.08);
+      --green: #4ADE80; --red: #ef4444; --yellow: #eab308;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); text-decoration: none; }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 20px; }
+
+    header.top { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+    .brand { font-family: var(--serif); font-size: 30px; font-weight: 600; letter-spacing: .3px; }
+    .brand em { font-style: italic; color: var(--accent); }
+    .tagline { color: var(--muted); font-size: 13.5px; max-width: 560px; margin-top: 4px; }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge { font-size: 11.5px; padding: 4px 9px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); background: var(--surface); white-space: nowrap; }
+    .badge b { color: var(--text); font-weight: 600; }
+    .badge.live { color: var(--green); border-color: rgba(74,222,128,.3); }
+    .badge.sim { color: var(--accent); border-color: rgba(233,168,76,.3); }
+
+    .layout { display: grid; grid-template-columns: 380px 1fr; gap: 18px; margin-top: 18px; }
+    @media (max-width: 940px) { .layout { grid-template-columns: 1fr; } }
+
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+    .panel + .panel { margin-top: 16px; }
+    .panel h2 { font-family: var(--serif); font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+    .panel .sub { color: var(--muted); font-size: 12.5px; margin-bottom: 12px; }
+    .section-eyebrow { text-transform: uppercase; letter-spacing: 1.4px; font-size: 10.5px; color: var(--muted-2); font-weight: 600; }
+
+    /* match list */
+    .match { border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; background: var(--surface-2); }
+    .match .hdr { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .match .teams { font-weight: 600; font-size: 15px; }
+    .match .stage { font-size: 11px; color: var(--muted); }
+    .pill { font-size: 10px; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+    .pill.live { color: var(--red); border-color: rgba(239,68,68,.35); }
+    .mkt-label { font-size: 10.5px; color: var(--muted-2); margin: 9px 0 5px; text-transform: uppercase; letter-spacing: .6px; }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip { flex: 1 1 auto; min-width: 88px; cursor: pointer; border: 1px solid var(--border); border-radius: 9px; padding: 7px 8px; background: var(--surface); transition: border-color .12s, background .12s; }
+    .chip:hover { border-color: var(--muted-2); }
+    .chip.sel { border-color: var(--accent); background: var(--accent-bg); }
+    .chip .c-label { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chip .c-odds { font-size: 12px; color: var(--muted); }
+    .chip .c-edge { font-size: 11.5px; font-weight: 600; margin-top: 2px; }
+    .edge-pos { color: var(--green); } .edge-neg { color: var(--muted-2); }
+
+    /* controls */
+    .controls { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .intent-row { display: flex; gap: 8px; }
+    .intent-row input { flex: 1; }
+    input[type=text], input[type=number] { background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; color: var(--text); padding: 9px 11px; font-family: var(--sans); font-size: 13.5px; width: 100%; }
+    input:focus { outline: none; border-color: var(--accent); }
+    button { cursor: pointer; font-family: var(--sans); font-weight: 600; font-size: 13.5px; border-radius: 9px; padding: 9px 14px; border: 1px solid var(--accent); background: var(--accent); color: #1a1206; transition: opacity .12s; }
+    button.ghost { background: transparent; color: var(--accent); }
+    button:hover { opacity: .9; }
+    button:disabled { opacity: .4; cursor: not-allowed; }
+    .field label { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 5px; }
+    .row2 { display: grid; grid-template-columns: 1fr 1.4fr; gap: 12px; align-items: end; }
+    .slider-head { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); margin-bottom: 5px; }
+    .slider-head b { color: var(--text); }
+    input[type=range] { width: 100%; accent-color: var(--accent); }
+    .kelly-note { font-size: 11px; margin-top: 4px; }
+
+    /* stat cards */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+    .stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px; }
+    .stat .k { font-size: 11px; color: var(--muted); }
+    .stat .v { font-size: 21px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .stat .v.small { font-size: 16px; }
+    .narration { margin-top: 12px; padding: 11px 13px; border-left: 2px solid var(--accent); background: var(--accent-bg); border-radius: 0 8px 8px 0; font-size: 13.5px; color: var(--text); }
+
+    .charts-2 { display: grid; grid-template-columns: 1fr 190px; gap: 14px; align-items: center; }
+    @media (max-width: 560px) { .charts-2 { grid-template-columns: 1fr; } }
+    svg { display: block; width: 100%; height: auto; }
+
+    table.strat { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12.5px; }
+    table.strat th, table.strat td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+    table.strat th:first-child, table.strat td:first-child { text-align: left; }
+    table.strat th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+
+    .hedge-legs { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
+    .leg { display: flex; justify-content: space-between; font-size: 13px; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; }
+    .leg b { color: var(--accent); }
+    .lock { font-size: 13px; margin-top: 8px; }
+    .lock .good { color: var(--green); font-weight: 600; } .lock .bad { color: var(--yellow); font-weight: 600; }
+
+    .orders { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .order { font-size: 12.5px; padding: 10px 12px; background: #0a0a0f; border: 1px solid var(--border); border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); }
+    .order .role { color: var(--accent); font-weight: 600; font-family: var(--sans); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
+    .muted { color: var(--muted); } .small { font-size: 12px; }
+    .empty { color: var(--muted); font-size: 13.5px; padding: 20px 0; text-align: center; }
+    .disclaimer { color: var(--muted-2); font-size: 11.5px; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .hide { display: none; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="brand">Canvas <em>Markets</em></div>
+      <div class="tagline">A risk-managed prediction-market copilot for the World Cup. Sharp TxODDS pricing → Kelly-sized stakes → Monte-Carlo ruin analysis → one-tap hedging → settled on-chain via <b style="color:var(--text)">Bankr</b>.</div>
+    </div>
+    <div class="badges" id="badges"></div>
+  </header>
+
+  <div class="layout">
+    <!-- LEFT: match board -->
+    <div>
+      <div class="panel">
+        <h2>World Cup Board</h2>
+        <div class="sub">Fair probabilities de-vigged from the sharp line. <span class="edge-pos">Green</span> = the on-chain price beats fair (positive edge).</div>
+        <div id="matchList"><div class="empty">Loading matches…</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: the desk -->
+    <div>
+      <div class="panel">
+        <h2>Risk Desk</h2>
+        <div class="sub">Talk to the copilot, or pick a side on the board. Everything below is computed exactly — the agent narrates the numbers, it never invents them.</div>
+        <div class="controls">
+          <div class="field">
+            <label>Ask the copilot</label>
+            <div class="intent-row">
+              <input type="text" id="intent" placeholder="e.g. Back Argentina, I've got $500 — half Kelly" />
+              <button id="intentBtn" class="ghost">Read</button>
+            </div>
+            <div id="intentReply" class="kelly-note muted"></div>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>Bankroll (USDC)</label>
+              <input type="number" id="bankroll" value="1000" min="1" step="50" />
+            </div>
+            <div class="field">
+              <div class="slider-head"><span>Kelly fraction</span><span><b id="kellyVal">0.50×</b> <span id="kellyTag"></span></span></div>
+              <input type="range" id="kelly" min="0.1" max="3" step="0.05" value="0.5" />
+              <div class="kelly-note muted">0.25× cautious · 0.5× half · 1× full · &gt;1× over-betting</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel hide" id="riskPanel">
+        <div class="section-eyebrow">Position &amp; edge</div>
+        <h2 id="riskTitle" style="margin-top:4px">—</h2>
+        <div class="stats" id="riskStats"></div>
+        <div class="narration" id="narration"></div>
+      </div>
+
+      <div class="panel hide" id="mcPanel">
+        <div class="section-eyebrow">Monte-Carlo bankroll · <span id="mcHorizon"></span> bets · 8,000 paths</div>
+        <h2 style="margin-top:4px">Will this keep you in the game?</h2>
+        <div class="charts-2">
+          <div id="fanChart"></div>
+          <div>
+            <div id="ruinGauge"></div>
+          </div>
+        </div>
+        <div class="mkt-label" style="margin-top:14px">Where you land after <span class="hz"></span> bets</div>
+        <div id="histChart"></div>
+        <table class="strat" id="stratTable"></table>
+      </div>
+
+      <div class="panel hide" id="hedgePanel">
+        <div class="section-eyebrow">The second trade</div>
+        <h2 style="margin-top:4px">Hedge to lock the outcome</h2>
+        <div class="sub" id="hedgeSub"></div>
+        <div class="hedge-legs" id="hedgeLegs"></div>
+        <div class="lock" id="hedgeLock"></div>
+        <div class="mkt-label" style="margin-top:12px">Payoff by result — <span class="muted">before vs after hedge</span></div>
+        <div id="payoffChart"></div>
+      </div>
+
+      <div class="panel hide" id="settlePanel">
+        <div class="section-eyebrow">Settlement · via Bankr</div>
+        <h2 style="margin-top:4px">Place the bets</h2>
+        <div class="sub" id="settleSub">One tap sends the primary + hedge as natural-language orders to Bankr's on-chain agent.</div>
+        <button id="settleBtn">Settle via Bankr →</button>
+        <div class="orders" id="orders"></div>
+      </div>
+
+      <div class="disclaimer">
+        Sample World Cup fixtures stand in for the live TxODDS feed until hackathon credentials are wired (one env var swaps the source). Odds, edges, Kelly stakes, ruin probabilities and hedges are all computed live from the numbers shown. Not betting advice.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const pct = (x) => `${(x * 100).toFixed(1)}%`;
+const usd = (x) => `$${Number(x).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+const COL = { accent: '#E9A84C', green: '#4ADE80', red: '#ef4444', muted: '#66637A', text: '#F0EDE8' };
+
+let STATE = { matches: [], sel: null, settlementMode: 'simulated', horizon: 20, risk: null, hedge: null, busy: false };
+
+// ---------- data ----------
+async function loadBoard() {
+  const r = await fetch('/api/markets');
+  const d = await r.json();
+  STATE.matches = d.matches; STATE.settlementMode = d.settlementMode; STATE.horizon = d.simHorizon;
+  $('badges').innerHTML =
+    `<span class="badge">Data: <b>${d.source === 'fixture' ? 'Sample fixtures' : 'TxODDS live'}</b></span>` +
+    `<span class="badge ${d.settlementMode === 'live' ? 'live' : 'sim'}">Settlement: <b>${d.settlementMode}</b></span>` +
+    `<span class="badge"><b>${d.count}</b> matches</span>`;
+  $('mcHorizon').textContent = d.simHorizon;
+  document.querySelectorAll('.hz').forEach(e => e.textContent = d.simHorizon);
+  renderBoard();
+  if (location.hash === '#demo') autoDemo();
+}
+
+function chip(m, o) {
+  const sel = STATE.sel && STATE.sel.matchId === m.id && STATE.sel.outcome === o.key;
+  const edgeCls = o.edge > 0 ? 'edge-pos' : 'edge-neg';
+  const edgeStr = (o.edge > 0 ? '+' : '') + pct(o.edge);
+  return `<div class="chip ${sel ? 'sel' : ''}" data-match="${m.id}" data-outcome="${o.key}">
+    <div class="c-label">${o.label}</div>
+    <div class="c-odds">${o.decimalOdds.toFixed(2)} · fair ${pct(o.fairProb)}</div>
+    <div class="c-edge ${edgeCls}">${edgeStr} edge</div>
+  </div>`;
+}
+
+function renderBoard() {
+  $('matchList').innerHTML = STATE.matches.map(m => `
+    <div class="match">
+      <div class="hdr">
+        <div><div class="teams">${m.home} <span class="muted">vs</span> ${m.away}</div>
+        <div class="stage">${m.stage} · ${new Date(m.kickoff).toUTCString().slice(0, 22)}</div></div>
+        <span class="pill ${m.status === 'live' ? 'live' : ''}">${m.status}</span>
+      </div>
+      ${m.markets.map(mk => `<div class="mkt-label">${mk.label}</div><div class="chips">${mk.outcomes.map(o => chip(m, o)).join('')}</div>`).join('')}
+    </div>`).join('');
+  document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+    STATE.sel = { matchId: c.dataset.match, outcome: c.dataset.outcome };
+    renderBoard();
+    assess();
+  }));
+}
+
+// Deep-link: /markets/#demo opens the desk on the best available edge.
+function autoDemo() {
+  let best = null;
+  for (const m of STATE.matches) for (const mk of m.markets) for (const o of mk.outcomes) {
+    if (!best || o.edge > best.edge) best = { matchId: m.id, outcome: o.key, edge: o.edge };
+  }
+  if (best) { STATE.sel = { matchId: best.matchId, outcome: best.outcome }; renderBoard(); assess(); }
+}
+
+// ---------- assessment ----------
+let debounceT = null;
+function assessDebounced() { clearTimeout(debounceT); debounceT = setTimeout(assess, 160); }
+
+async function assess() {
+  if (!STATE.sel) return;
+  const bankroll = Math.max(1, Number($('bankroll').value) || 1000);
+  const kelly = Number($('kelly').value);
+  const body = { matchId: STATE.sel.matchId, outcome: STATE.sel.outcome, bankroll, kellyFraction: kelly };
+  const r = await fetch('/api/markets/risk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!r.ok) return;
+  STATE.risk = await r.json();
+  renderRisk();
+  renderMonteCarlo(bankroll);
+  const stake = STATE.risk.assessment.stake.stake;
+  if (stake > 0) { await loadHedge(stake); } else { $('hedgePanel').classList.add('hide'); $('settlePanel').classList.add('hide'); }
+}
+
+function renderRisk() {
+  const a = STATE.risk.assessment, m = a.metrics;
+  $('riskPanel').classList.remove('hide');
+  $('riskTitle').innerHTML = `${STATE.risk.selectionLabel} <span class="muted small">— ${STATE.risk.matchLabel}</span>`;
+  const s = a.stake;
+  $('riskStats').innerHTML = [
+    ['Fair prob', pct(a.fairProb)],
+    ['Market implied', pct(m.impliedProb)],
+    ['Edge (EV/$1)', (m.edge > 0 ? '+' : '') + pct(m.edge)],
+    ['Sharpe', m.sharpe.toFixed(2)],
+    ['Full Kelly', pct(Math.max(0, s.fullKelly))],
+    ['Recommended stake', s.bet ? usd(s.stake) : '—'],
+  ].map(([k, v], i) => `<div class="stat"><div class="k">${k}</div><div class="v ${i >= 4 ? 'small' : ''}">${v}</div></div>`).join('');
+  $('narration').textContent = STATE.risk.narration;
+}
+
+function renderMonteCarlo(bankroll) {
+  const a = STATE.risk.assessment, sim = a.simulation;
+  $('mcPanel').classList.remove('hide');
+  const ruinThreshold = 0.25 * bankroll;
+  $('fanChart').innerHTML = fanChart(sim, bankroll, ruinThreshold);
+  $('ruinGauge').innerHTML = ruinGauge(sim.ruinProbability);
+  $('histChart').innerHTML = histChart(sim.terminalHistogram, a.simulation.terminal.p50, bankroll);
+  $('stratTable').innerHTML = stratTable(a.strategies);
+}
+
+async function loadHedge(stake) {
+  const r = await fetch('/api/markets/hedge', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ matchId: STATE.sel.matchId, outcome: STATE.sel.outcome, stake }) });
+  if (!r.ok) { $('hedgePanel').classList.add('hide'); return; }
+  STATE.hedge = await r.json();
+  renderHedge(stake);
+  $('settlePanel').classList.remove('hide');
+  $('orders').innerHTML = '';
+  $('settleBtn').disabled = false;
+  $('settleBtn').textContent = STATE.settlementMode === 'live' ? 'Settle LIVE via Bankr →' : 'Settle via Bankr (simulated) →';
+}
+
+function renderHedge(stake) {
+  const h = STATE.hedge.hedge;
+  $('hedgePanel').classList.remove('hide');
+  $('hedgeSub').innerHTML = `You'd stake <b>${usd(stake)}</b> on ${STATE.hedge.primaryLabel}. Add these legs to flatten every outcome (${STATE.hedge.marketLabel}):`;
+  $('hedgeLegs').innerHTML = h.legs.map(l => `<div class="leg"><span>Back <b>${l.label}</b> @ ${l.decimalOdds.toFixed(2)}</span><span>${usd(l.stake)}</span></div>`).join('');
+  const lock = h.isArbitrage
+    ? `<span class="good">Locked profit ${usd(h.guaranteedProfit)}</span> on every result (${pct(h.guaranteedRoi)} ROI) — a genuine arb across the book.`
+    : `Locks a fixed <span class="bad">${usd(Math.abs(h.guaranteedProfit))}</span> cost for <b>zero variance</b> — you can't be swung by the result. Total staked ${usd(h.totalStaked)}.`;
+  $('hedgeLock').innerHTML = lock;
+  $('payoffChart').innerHTML = payoffChart(h.unhedgedPayoff, h.hedgedPayoff);
+}
+
+// ---------- settle ----------
+$('settleBtn').addEventListener('click', async () => {
+  if (!STATE.sel || !STATE.risk) return;
+  const stake = STATE.risk.assessment.stake.stake;
+  const hedgeLegs = (STATE.hedge?.hedge.legs || []).map(l => ({ outcome: l.outcome, stake: l.stake }));
+  $('settleBtn').disabled = true; $('settleBtn').textContent = 'Submitting…';
+  const r = await fetch('/api/markets/settle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ matchId: STATE.sel.matchId, primary: { outcome: STATE.sel.outcome, stake }, hedgeLegs }) });
+  const d = await r.json();
+  $('orders').innerHTML = `<div class="small muted" style="margin-bottom:2px">${d.note}</div>` + d.legs.map(l =>
+    `<div class="order"><div class="role">${l.role}${l.status ? ' · ' + l.status : ''}</div>${l.prompt}${l.jobId ? `<div class="small muted">job ${l.jobId}</div>` : ''}${l.error ? `<div class="small" style="color:var(--red)">${l.error}</div>` : ''}</div>`).join('');
+  $('settleBtn').disabled = false;
+  $('settleBtn').textContent = STATE.settlementMode === 'live' ? 'Settle LIVE via Bankr →' : 'Settle via Bankr (simulated) →';
+});
+
+// ---------- charts (hand-rolled SVG) ----------
+function fanChart(sim, start, ruin) {
+  const W = 600, H = 260, pL = 46, pR = 14, pT = 14, pB = 26;
+  const b = sim.bands, N = b.length - 1;
+  const yMax = Math.max(start * 1.4, ...b.map(x => x.p95)) * 1.05;
+  const X = i => pL + (W - pL - pR) * (i / N);
+  const Y = v => (H - pB) - (H - pT - pB) * (Math.min(v, yMax) / yMax);
+  const band = (hi, lo, fill) => {
+    const top = b.map((x, i) => `${X(i).toFixed(1)},${Y(x[hi]).toFixed(1)}`).join(' ');
+    const bot = b.map((x, i) => `${X(i).toFixed(1)},${Y(x[lo]).toFixed(1)}`).reverse().join(' ');
+    return `<polygon points="${top} ${bot}" fill="${fill}"/>`;
+  };
+  const med = `<polyline points="${b.map((x, i) => `${X(i).toFixed(1)},${Y(x.p50).toFixed(1)}`).join(' ')}" fill="none" stroke="${COL.accent}" stroke-width="2.2"/>`;
+  const paths = sim.samplePaths.slice(0, 9).map(p => `<polyline points="${p.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="rgba(150,148,164,.22)" stroke-width="1"/>`).join('');
+  const ry = Y(ruin), sy = Y(start);
+  const gy = v => `<line x1="${pL}" y1="${Y(v).toFixed(1)}" x2="${W - pR}" y2="${Y(v).toFixed(1)}" stroke="rgba(240,237,232,.06)"/>`;
+  const ticks = [0, start, yMax].map(v => `${gy(v)}<text x="4" y="${(Y(v) + 3).toFixed(1)}" fill="${COL.muted}" font-size="10">${v >= 1000 ? (v / 1000).toFixed(1) + 'k' : Math.round(v)}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Monte Carlo bankroll fan chart">
+    ${ticks}
+    ${band('p95', 'p5', 'rgba(233,168,76,.11)')}
+    ${band('p75', 'p25', 'rgba(233,168,76,.22)')}
+    ${paths}
+    <line x1="${pL}" y1="${sy.toFixed(1)}" x2="${W - pR}" y2="${sy.toFixed(1)}" stroke="rgba(240,237,232,.28)" stroke-dasharray="2 3"/>
+    <line x1="${pL}" y1="${ry.toFixed(1)}" x2="${W - pR}" y2="${ry.toFixed(1)}" stroke="${COL.red}" stroke-dasharray="4 3"/>
+    <text x="${pL + 4}" y="${(ry - 4).toFixed(1)}" fill="${COL.red}" font-size="10">ruin floor (${usd(ruin)})</text>
+    ${med}
+    <text x="${pL}" y="${H - 8}" fill="${COL.muted}" font-size="10">bet 0</text>
+    <text x="${W - pR}" y="${H - 8}" fill="${COL.muted}" font-size="10" text-anchor="end">bet ${N}</text>
+  </svg>`;
+}
+
+function ruinGauge(prob) {
+  const S = 190, r = 62, cx = 95, cy = 92, sw = 15, C = 2 * Math.PI * r;
+  const f = Math.min(1, Math.max(0, prob));
+  const color = prob < 0.1 ? COL.green : prob < 0.25 ? COL.accent : COL.red;
+  return `<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="Probability of ruin gauge">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1C1C28" stroke-width="${sw}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"
+      stroke-dasharray="${(C * f).toFixed(2)} ${(C * (1 - f) + 0.01).toFixed(2)}" transform="rotate(-90 ${cx} ${cy})"/>
+    <text x="${cx}" y="${cy - 1}" text-anchor="middle" fill="${COL.text}" font-size="30" font-weight="600">${(prob * 100).toFixed(1)}%</text>
+    <text x="${cx}" y="${cy + 20}" text-anchor="middle" fill="${COL.muted}" font-size="11">chance of ruin</text>
+  </svg>`;
+}
+
+function histChart(bins, median, start) {
+  if (!bins || !bins.length) return '';
+  const W = 600, H = 130, pL = 8, pR = 8, pT = 8, pB = 20;
+  const x0 = bins[0].x0, x1 = bins[bins.length - 1].x1;
+  const maxC = Math.max(...bins.map(b => b.count), 1);
+  const SX = v => pL + (W - pL - pR) * ((v - x0) / (x1 - x0 || 1));
+  const bw = (W - pL - pR) / bins.length;
+  const bars = bins.map((b, i) => {
+    const h = (H - pT - pB) * (b.count / maxC);
+    const color = b.x1 < start ? 'rgba(239,68,68,.5)' : 'rgba(74,222,128,.5)';
+    return `<rect x="${(pL + bw * i + 0.6).toFixed(1)}" y="${(H - pB - h).toFixed(1)}" width="${(bw - 1.2).toFixed(1)}" height="${h.toFixed(1)}" fill="${color}"/>`;
+  }).join('');
+  const vline = (v, col, lbl) => v >= x0 && v <= x1 ? `<line x1="${SX(v).toFixed(1)}" y1="${pT}" x2="${SX(v).toFixed(1)}" y2="${H - pB}" stroke="${col}" stroke-dasharray="3 2"/><text x="${SX(v).toFixed(1)}" y="${H - 6}" fill="${col}" font-size="10" text-anchor="middle">${lbl}</text>` : '';
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Terminal bankroll histogram">
+    ${bars}
+    ${vline(start, 'rgba(240,237,232,.5)', 'start')}
+    ${vline(median, COL.accent, 'median')}
+  </svg>`;
+}
+
+function stratTable(strats) {
+  const rows = strats.map(s => {
+    const rc = s.ruinProbability < 0.1 ? COL.green : s.ruinProbability < 0.25 ? COL.accent : COL.red;
+    return `<tr><td>${s.label}</td><td>${pct(s.stakeFraction)}</td><td style="color:${rc}">${pct(s.ruinProbability)}</td><td>${(s.medianLogGrowth * 100).toFixed(2)}%</td></tr>`;
+  }).join('');
+  return `<thead><tr><th>Strategy</th><th>Stake/bet</th><th>Ruin</th><th>Growth/bet</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+function payoffChart(unhedged, hedged) {
+  const W = 600, H = 170, pL = 40, pR = 12, pT = 12, pB = 26;
+  const outcomes = unhedged.map(u => u.label);
+  const vals = [...unhedged, ...hedged].map(x => x.profit);
+  const mx = Math.max(1, ...vals.map(Math.abs)) * 1.15;
+  const zeroY = pT + (H - pT - pB) * (mx / (2 * mx));
+  const Y = v => pT + (H - pT - pB) * ((mx - v) / (2 * mx));
+  const groupW = (W - pL - pR) / outcomes.length;
+  const bw = Math.min(46, groupW / 2.6);
+  let svg = `<line x1="${pL}" y1="${zeroY.toFixed(1)}" x2="${W - pR}" y2="${zeroY.toFixed(1)}" stroke="rgba(240,237,232,.3)"/>`;
+  outcomes.forEach((o, i) => {
+    const cx = pL + groupW * (i + 0.5);
+    const u = unhedged[i].profit, hd = hedged[i].profit;
+    const bar = (x, v, fill) => { const y = Y(Math.max(0, v)), h = Math.abs(Y(v) - zeroY); return `<rect x="${(x).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1, h).toFixed(1)}" rx="2" fill="${fill}"/>`; };
+    svg += bar(cx - bw - 3, u, 'rgba(150,148,164,.55)');
+    svg += bar(cx + 3, hd, COL.accent);
+    svg += `<text x="${cx.toFixed(1)}" y="${H - 8}" fill="${COL.muted}" font-size="10.5" text-anchor="middle">${o}</text>`;
+  });
+  svg += `<text x="${pL}" y="10" fill="${COL.muted}" font-size="10">profit</text>`;
+  svg += `<g transform="translate(${W - pR - 150},2)"><rect width="10" height="10" fill="rgba(150,148,164,.55)"/><text x="14" y="9" fill="${COL.muted}" font-size="10">unhedged</text><rect x="78" width="10" height="10" fill="${COL.accent}"/><text x="92" y="9" fill="${COL.muted}" font-size="10">hedged</text></g>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Payoff by outcome, hedged vs unhedged">${svg}</svg>`;
+}
+
+// ---------- kelly slider + inputs ----------
+function kellyTag(v) { return v <= 0.3 ? 'cautious' : v <= 0.6 ? 'half' : v <= 1.05 ? 'full' : 'over-betting'; }
+$('kelly').addEventListener('input', () => {
+  const v = Number($('kelly').value);
+  $('kellyVal').textContent = v.toFixed(2) + '×';
+  const tag = kellyTag(v);
+  $('kellyTag').textContent = tag;
+  $('kellyTag').style.color = v > 1.05 ? COL.red : COL.muted;
+  assessDebounced();
+});
+$('bankroll').addEventListener('input', assessDebounced);
+
+$('intentBtn').addEventListener('click', runIntent);
+$('intent').addEventListener('keydown', (e) => { if (e.key === 'Enter') runIntent(); });
+async function runIntent() {
+  const text = $('intent').value.trim();
+  if (!text) return;
+  const r = await fetch('/api/markets/intent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+  const d = await r.json();
+  $('intentReply').textContent = d.reply + (d.source === 'llm' ? '' : '  (heuristic)');
+  if (d.bankroll) $('bankroll').value = d.bankroll;
+  if (typeof d.kellyFraction === 'number') { $('kelly').value = d.kellyFraction; $('kelly').dispatchEvent(new Event('input')); }
+  if (d.matchId && d.outcome) { STATE.sel = { matchId: d.matchId, outcome: d.outcome }; renderBoard(); assess(); }
+}
+
+// kick off
+$('kelly').dispatchEvent(new Event('input'));
+loadBoard();
+</script>
+</body>
+</html>

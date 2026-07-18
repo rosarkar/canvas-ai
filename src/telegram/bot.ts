@@ -24,6 +24,7 @@ import { dashboardRouter } from "@/api/dashboard.js";
 import { depositRouter } from "@/api/deposit.js";
 import { groupOwnerRouter } from "@/api/group-owner.js";
 import { groupsRouter } from "@/api/groups.js";
+import { marketsRouter } from "@/api/markets.js";
 import { logger } from "@/utils/logger.js";
 
 let bot: Bot | null = null;
@@ -74,11 +75,13 @@ export function startTelegramBot(): void {
   app.use("/advertiser", express.static(path.join(repoRoot, "public/advertiser")));
   app.use("/group-owner", express.static(path.join(repoRoot, "public/group-owner")));
   app.use("/dashboard", express.static(path.join(repoRoot, "public/dashboard")));
+  app.use("/markets", express.static(path.join(repoRoot, "public/markets")));
   app.use(advertiserRouter);
   app.use(dashboardRouter);
   app.use(depositRouter);
   app.use(groupOwnerRouter);
   app.use(groupsRouter);
+  app.use(marketsRouter);
 
   app.get("/health", (_req, res) => {
     res.json({ ok: true, service: "canvas-ai" });

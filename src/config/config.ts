@@ -42,6 +42,24 @@ interface Config {
   openai: {
     apiKey: string;
   };
+  markets: {
+    /** TxODDS hackathon API key. Empty → the risk desk runs on sample fixtures. */
+    txoddsApiKey: string;
+    txoddsBaseUrl: string;
+    /** When true (and a Bankr key is set) settlement places real on-chain bets. */
+    liveSettlement: boolean;
+    /** Repeated-bet horizon for the Monte-Carlo bankroll projection. */
+    simHorizonBets: number;
+  };
+  solana: {
+    network: "devnet" | "mainnet";
+    /** Base58 or JSON-array secret key for the TxLINE subscription wallet. */
+    devnetSecretKey: string;
+    /** TxLINE free service level (devnet 1; mainnet 1=60s, 12=realtime). */
+    serviceLevel: number;
+    /** Use the real on-chain TxLINE feed instead of sample fixtures. */
+    useTxline: boolean;
+  };
   constants: {
     /** Calibrated after founder review of first ~50 responses; placeholder until then. */
     KIMI_PASS_THRESHOLD: number;
@@ -100,6 +118,18 @@ export const config: Config = {
   },
   openai: {
     apiKey: process.env.OPENAI_API_KEY?.trim() ?? "",
+  },
+  markets: {
+    txoddsApiKey: process.env.TXODDS_API_KEY?.trim() ?? "",
+    txoddsBaseUrl: process.env.TXODDS_BASE_URL?.trim() ?? "https://api.txodds.net",
+    liveSettlement: (process.env.MARKETS_LIVE_SETTLEMENT?.trim() ?? "false") === "true",
+    simHorizonBets: Number(process.env.MARKETS_SIM_HORIZON_BETS ?? "40"),
+  },
+  solana: {
+    network: process.env.SOLANA_NETWORK?.trim() === "mainnet" ? "mainnet" : "devnet",
+    devnetSecretKey: process.env.SOLANA_DEVNET_SECRET_KEY?.trim() ?? "",
+    serviceLevel: Number(process.env.TXLINE_SERVICE_LEVEL ?? "1"),
+    useTxline: (process.env.USE_TXLINE?.trim() ?? "false") === "true",
   },
   constants: {
     KIMI_PASS_THRESHOLD: Number(process.env.KIMI_PASS_THRESHOLD ?? "0"),
