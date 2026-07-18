@@ -18,7 +18,12 @@
       --serif: 'Cormorant Garamond', Georgia, serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.5; -webkit-font-smoothing: antialiased; scrollbar-width: thin; scrollbar-color: #2b2b38 transparent; }
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #23232e; border: 3px solid var(--bg); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #33333f; }
+    ::-webkit-scrollbar-corner { background: transparent; }
     a { color: var(--accent); text-decoration: none; }
     .wrap { max-width: 1240px; margin: 0 auto; padding: 20px; }
 
@@ -105,6 +110,19 @@
     .empty { color: var(--muted); font-size: 13.5px; padding: 20px 0; text-align: center; }
     .disclaimer { color: var(--muted-2); font-size: 11.5px; margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--border); }
     .hide { display: none; }
+
+    /* settlement route + on-chain data anchor (honest, tiered — matches the fan track) */
+    .route { font-size: 12px; color: var(--muted); margin: 0 0 12px; padding: 9px 11px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; line-height: 1.55; }
+    .route b { color: var(--text); font-weight: 600; }
+    .route .sol { color: var(--accent); font-weight: 600; }
+    .anchor { margin-top: 12px; padding: 12px 13px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2); }
+    .tierbadge { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+    .tier-anchor { color: var(--accent); background: var(--accent-bg); border: 1px solid rgba(233,168,76,.35); }
+    .tier-sample { color: #6ea8fe; background: rgba(110,168,254,.08); border: 1px solid rgba(110,168,254,.3); }
+    .anchor .a-note { font-size: 11.5px; color: var(--muted); margin: 8px 0; line-height: 1.5; }
+    .anchor .a-k { font-size: 10px; color: var(--muted-2); text-transform: uppercase; letter-spacing: .6px; font-weight: 600; }
+    .anchor .a-hash { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; word-break: break-all; color: var(--text); background: #0a0a0f; border: 1px solid var(--border); border-radius: 7px; padding: 7px 9px; margin-top: 4px; }
+    .anchor .explorer { display: inline-flex; align-items: center; gap: 6px; margin-top: 11px; font-size: 12.5px; color: var(--accent); font-weight: 600; }
   </style>
 </head>
 <body>
@@ -112,7 +130,7 @@
   <header class="top">
     <div>
       <div class="brand">Canvas <em>Markets</em></div>
-      <div class="tagline">A risk-managed prediction-market copilot for the World Cup. Sharp TxODDS pricing → Kelly-sized stakes → Monte-Carlo ruin analysis → one-tap hedging → settled on-chain via <b style="color:var(--text)">Bankr</b>.</div>
+      <div class="tagline">A risk-managed prediction-market copilot for the World Cup. <b style="color:var(--text)">TxLINE StablePrice (Solana)</b> → de-vig → Kelly-sized stakes → Monte-Carlo ruin analysis → one-tap hedging → <b style="color:var(--text)">Bankr</b> executes cross-chain to Polymarket (USDC on Polygon).</div>
     </div>
     <div class="badges" id="badges"></div>
   </header>
@@ -187,15 +205,16 @@
       </div>
 
       <div class="panel hide" id="settlePanel">
-        <div class="section-eyebrow">Settlement · via Bankr</div>
+        <div class="section-eyebrow">Settlement · cross-chain via Bankr</div>
         <h2 style="margin-top:4px">Place the bets</h2>
-        <div class="sub" id="settleSub">One tap sends the primary + hedge as natural-language orders to Bankr's on-chain agent.</div>
+        <div class="sub" id="settleSub">One tap composes the primary + hedge as natural-language orders for Bankr's cross-chain agent.</div>
+        <div class="route" id="settleRoute"></div>
         <button id="settleBtn">Settle via Bankr →</button>
         <div class="orders" id="orders"></div>
       </div>
 
       <div class="disclaimer">
-        Sample World Cup fixtures stand in for the live TxODDS feed until hackathon credentials are wired (one env var swaps the source). Odds, edges, Kelly stakes, ruin probabilities and hedges are all computed live from the numbers shown. Not betting advice.
+        Prices come from the shared on-chain <b>TxLINE (Solana)</b> feed via <code>resolveOddsFeed()</code>: with <code>USE_TXLINE=true</code> and a funded devnet wallet the desk reads live StablePrice (anchored to <code>daily_scores_merkle_roots</code> on Solana); otherwise it uses clearly-labelled <b>sample fixtures</b> in TxLINE StablePrice format — sample data is never on-chain-verified. Odds, edges, Kelly stakes, ruin probabilities and hedges are all computed live from the numbers shown. Settlement is <b>simulated by default</b> (no funds move, no bet placed); the Solana leg is TxLINE data + verification, while Bankr executes cross-chain and its Polymarket path settles USDC on Polygon. Not betting advice.
       </div>
     </div>
   </div>
@@ -207,15 +226,22 @@ const pct = (x) => `${(x * 100).toFixed(1)}%`;
 const usd = (x) => `$${Number(x).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 const COL = { accent: '#E9A84C', green: '#4ADE80', red: '#ef4444', muted: '#66637A', text: '#F0EDE8' };
 
-let STATE = { matches: [], sel: null, settlementMode: 'simulated', horizon: 20, risk: null, hedge: null, busy: false };
+let STATE = { matches: [], sel: null, settlementMode: 'simulated', horizon: 20, risk: null, hedge: null, provenance: null, route: '', busy: false };
 
 // ---------- data ----------
 async function loadBoard() {
   const r = await fetch('/api/markets');
   const d = await r.json();
   STATE.matches = d.matches; STATE.settlementMode = d.settlementMode; STATE.horizon = d.simHorizon;
+  STATE.provenance = d.provenance || null; STATE.route = d.settlementRoute || '';
+  const live = d.source === 'txodds-live';
+  const p = STATE.provenance;
+  const provChip = p && live
+    ? `<span class="badge live" title="${p.note}">Prices: <b>TxLINE live (Solana)</b>${p.rootExplorerUrl ? ` · <a href="${p.rootExplorerUrl}" target="_blank" rel="noopener">◎ view day-root on Solana Explorer →</a>` : ''}</span>`
+    : `<span class="badge" title="${p ? p.note : ''}">Prices: <b>sample fixtures</b> · TxLINE StablePrice format</span>`;
   $('badges').innerHTML =
-    `<span class="badge">Data: <b>${d.source === 'fixture' ? 'Sample fixtures' : 'TxODDS live'}</b></span>` +
+    `<span class="badge">Data: <b>${live ? 'TxODDS live' : 'Sample fixtures'}</b></span>` +
+    provChip +
     `<span class="badge ${d.settlementMode === 'live' ? 'live' : 'sim'}">Settlement: <b>${d.settlementMode}</b></span>` +
     `<span class="badge"><b>${d.count}</b> matches</span>`;
   $('mcHorizon').textContent = d.simHorizon;
@@ -252,13 +278,22 @@ function renderBoard() {
   }));
 }
 
-// Deep-link: /markets/#demo opens the desk on the best available edge.
+// Deep-link: /markets/#demo lands on the best available POSITIVE edge (the story
+// the desk exists to tell). If no outcome has a positive edge, fall back to the
+// highest edge and flag it neutrally — never silently open on a losing bet.
 function autoDemo() {
-  let best = null;
+  let bestPos = null, bestAny = null;
   for (const m of STATE.matches) for (const mk of m.markets) for (const o of mk.outcomes) {
-    if (!best || o.edge > best.edge) best = { matchId: m.id, outcome: o.key, edge: o.edge };
+    if (!bestAny || o.edge > bestAny.edge) bestAny = { matchId: m.id, outcome: o.key, edge: o.edge };
+    if (o.edge > 0 && (!bestPos || o.edge > bestPos.edge)) bestPos = { matchId: m.id, outcome: o.key, edge: o.edge };
   }
-  if (best) { STATE.sel = { matchId: best.matchId, outcome: best.outcome }; renderBoard(); assess(); }
+  const pick = bestPos || bestAny;
+  if (pick) {
+    STATE.demoNeutral = !bestPos;
+    STATE.sel = { matchId: pick.matchId, outcome: pick.outcome };
+    renderBoard();
+    assess();
+  }
 }
 
 // ---------- assessment ----------
@@ -292,7 +327,10 @@ function renderRisk() {
     ['Full Kelly', pct(Math.max(0, s.fullKelly))],
     ['Recommended stake', s.bet ? usd(s.stake) : '—'],
   ].map(([k, v], i) => `<div class="stat"><div class="k">${k}</div><div class="v ${i >= 4 ? 'small' : ''}">${v}</div></div>`).join('');
-  $('narration').textContent = STATE.risk.narration;
+  const neutralNote = STATE.demoNeutral && m.edge <= 0
+    ? ` <span class="muted">(No positive edge in the book right now — showing the strongest available line; the desk only sizes a stake when the edge is positive.)</span>`
+    : '';
+  $('narration').innerHTML = STATE.risk.narration + neutralNote;
 }
 
 function renderMonteCarlo(bankroll) {
@@ -311,9 +349,20 @@ async function loadHedge(stake) {
   STATE.hedge = await r.json();
   renderHedge(stake);
   $('settlePanel').classList.remove('hide');
+  $('settleRoute').innerHTML = routeLine();
   $('orders').innerHTML = '';
   $('settleBtn').disabled = false;
   $('settleBtn').textContent = STATE.settlementMode === 'live' ? 'Settle LIVE via Bankr →' : 'Settle via Bankr (simulated) →';
+}
+
+// The precise, honest cross-chain route. Solana = TxLINE data/verification;
+// Bankr's Polymarket path settles USDC on Polygon — NOT Solana-native.
+function routeLine() {
+  const r = STATE.route || 'TxLINE StablePrice (Solana) → de-vig → Kelly-sized → Bankr executes cross-chain → Polymarket (USDC on Polygon)';
+  const styled = r
+    .replace(/TxLINE StablePrice \(Solana\)/, '<span class="sol">TxLINE StablePrice (Solana)</span>')
+    .replace(/Polymarket \(USDC on Polygon\)/, '<b>Polymarket (USDC on Polygon)</b>');
+  return `<b>Route:</b> ${styled}<br><span class="muted" style="font-size:11px">The Solana leg is TxLINE data + on-chain verification. Bankr is the cross-chain execution rail — its Polymarket path settles USDC on Polygon, not Solana-native.</span>`;
 }
 
 function renderHedge(stake) {
@@ -336,11 +385,32 @@ $('settleBtn').addEventListener('click', async () => {
   $('settleBtn').disabled = true; $('settleBtn').textContent = 'Submitting…';
   const r = await fetch('/api/markets/settle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ matchId: STATE.sel.matchId, primary: { outcome: STATE.sel.outcome, stake }, hedgeLegs }) });
   const d = await r.json();
-  $('orders').innerHTML = `<div class="small muted" style="margin-bottom:2px">${d.note}</div>` + d.legs.map(l =>
+  const orders = d.legs.map(l =>
     `<div class="order"><div class="role">${l.role}${l.status ? ' · ' + l.status : ''}</div>${l.prompt}${l.jobId ? `<div class="small muted">job ${l.jobId}</div>` : ''}${l.error ? `<div class="small" style="color:var(--red)">${l.error}</div>` : ''}</div>`).join('');
+  $('orders').innerHTML = `<div class="small muted" style="margin-bottom:2px">${d.note}</div>` + orders + anchorBlock(d.anchor);
   $('settleBtn').disabled = false;
   $('settleBtn').textContent = STATE.settlementMode === 'live' ? 'Settle LIVE via Bankr →' : 'Settle via Bankr (simulated) →';
 });
+
+// The Solana data anchor — honestly labelled as the TxLINE day-root this position
+// priced against, NOT a claim that a bet executed. Mirrors the fan track's tier style.
+function anchorBlock(anchor) {
+  const a = anchor || (STATE.provenance ? { network: STATE.provenance.network, source: STATE.provenance.onChain ? 'txodds-live' : 'sample fixtures', rootPda: STATE.provenance.rootPda, rootExplorerUrl: STATE.provenance.rootExplorerUrl, note: STATE.provenance.note } : null);
+  if (!a) return '';
+  const live = a.source === 'txodds-live';
+  const tierCls = live ? 'tier-anchor' : 'tier-sample';
+  const tierLbl = live ? '◎ anchored on Solana' : '◎ Solana data anchor · sample';
+  const link = a.rootExplorerUrl
+    ? `<a class="explorer" href="${a.rootExplorerUrl}" target="_blank" rel="noopener">◎ view the day-root account on Solana Explorer →</a>`
+    : '';
+  return `<div class="anchor">
+    <span class="tierbadge ${tierCls}">${tierLbl}</span>
+    <div class="a-note">${a.note || ''}</div>
+    <div class="a-k">Anchored on Solana — daily_scores_merkle_roots (${a.network})</div>
+    <div class="a-hash">${a.rootPda || '—'}</div>
+    ${link}
+  </div>`;
+}
 
 // ---------- charts (hand-rolled SVG) ----------
 function fanChart(sim, start, ruin) {

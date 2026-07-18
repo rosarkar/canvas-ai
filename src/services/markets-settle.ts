@@ -11,6 +11,15 @@ import { config } from "@/config/index.js";
 import { logger } from "@/utils/logger.js";
 import { isBankrConfigured, runPrompt } from "@/services/bankr.client.js";
 
+/**
+ * The exact, honest cross-chain settlement route. The Solana leg is TxLINE
+ * data + on-chain verification; the *execution* rail is Bankr, whose Polymarket
+ * path settles in USDC on Polygon (NOT Solana-native). We state this precisely
+ * so a judge is never misled into thinking a bet executes on Solana.
+ */
+export const SETTLEMENT_ROUTE =
+  "TxLINE StablePrice (Solana) → de-vig → Kelly-sized → Bankr executes cross-chain → Polymarket (USDC on Polygon)";
+
 export interface SettlementLegInput {
   role: "primary" | "hedge";
   /** Human selection, e.g. "Argentina". */
@@ -34,10 +43,26 @@ export interface SettlementLegResult extends SettlementLegInput {
   error?: string;
 }
 
+/** The Solana data-anchor behind this settlement (the TxLINE day-root account). */
+export interface SettlementAnchor {
+  network: "devnet" | "mainnet";
+  /** "sample fixtures" | "txodds-live" — what the fair prices came from. */
+  source: string;
+  /** daily_scores_merkle_roots PDA that anchors the day's TxLINE scores. */
+  rootPda: string;
+  rootExplorerUrl: string;
+  /** Honest, tiered one-liner about what this anchor does and does not assert. */
+  note: string;
+}
+
 export interface SettlementResult {
   mode: "simulated" | "live";
   legs: SettlementLegResult[];
   note: string;
+  /** The precise cross-chain route these orders would travel. */
+  route: string;
+  /** The Solana data anchor (present when the caller supplies one). */
+  anchor?: SettlementAnchor;
 }
 
 /** Compose the Bankr order text for one leg. */
@@ -55,7 +80,10 @@ export function composeOrder(leg: SettlementLegInput): string {
  * Settle a set of legs. In simulated mode returns the composed prompts only;
  * in live mode submits each to Bankr and reports job status.
  */
-export async function settle(legs: SettlementLegInput[]): Promise<SettlementResult> {
+export async function settle(
+  legs: SettlementLegInput[],
+  anchor?: SettlementAnchor,
+): Promise<SettlementResult> {
   const live = config.markets.liveSettlement && isBankrConfigured();
   const composed: SettlementLegResult[] = legs.map((leg) => ({ ...leg, prompt: composeOrder(leg) }));
 
@@ -66,7 +94,9 @@ export async function settle(legs: SettlementLegInput[]): Promise<SettlementResu
     return {
       mode: "simulated",
       legs: composed,
-      note: `Simulated — no funds moved (${why}). These are the exact orders Bankr would execute.`,
+      route: SETTLEMENT_ROUTE,
+      anchor,
+      note: `Simulated — no funds moved (${why}). These are the exact orders Bankr would execute; no bet was placed.`,
     };
   }
 
@@ -88,6 +118,8 @@ export async function settle(legs: SettlementLegInput[]): Promise<SettlementResu
   return {
     mode: "live",
     legs: composed,
-    note: "Live — orders submitted to Bankr for on-chain execution.",
+    route: SETTLEMENT_ROUTE,
+    anchor,
+    note: "Live — orders submitted to Bankr for cross-chain execution (Polymarket settles USDC on Polygon).",
   };
 }

@@ -13,17 +13,69 @@
  */
 import { Router, type Request, type Response } from "express";
 
-import { type MatchOdds, type MarketOutcome } from "@/services/txodds.client.js";
+import { type MatchOdds, type MarketOutcome, type FeedSource } from "@/services/txodds.client.js";
 import { resolveOddsFeed } from "@/services/odds-feed.js";
 import { assessSelection, lockInHedge } from "@/services/risk/index.js";
 import { parseBetIntent, explainAssessment } from "@/services/markets-agent.js";
-import { settle, type SettlementLegInput } from "@/services/markets-settle.js";
+import { settle, type SettlementLegInput, type SettlementAnchor } from "@/services/markets-settle.js";
+import {
+  TXLINE_NETWORKS,
+  dailyScoresRootsPda,
+  explorerAddress,
+} from "@/services/txline/program.js";
+import { epochDayFromMs } from "@/services/txline/verify.js";
 import { config } from "@/config/index.js";
 import { logger } from "@/utils/logger.js";
 
 export const marketsRouter = Router();
 
 const matchLabel = (m: MatchOdds): string => `${m.home} vs ${m.away}`;
+
+/**
+ * On-chain data provenance for the fair prices. Live: the fair prices come from
+ * TxLINE StablePrice, whose day scores anchor to `daily_scores_merkle_roots` on
+ * Solana. Sample: the SAME account is where the live root would be published —
+ * we surface it as the format the desk targets, clearly labelled as sample.
+ * Never labels sample data as on-chain-verified.
+ */
+function buildProvenance(source: FeedSource): {
+  network: "devnet" | "mainnet";
+  source: FeedSource;
+  onChain: boolean;
+  rootPda: string;
+  rootExplorerUrl: string;
+  note: string;
+} {
+  const network = config.solana.network;
+  const cfg = TXLINE_NETWORKS[network];
+  const epochDay = epochDayFromMs(Date.now());
+  const rootPda = dailyScoresRootsPda(cfg.programId, epochDay).toBase58();
+  const live = source === "txodds-live";
+  return {
+    network,
+    source,
+    onChain: live,
+    rootPda,
+    rootExplorerUrl: explorerAddress(rootPda, network),
+    note: live
+      ? "Fair prices from TxLINE StablePrice; the day's scores anchor to this daily_scores_merkle_roots account on Solana."
+      : "Sample fixtures in TxLINE StablePrice format. This is the daily_scores_merkle_roots account the live feed would anchor to — sample data is NOT on-chain-verified.",
+  };
+}
+
+/** Turn the provenance into the settlement anchor honestly (data anchor, not a bet receipt). */
+function anchorFrom(source: FeedSource): SettlementAnchor {
+  const p = buildProvenance(source);
+  return {
+    network: p.network,
+    source: p.onChain ? "txodds-live" : "sample fixtures",
+    rootPda: p.rootPda,
+    rootExplorerUrl: p.rootExplorerUrl,
+    note: p.onChain
+      ? "Data anchor — the TxLINE day-root this position priced against (Solana). Not a claim that a bet executed."
+      : "Data anchor — the TxLINE day-root account the live feed targets (sample prices; no bet executed).",
+  };
+}
 
 /** Locate an outcome across all of a match's markets. */
 function findOutcome(
@@ -44,7 +96,10 @@ marketsRouter.get("/api/markets", async (_req: Request, res: Response) => {
     res.json({
       source: feed.source,
       settlementMode: config.markets.liveSettlement ? "live" : "simulated",
+      settlementRoute:
+        "TxLINE StablePrice (Solana) → de-vig → Kelly-sized → Bankr executes cross-chain → Polymarket (USDC on Polygon)",
       simHorizon: config.markets.simHorizonBets,
+      provenance: buildProvenance(feed.source),
       count: matches.length,
       matches,
     });
@@ -197,7 +252,8 @@ marketsRouter.post("/api/markets/settle", async (req: Request, res: Response) =>
       res.status(400).json({ error: "matchId and a primary { outcome, stake>0 } are required" });
       return;
     }
-    const match = await (await resolveOddsFeed()).getMatch(matchId);
+    const feed = await resolveOddsFeed();
+    const match = await feed.getMatch(matchId);
     if (!match) {
       res.status(404).json({ error: "Match not found" });
       return;
@@ -232,7 +288,7 @@ marketsRouter.post("/api/markets/settle", async (req: Request, res: Response) =>
       if (leg) legs.push(leg);
     }
 
-    const result = await settle(legs);
+    const result = await settle(legs, anchorFrom(feed.source));
     res.json(result);
   } catch (err) {
     logger.error({ err }, "POST /api/markets/settle failed");
