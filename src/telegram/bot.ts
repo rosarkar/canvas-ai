@@ -19,12 +19,14 @@ import { registerMessageHandler } from "@/telegram/handlers/message.js";
 import { registerRegisterHandler } from "@/telegram/handlers/register.js";
 import { registerStartHandler } from "@/telegram/handlers/start.js";
 import { registerAgentOfferSkipHandler } from "@/telegram/services/captcha-dm.js";
+import { registerPredictHandler } from "@/telegram/handlers/predict.js";
 import { advertiserRouter } from "@/api/advertiser.js";
 import { dashboardRouter } from "@/api/dashboard.js";
 import { depositRouter } from "@/api/deposit.js";
 import { groupOwnerRouter } from "@/api/group-owner.js";
 import { groupsRouter } from "@/api/groups.js";
 import { marketsRouter } from "@/api/markets.js";
+import { fanRouter } from "@/api/fan.js";
 import { logger } from "@/utils/logger.js";
 
 let bot: Bot | null = null;
@@ -51,6 +53,7 @@ export function startTelegramBot(): void {
   registerAgentOfferSkipHandler(bot);
   registerAdmissionCallbackHandler(bot);
   registerMenuHandler(bot);
+  registerPredictHandler(bot);
   registerMessageHandler(bot);
 
   bot.catch((err) => {
@@ -76,12 +79,14 @@ export function startTelegramBot(): void {
   app.use("/group-owner", express.static(path.join(repoRoot, "public/group-owner")));
   app.use("/dashboard", express.static(path.join(repoRoot, "public/dashboard")));
   app.use("/markets", express.static(path.join(repoRoot, "public/markets")));
+  app.use("/fan", express.static(path.join(repoRoot, "public/fan")));
   app.use(advertiserRouter);
   app.use(dashboardRouter);
   app.use(depositRouter);
   app.use(groupOwnerRouter);
   app.use(groupsRouter);
   app.use(marketsRouter);
+  app.use(fanRouter);
 
   app.get("/health", (_req, res) => {
     res.json({ ok: true, service: "canvas-ai" });

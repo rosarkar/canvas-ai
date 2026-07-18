@@ -16,6 +16,7 @@
     "txline:smoke": "tsx scripts/txline-smoke.ts",
     "agent": "tsx src/agent-server.ts",
     "agent:run": "tsx scripts/agent-run.ts",
+    "fan": "tsx src/fan-server.ts",
     "build": "tsc && tsc-alias",
     "test": "vitest run",
     "lint": "eslint .",
