@@ -4,24 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Canvas — Get paid every time someone joins your group</title>
-<meta name="description" content="Canvas replaces the Telegram bot-check with a short sponsored task. New members answer a question, you earn USDC per verified join — automatically. A two-sided marketplace on Base.">
-<link rel="canonical" href="https://canvas-protocol.com/">
-<meta name="theme-color" content="#08080B">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/favicon.svg">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Canvas Protocol">
-<meta property="og:title" content="Canvas — Get paid every time someone joins your group">
-<meta property="og:description" content="Canvas replaces the Telegram bot-check with a short sponsored task. New members answer a question, you earn USDC per verified join — automatically. A two-sided marketplace on Base.">
-<meta property="og:url" content="https://canvas-protocol.com/">
-<meta property="og:image" content="https://canvas-protocol.com/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Canvas — Get paid every time someone joins your group">
-<meta name="twitter:description" content="Canvas replaces the Telegram bot-check with a short sponsored task. New members answer a question, you earn USDC per verified join — automatically. A two-sided marketplace on Base.">
-<meta name="twitter:image" content="https://canvas-protocol.com/og.png">
-<meta name="twitter:site" content="@Canvas_Protocol">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -256,49 +238,23 @@ footer { border-top: 1px solid var(--border); padding: 44px 56px; }
   .cta-section { padding: 88px 24px; }
   footer { padding: 40px 24px; }
 }
-
-/* Accessibility + mobile navigation */
-.skip-link { position:absolute; left:-9999px; top:0; z-index:500; background:var(--accent); color:#08080B; padding:10px 16px; border-radius:0 0 6px 0; font-size:13px; font-weight:600; text-decoration:none; }
-.skip-link:focus { left:0; }
-a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-visible, [role="button"]:focus-visible { outline:2px solid var(--accent); outline-offset:3px; border-radius:3px; }
-.nav-toggle { display:none; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; width:42px; height:38px; cursor:pointer; align-items:center; justify-content:center; flex-direction:column; gap:4px; }
-.nav-toggle span { display:block; width:20px; height:2px; border-radius:2px; background:var(--text); transition:transform .2s ease, opacity .2s ease; }
-nav.nav-open .nav-toggle span:nth-child(1) { transform:translateY(6px) rotate(45deg); }
-nav.nav-open .nav-toggle span:nth-child(2) { opacity:0; }
-nav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-6px) rotate(-45deg); }
-.nav-collapse { display:contents; }
-@media (max-width: 960px) {
-  .nav-toggle { display:inline-flex; }
-  .nav-collapse { display:none; position:absolute; top:60px; left:0; right:0; flex-direction:column; align-items:stretch; gap:0; background:rgba(8,8,11,0.98); border-bottom:1px solid var(--border); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:8px 24px 20px; }
-  nav.nav-open .nav-collapse { display:flex; }
-  .nav-collapse .nav-links { position:static; transform:none; left:auto; display:flex; flex-direction:column; gap:0; }
-  .nav-collapse .nav-links a { display:block; padding:13px 0; border-bottom:1px solid var(--border); font-size:15px; }
-  .nav-collapse .nav-actions { flex-direction:column; align-items:stretch; gap:12px; margin-top:16px; }
-  .nav-collapse .nav-actions .btn-nav { justify-content:center; padding:12px; }
-  .nav-collapse .nav-contact { padding:4px 0; }
-}
 </style>
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
 
-<nav aria-label="Primary">
-  <a href="/" class="nav-logo">Canvas</a>
-  <div class="nav-collapse" id="nav-menu">
-    <ul class="nav-links">
-    <li><a href="/group-owners">Group Owners</a></li>
-    <li><a href="/advertisers">Advertisers</a></li>
-    <li><a href="/about">About</a></li>
+<nav>
+  <a href="index.html" class="nav-logo">Canvas</a>
+  <ul class="nav-links">
+    <li><a href="group-owners.html">Group Owners</a></li>
+    <li><a href="advertisers.html">Advertisers</a></li>
+    <li><a href="about.html">About</a></li>
     <li><a href="https://docs.canvas-protocol.com">Docs</a></li>
   </ul>
   <div class="nav-actions">
     <a href="mailto:hello@canvasprotocol.xyz" class="nav-contact">Contact</a>
-    <a href="/group-owners" class="btn-nav">Register your group →</a>
+    <a href="group-owners.html" class="btn-nav">Register your group →</a>
   </div>
-    </div>
-    <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span><span></span></button>
 </nav>
-<a id="main" tabindex="-1"></a>
 
 <!-- HERO -->
 <section class="hero">
@@ -306,61 +262,206 @@ nav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-6px) rotate(-
     <h1>Get paid every time someone joins your group.</h1>
     <p class="hero-sub">Canvas replaces the standard join verification with a short sponsored task. New members answer a question before they're let in. You earn USDC. Every join, automatically.</p>
     <div class="hero-ctas">
-      <a href="/group-owners" class="btn-lg btn-primary">Register your group →</a>
-      <a href="/advertisers" class="btn-lg btn-secondary">Run a campaign</a>
+      <a href="group-owners.html" class="btn-lg btn-primary">Register your group →</a>
+      <a href="advertisers.html" class="btn-lg btn-secondary">Run a campaign</a>
     </div>
   </div>
 
-  <div class="tg-mockup" aria-hidden="true">
+  <div class="tg-mockup" id="canvas-chat-phone">
     <div class="tg-topbar">
-      <div class="tg-avatar">CV</div>
+      <div class="tg-avatar" id="cv-avatar" style="background:#2B5278">CV</div>
       <div class="tg-info">
-        <span class="tg-name">@CanvasVerificationBot</span>
-        <span class="tg-online">online</span>
+        <span class="tg-name" id="cv-name">@CanvasVerificationBot</span>
+        <span class="tg-online" id="cv-status">online</span>
       </div>
     </div>
-    <div class="tg-body">
-      <div class="tg-msg-bot">
-        <p>👋 To join <strong>Taylor Nation</strong>, complete a quick question first.</p>
-        <div class="tg-task-card">
-          <p class="tg-task-q">At a concert, where do you prefer to be? Pick your spot and tell us in a sentence or two why.</p>
-          <div class="tg-task-opt"><span class="tg-task-key">A</span><span>Front floor, general admission, as close as possible</span></div>
-          <div class="tg-task-opt"><span class="tg-task-key">B</span><span>Lower bowl seats with a clear view of the full stage</span></div>
-          <div class="tg-task-opt"><span class="tg-task-key">C</span><span>Upper section, full view of the production and crowd</span></div>
-        </div>
-        <span class="tg-time">14:22</span>
-      </div>
-      <div class="tg-msg-user">
-        <span class="tg-user-reply">A. The floor is the whole show. Sound, crowd, energy. You're inside the thing, not watching it. I'd rather lose my shoes in the pit than sit comfortably and feel removed.</span>
-        <span class="tg-time">14:23</span>
-      </div>
-      <div class="tg-msg-bot">
-        <p>✓ Verified. One last step before you're in.</p>
-        <div class="tg-task-card">
-          <p class="tg-task-q" style="margin-bottom:8px;font-weight:500;color:rgba(255,255,255,0.8)">Taylor Nation community rules</p>
-          <div class="tg-task-opt" style="border-top:none;padding-top:0"><span style="color:rgba(255,255,255,0.4);font-size:11px">·</span><span style="font-size:11.5px">No spoilers without warnings</span></div>
-          <div class="tg-task-opt"><span style="color:rgba(255,255,255,0.4);font-size:11px">·</span><span style="font-size:11.5px">Be kind to other fans</span></div>
-          <div class="tg-task-opt"><span style="color:rgba(255,255,255,0.4);font-size:11px">·</span><span style="font-size:11.5px">No unauthorized ticket resales or scalping</span></div>
-        </div>
-        <div class="tg-agent-btns" style="margin-top:10px">
-          <span class="tg-agent-btn primary">Accept and join →</span>
-          <span class="tg-agent-btn ghost">Decline</span>
-        </div>
-        <span class="tg-time">14:23</span>
-      </div>
-      <div class="tg-msg-bot">
-        <p>You're in. Welcome to Taylor Nation.</p>
-        <div class="tg-agent-offer">
-          <p>Your response helps build smarter concert recommendations. Want early access to Setlist AI?</p>
-          <div class="tg-agent-btns">
-            <span class="tg-agent-btn primary">Get early access →</span>
-            <span class="tg-agent-btn ghost">Skip</span>
-          </div>
-        </div>
-        <span class="tg-time">14:23</span>
-      </div>
-    </div>
+    <div id="cv-chat" style="padding:14px 14px;display:flex;flex-direction:column;gap:10px;background:#17212B;height:460px;overflow-y:auto;scroll-behavior:smooth"></div>
   </div>
+
+  <style>
+    #cv-chat::-webkit-scrollbar{display:none}
+    .cv-wrap{display:flex;gap:7px;flex-shrink:0;animation:cvFade .3s ease forwards}
+    .cv-wrap.user{flex-direction:row-reverse}
+    @keyframes cvFade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+    .cv-bub{max-width:84%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.55;color:#e8e8e8}
+    .cv-bub.bot{background:#1F2D3D;border-radius:4px 12px 12px 12px}
+    .cv-bub.user{background:#2B5278;border-radius:12px 4px 12px 12px}
+    .cv-time{font-size:10px;color:rgba(255,255,255,0.3);display:block;text-align:right;margin-top:4px}
+    .cv-typing-wrap{display:flex;gap:7px;flex-shrink:0;animation:cvFade .3s ease forwards}
+    .cv-typing{display:flex;align-items:center;gap:4px;padding:10px 13px;background:#1F2D3D;border-radius:4px 12px 12px 12px;width:50px}
+    .cv-dot{width:6px;height:6px;border-radius:50%;background:#66637A;animation:cvBounce .9s infinite}
+    .cv-dot:nth-child(2){animation-delay:.15s}.cv-dot:nth-child(3){animation-delay:.3s}
+    @keyframes cvBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+    .cv-task{background:rgba(0,0,0,0.2);border-radius:8px;padding:9px 11px;margin-top:7px;border:1px solid rgba(255,255,255,0.06);font-size:12px;color:rgba(255,255,255,0.7);line-height:1.5}
+    .cv-task-label{font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+    .cv-opt{display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer;transition:background .12s,transform .1s,border-color .12s;margin-top:4px}
+    .cv-opt:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.2)}
+    .cv-opt.tapped{background:#2B5278;border-color:#3d6b99;color:#fff;transform:scale(0.96)}
+    .cv-opt-key{color:#7EB0E8;font-weight:700;flex-shrink:0;min-width:12px}
+    .cv-rules{background:rgba(0,0,0,0.2);border-radius:8px;padding:9px 11px;margin-top:7px;border:1px solid rgba(255,255,255,0.06)}
+    .cv-rules-title{font-size:12px;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:5px}
+    .cv-rules-list{font-size:11px;color:rgba(255,255,255,0.45);line-height:1.9}
+    .cv-btn-row{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+    .cv-btn{font-size:12px;padding:6px 12px;border-radius:6px;cursor:default;user-select:none;transition:transform .1s,background .1s;display:inline-block}
+    .cv-btn.p{background:#2B5278;border:1px solid #3d6b99;color:#fff}
+    .cv-btn.g{background:transparent;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.4)}
+    .cv-btn.tapped{transform:scale(0.93);background:#3a6b99}
+    .cv-ad{background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:9px 11px;margin-top:7px}
+    .cv-ad-label{font-size:10px;color:#4ADE80;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+    .cv-ad-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px}
+    .cv-ad-sub{font-size:11.5px;color:rgba(255,255,255,0.5);line-height:1.55;margin-bottom:7px}
+    .cv-pill{display:inline-block;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);color:#4ADE80;font-size:10px;padding:2px 7px;border-radius:20px;margin-bottom:7px}
+  </style>
+
+  <script>
+  (function(){
+    const chat=document.getElementById('cv-chat');
+    const cvName=document.getElementById('cv-name');
+    const cvStatus=document.getElementById('cv-status');
+    const cvAvatar=document.getElementById('cv-avatar');
+    let tids=[];
+    function q(ms,fn){const t=setTimeout(fn,ms);tids.push(t);}
+    function clearAll(){tids.forEach(clearTimeout);tids=[];}
+    function ts(){const n=new Date();return n.getHours()+':'+(String(n.getMinutes()).padStart(2,'0'));}
+    function scroll(){chat.scrollTo({top:chat.scrollHeight,behavior:'smooth'});}
+
+    function showTyping(){
+      const w=document.createElement('div');
+      w.className='cv-typing-wrap';
+      w.innerHTML='<div class="cv-typing"><div class="cv-dot"></div><div class="cv-dot"></div><div class="cv-dot"></div></div>';
+      chat.appendChild(w);scroll();return w;
+    }
+
+    function addBubble(type,html){
+      const w=document.createElement('div');
+      w.className='cv-wrap '+type;
+      const b=document.createElement('div');
+      b.className='cv-bub '+type;
+      b.innerHTML=html+'<span class="cv-time">'+ts()+'</span>';
+      w.appendChild(b);chat.appendChild(w);scroll();return b;
+    }
+
+    function botSay(html,dur,cb){
+      const ind=showTyping();
+      q(dur,()=>{ind.remove();addBubble('bot',html);if(cb)cb();});
+    }
+
+    function userSay(text,cb){
+      addBubble('user',text);
+      if(cb)q(300,cb);
+    }
+
+    function tap(btn,cb){
+      btn.classList.add('tapped');
+      q(180,()=>{btn.classList.remove('tapped');if(cb)q(120,cb);});
+    }
+
+    function toSeatScout(cb){
+      cvAvatar.style.background='#1a4a2a';
+      cvAvatar.textContent='SS';
+      cvName.textContent='@SeatScoutBot';
+      cvStatus.style.color='#4ADE80';
+      cvStatus.textContent='online';
+      chat.innerHTML='';
+      if(cb)cb();
+    }
+
+    function toCanvas(){
+      cvAvatar.style.background='#2B5278';
+      cvAvatar.textContent='CV';
+      cvName.textContent='@CanvasVerificationBot';
+      cvStatus.style.color='#4ADE80';
+      cvStatus.textContent='online';
+    }
+
+    function runSeatScout(){
+      toSeatScout(()=>{
+        q(500,()=>{
+          botSay('Hey! Tell me your favourite artists and I\'ll message you the moment they announce a tour or drop new tickets.',900,()=>{
+            q(1400,()=>{
+              userSay('Taylor Swift, Sabrina Carpenter, Chappell Roan',()=>{
+                q(400,()=>{
+                  botSay('Got them. I\'ll watch all three and send you a heads up as soon as anything goes on sale. You\'ll never have to check again.',800,()=>{
+                    q(3500,()=>{toCanvas();start();});
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    }
+
+    function start(){
+      clearAll();chat.innerHTML='';scroll();
+      q(600,()=>{
+        botSay('👋 To join <strong style="color:#fff">Taylor Nation</strong>, complete a quick question first.',900,()=>{
+          q(400,()=>{
+            const taskHtml='<div class="cv-task"><div class="cv-task-label">Setlist AI · fan preference data</div>At a concert, where do you prefer to be? Pick your spot.<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.07);padding-top:4px;display:flex;flex-direction:column"><div class="cv-opt" id="cv-opt-a"><span class="cv-opt-key">A</span><span>Front floor, as close as possible</span></div><div class="cv-opt" id="cv-opt-b"><span class="cv-opt-key">B</span><span>Lower bowl with a clear view of the stage</span></div><div class="cv-opt" id="cv-opt-c"><span class="cv-opt-key">C</span><span>Upper section, full view of the crowd</span></div></div></div>';
+            botSay(taskHtml,900,()=>{
+              q(1400,()=>{
+                const optA=document.getElementById('cv-opt-a');
+                optA.classList.add('tapped');
+                q(200,()=>{
+                  optA.classList.remove('tapped');
+                  q(120,()=>{
+                    userSay('A. Front floor, as close as possible.',()=>{
+                      q(400,()=>{
+                        botSay('Nice. Why the floor?',500,()=>{
+                          q(1200,()=>{
+                            userSay('You feel the bass in your chest and there is nothing between you and the stage.',()=>{
+                              q(400,()=>{
+                                botSay('✓ Verified. One last step before you\'re in.',700,()=>{
+                                  q(300,()=>{
+                                    const rHtml='<div class="cv-rules"><div class="cv-rules-title">Taylor Nation community rules</div><div class="cv-rules-list">· No spoilers without warnings<br>· Be kind to other fans<br>· No unauthorized ticket resales or scalping</div></div><div class="cv-btn-row"><span class="cv-btn p" id="cv-accept">Accept and join →</span><span class="cv-btn g">Decline</span></div>';
+                                    botSay(rHtml,800,()=>{
+                                      q(1400,()=>{
+                                        const btn=document.getElementById('cv-accept');
+                                        tap(btn,()=>{
+                                          btn.closest('.cv-btn-row').style.display='none';
+                                          userSay('Accept and join →',()=>{
+                                            q(400,()=>{
+                                              botSay("You're in. Welcome to Taylor Nation. 🎶",600,()=>{
+                                                q(500,()=>{
+                                                  const aHtml='<div class="cv-ad"><div class="cv-ad-label">Sponsored · SeatScout</div><div class="cv-ad-title">Never miss a tour announcement</div><span class="cv-pill">Free · concert agent</span><div class="cv-ad-sub">SeatScout watches your favourite artists and messages you the moment tickets go live.</div><div class="cv-btn-row"><span class="cv-btn p" id="cv-scout">Open SeatScout →</span><span class="cv-btn g">Skip</span></div></div>';
+                                                  botSay(aHtml,1000,()=>{
+                                                    q(1600,()=>{
+                                                      const sb=document.getElementById('cv-scout');
+                                                      tap(sb,()=>{
+                                                        sb.closest('.cv-btn-row').style.display='none';
+                                                        userSay('Open SeatScout →',()=>{
+                                                          q(600,()=>runSeatScout());
+                                                        });
+                                                      });
+                                                    });
+                                                  });
+                                                });
+                                              });
+                                            });
+                                          });
+                                        });
+                                      });
+                                    });
+                                  });
+                                });
+                              });
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    }
+
+    start();
+  })();
+  </script>
 </section>
 
 <hr class="full-rule">
@@ -405,7 +506,7 @@ nav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-6px) rotate(-
       <li>Set how often members re-verify: every join, every 30 days, or any cadence you choose</li>
       <li>Revenue splits for mods and admins, paid automatically to each wallet</li>
     </ul>
-    <a href="/group-owners" class="audience-link">How it works for group owners →</a>
+    <a href="group-owners.html" class="audience-link">How it works for group owners →</a>
   </div>
   <div class="audience-panel">
     <span class="audience-label">For advertisers</span>
@@ -417,7 +518,7 @@ nav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-6px) rotate(-
       <li>Every response scored by AI before payout releases</li>
       <li>Post-verification agent handoff: offer your product to every verified member</li>
     </ul>
-    <a href="/advertisers" class="audience-link">How it works for advertisers →</a>
+    <a href="advertisers.html" class="audience-link">How it works for advertisers →</a>
   </div>
 </div>
 
@@ -435,7 +536,7 @@ nav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-6px) rotate(-
   <div class="uc-card">
     <span class="uc-tag">RLHF training data</span>
     <p class="uc-advertiser">AI lab collecting human perception data for content recommendation models</p>
-    <div class="uc-tg" aria-hidden="true">
+    <div class="uc-tg">
       <div class="tg-topbar">
         <div class="tg-avatar" style="background:#3D6B8E">NF</div>
         <div class="tg-info">
@@ -480,7 +581,7 @@ nav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-6px) rotate(-
   <div class="uc-card">
     <span class="uc-tag">User acquisition</span>
     <p class="uc-advertiser">Leading lending protocol on Base · warm leads from verified DeFi-native members</p>
-    <div class="uc-tg" aria-hidden="true">
+    <div class="uc-tg">
       <div class="tg-topbar">
         <div class="tg-avatar" style="background:#2B5278">BD</div>
         <div class="tg-info">
@@ -529,7 +630,7 @@ nav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-6px) rotate(-
   <div class="uc-card">
     <span class="uc-tag">Community growth</span>
     <p class="uc-advertiser">Aeons (SPX6900) · growing their community through ads in adjacent crypto trading groups</p>
-    <div class="uc-tg" aria-hidden="true">
+    <div class="uc-tg">
       <div class="tg-topbar">
         <div class="tg-avatar" style="background:#2A6B4A">ST</div>
         <div class="tg-info">
@@ -597,38 +698,23 @@ nav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-6px) rotate(-
   <h2>Your next member is worth<br>more than <span>you think.</span></h2>
   <p>Register your group in two minutes. Start earning from the very next join.</p>
   <div class="cta-btns">
-    <a href="/group-owners" class="btn-lg btn-primary">Register your group →</a>
-    <a href="/advertisers" class="btn-lg btn-secondary">Run a campaign</a>
+    <a href="group-owners.html" class="btn-lg btn-primary">Register your group →</a>
+    <a href="advertisers.html" class="btn-lg btn-secondary">Run a campaign</a>
   </div>
 </div>
 
 <footer>
   <div class="footer-inner">
-    <a href="/" class="footer-logo">Canvas</a>
+    <a href="index.html" class="footer-logo">Canvas</a>
     <ul class="footer-links">
-      <li><a href="/group-owners">Group Owners</a></li>
-      <li><a href="/advertisers">Advertisers</a></li>
-      <li><a href="/about">About</a></li>
+      <li><a href="group-owners.html">Group Owners</a></li>
+      <li><a href="advertisers.html">Advertisers</a></li>
+      <li><a href="about.html">About</a></li>
       <li><a href="https://docs.canvas-protocol.com">Docs</a></li>
       <li><a href="mailto:hello@canvasprotocol.xyz">Contact</a></li>
     </ul>
     <span class="footer-copy">© 2026 Canvas Protocol</span>
   </div>
 </footer>
-
-<script>
-(function(){
-  var nav=document.querySelector('nav');
-  var btn=nav&&nav.querySelector('.nav-toggle');
-  if(!nav||!btn)return;
-  btn.addEventListener('click',function(){
-    var open=nav.classList.toggle('nav-open');
-    btn.setAttribute('aria-expanded',open?'true':'false');
-  });
-  nav.querySelectorAll('.nav-collapse a').forEach(function(a){
-    a.addEventListener('click',function(){nav.classList.remove('nav-open');btn.setAttribute('aria-expanded','false');});
-  });
-})();
-</script>
 </body>
 </html>
