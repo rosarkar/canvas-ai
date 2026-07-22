@@ -3,260 +3,156 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Canvas — For advertisers</title>
-<meta name="description" content="Reach verified, context-matched humans at the moment they join a community. Pay per verified completion, scored by AI, settled on Base — for RLHF data or warm leads.">
-<link rel="canonical" href="https://canvas-protocol.com/advertisers">
-<meta name="theme-color" content="#08080B">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/favicon.svg">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Canvas Protocol">
-<meta property="og:title" content="Canvas for advertisers — pay for verified humans">
-<meta property="og:description" content="Reach verified, context-matched humans at the moment they join a community. Pay per verified completion, scored by AI, settled on Base — for RLHF data or warm leads.">
-<meta property="og:url" content="https://canvas-protocol.com/advertisers">
-<meta property="og:image" content="https://canvas-protocol.com/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Canvas for advertisers — pay for verified humans">
-<meta name="twitter:description" content="Reach verified, context-matched humans at the moment they join a community. Pay per verified completion, scored by AI, settled on Base — for RLHF data or warm leads.">
-<meta name="twitter:image" content="https://canvas-protocol.com/og.png">
-<meta name="twitter:site" content="@Canvas_Protocol">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Canvas &mdash; For advertisers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root {
-  --bg: #08080B; --surface: #0E0E14; --surface-2: #131319; --border: #1C1C28;
-  --text: #F0EDE8; --muted: #66637A; --muted-2: #9694A4; --accent: #E9A84C;
-  --accent-bg: rgba(233,168,76,0.07); --green: #4ADE80;
-  --sans: 'Inter', -apple-system, sans-serif; --serif: 'Cormorant Garamond', Georgia, serif;
-}
-html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-
-
-
-nav { position: sticky; top: 0; z-index: 200; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 56px; background: rgba(8,8,11,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
-.nav-logo { font-family: var(--serif); font-weight: 700; font-size: 22px; color: var(--text); text-decoration: none; letter-spacing: -0.01em; }
-.nav-links { list-style: none; display: flex; gap: 36px; position: absolute; left: 50%; transform: translateX(-50%); }
-.nav-links a { font-size: 13.5px; color: var(--muted-2); text-decoration: none; transition: color 0.15s; }
-.nav-links a:hover, .nav-links a.active { color: var(--text); }
-.nav-actions { display: flex; align-items: center; gap: 20px; }
-.nav-contact { font-size: 13.5px; color: var(--muted-2); text-decoration: none; }
-.nav-contact:hover { color: var(--text); }
-.btn-nav { display: inline-flex; align-items: center; gap: 5px; padding: 8px 18px; background: var(--accent); color: #08080B; font-size: 13.5px; font-weight: 600; font-family: var(--sans); border-radius: 5px; text-decoration: none; transition: opacity 0.15s; }
-.btn-nav:hover { opacity: 0.85; }
-.btn-lg { display: inline-flex; align-items: center; gap: 7px; padding: 13px 26px; font-size: 15px; font-weight: 600; font-family: var(--sans); border-radius: 5px; text-decoration: none; transition: opacity 0.15s; }
-.btn-primary { background: var(--accent); color: #08080B; }
-.btn-primary:hover { opacity: 0.85; }
-.btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
-.btn-secondary:hover { border-color: var(--muted); }
-.full-rule { border: none; border-top: 1px solid var(--border); }
-.section-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 16px; display: block; }
-
-/* PAGE HERO */
-.page-hero { padding: 96px 56px 104px; max-width: 1240px; margin: 0 auto; }
-.page-hero h1 { font-family: var(--serif); font-style: italic; font-size: clamp(48px, 5.5vw, 76px); font-weight: 700; line-height: 1.06; letter-spacing: -0.02em; margin-bottom: 28px; max-width: 860px; }
-.page-hero h1 span { color: var(--accent); font-style: normal; }
-.page-hero-row { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-.page-hero-sub { font-size: 18px; color: var(--muted-2); line-height: 1.75; margin-bottom: 40px; font-weight: 300; max-width: 460px; }
-.page-hero-right p { font-size: 15px; color: var(--muted-2); line-height: 1.8; font-weight: 300; margin-bottom: 20px; }
-
-/* TWO BUYER TYPES */
-.buyer-types {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  background: var(--border);
-  gap: 1px;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.buyer-panel { background: var(--surface); padding: 64px 56px 72px; }
-.buyer-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 28px; display: block; }
-.buyer-panel h3 { font-family: var(--serif); font-style: italic; font-size: clamp(28px, 2.8vw, 40px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 18px; max-width: 360px; }
-.buyer-panel > p { font-size: 15px; color: var(--muted-2); line-height: 1.78; max-width: 400px; margin-bottom: 36px; font-weight: 300; }
-.buyer-rows { list-style: none; margin-bottom: 44px; display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--border); }
-.buyer-rows li { font-size: 14px; color: var(--muted-2); padding: 13px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px; line-height: 1.55; font-weight: 300; }
-.buyer-rows li::before { content: '→'; color: var(--accent); flex-shrink: 0; margin-top: 1px; font-size: 13px; }
-.buyer-targets { margin-top: 28px; }
-.buyer-targets-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px; display: block; }
-.targets-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.target-tag { padding: 5px 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 3px; font-size: 12px; color: var(--muted-2); font-weight: 400; }
-
-/* HOW CAMPAIGNS WORK */
-.campaign-section { padding: 88px 56px; max-width: 1240px; margin: 0 auto; }
-.campaign-section h2 { font-family: var(--serif); font-style: italic; font-size: clamp(34px, 3.5vw, 48px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 56px; max-width: 520px; }
-.campaign-flow { display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--border); }
-.flow-step { display: grid; grid-template-columns: 80px 1fr 1fr; gap: 40px; padding: 40px 0; border-bottom: 1px solid var(--border); align-items: start; }
-.flow-num { font-family: var(--serif); font-style: italic; font-size: 44px; font-weight: 700; color: var(--border); letter-spacing: -0.03em; line-height: 1; }
-.flow-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
-.flow-desc { font-size: 14px; color: var(--muted-2); line-height: 1.75; font-weight: 300; }
-.flow-detail { font-size: 13px; color: var(--muted); line-height: 1.7; font-weight: 300; padding-top: 2px; }
-
-/* WHY CANVAS */
-.why-section { padding: 0 56px 88px; max-width: 1240px; margin: 0 auto; }
-.why-head { margin-bottom: 48px; }
-.why-head h2 { font-family: var(--serif); font-style: italic; font-size: clamp(32px, 3vw, 44px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 14px; }
-.why-head p { font-size: 15px; color: var(--muted-2); max-width: 520px; line-height: 1.75; font-weight: 300; }
-.comparison {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  background: var(--border);
-  gap: 1px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
-}
-.compare-col { background: var(--surface); padding: 40px 36px 44px; }
-.compare-col.highlight { background: var(--accent-bg); }
-.compare-title { font-size: 15px; font-weight: 600; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
-.compare-accent { color: var(--accent); }
-.compare-list { list-style: none; display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--border); }
-.compare-list li { font-size: 13px; color: var(--muted-2); padding: 11px 0; border-bottom: 1px solid var(--border); line-height: 1.55; display: flex; gap: 9px; font-weight: 300; }
-.compare-list li .ico { flex-shrink: 0; }
-.compare-list li .ico.y { color: var(--accent); }
-.compare-list li .ico.n { color: var(--muted); opacity: 0.5; }
-
-/* TASK FORMAT */
-.format-section { padding: 0; }
-.format-head { padding: 80px 56px 48px; max-width: 1240px; margin: 0 auto; }
-.format-head h2 { font-family: var(--serif); font-style: italic; font-size: clamp(32px, 3.5vw, 44px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 14px; }
-.format-head p { font-size: 15px; color: var(--muted-2); max-width: 480px; line-height: 1.75; font-weight: 300; }
-.formats { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--border); gap: 1px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-.formats .format-card[style*="grid-column"] { background: var(--surface-2); }
-.format-card { background: var(--bg); padding: 44px 40px 52px; }
-.format-tag { display: inline-block; padding: 4px 10px; background: var(--accent-bg); color: var(--accent); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 3px; margin-bottom: 20px; }
-.format-card h4 { font-size: 18px; font-weight: 600; margin-bottom: 10px; line-height: 1.3; }
-.format-card p { font-size: 14px; color: var(--muted-2); line-height: 1.75; margin-bottom: 20px; font-weight: 300; }
-.format-example { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-size: 12.5px; color: var(--muted-2); line-height: 1.6; font-weight: 300; }
-
-/* CTA */
-.cta-section { padding: 120px 56px; text-align: center; max-width: 1240px; margin: 0 auto; }
-.cta-section h2 { font-family: var(--serif); font-style: italic; font-size: clamp(40px, 4.5vw, 64px); font-weight: 700; line-height: 1.06; letter-spacing: -0.02em; margin-bottom: 18px; }
-.cta-section h2 span { color: var(--accent); font-style: normal; }
-.cta-section p { font-size: 16px; color: var(--muted-2); margin-bottom: 44px; font-weight: 300; line-height: 1.7; }
-.cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-
-footer { border-top: 1px solid var(--border); padding: 44px 56px; }
-.footer-inner { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
-.footer-logo { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; }
-.footer-links { list-style: none; display: flex; gap: 28px; flex-wrap: wrap; }
-.footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
-.footer-links a:hover { color: var(--text); }
-.footer-copy { font-size: 13px; color: var(--muted); }
-
-@media (max-width: 960px) {
-  nav { padding: 0 24px; }
-  .nav-links { display: none; }
-  .page-hero { padding: 72px 24px 80px; }
-  .page-hero-row { grid-template-columns: 1fr; gap: 32px; }
-  .buyer-types { grid-template-columns: 1fr; }
-  .buyer-panel { padding: 48px 28px; }
-  .campaign-section { padding: 72px 24px; }
-  .flow-step { grid-template-columns: 60px 1fr; gap: 24px; }
-  .flow-detail { display: none; }
-  .why-section { padding: 0 24px 72px; }
-  .comparison { grid-template-columns: 1fr; }
-  .format-head { padding: 64px 24px 40px; }
-  .formats { grid-template-columns: 1fr; }
-  .format-card { padding: 36px 28px; }
-  .cta-section { padding: 88px 24px; }
-  footer { padding: 40px 24px; }
-}
-
-/* Accessibility + mobile navigation */
-.skip-link { position:absolute; left:-9999px; top:0; z-index:500; background:var(--accent); color:#08080B; padding:10px 16px; border-radius:0 0 6px 0; font-size:13px; font-weight:600; text-decoration:none; }
-.skip-link:focus { left:0; }
-a:focus-visible, button:focus-visible, [tabindex]:focus-visible, input:focus-visible, [role="button"]:focus-visible { outline:2px solid var(--accent); outline-offset:3px; border-radius:3px; }
-.nav-toggle { display:none; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; width:42px; height:38px; cursor:pointer; align-items:center; justify-content:center; flex-direction:column; gap:4px; }
-.nav-toggle span { display:block; width:20px; height:2px; border-radius:2px; background:var(--text); transition:transform .2s ease, opacity .2s ease; }
-nav.nav-open .nav-toggle span:nth-child(1) { transform:translateY(6px) rotate(45deg); }
-nav.nav-open .nav-toggle span:nth-child(2) { opacity:0; }
-nav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-6px) rotate(-45deg); }
-.nav-collapse { display:contents; }
-@media (max-width: 960px) {
-  .nav-toggle { display:inline-flex; }
-  .nav-collapse { display:none; position:absolute; top:60px; left:0; right:0; flex-direction:column; align-items:stretch; gap:0; background:rgba(8,8,11,0.98); border-bottom:1px solid var(--border); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:8px 24px 20px; }
-  nav.nav-open .nav-collapse { display:flex; }
-  .nav-collapse .nav-links { position:static; transform:none; left:auto; display:flex; flex-direction:column; gap:0; }
-  .nav-collapse .nav-links a { display:block; padding:13px 0; border-bottom:1px solid var(--border); font-size:15px; }
-  .nav-collapse .nav-actions { flex-direction:column; align-items:stretch; gap:12px; margin-top:16px; }
-  .nav-collapse .nav-actions .btn-nav { justify-content:center; padding:12px; }
-  .nav-collapse .nav-contact { padding:4px 0; }
+:root{--bg:#000;--surface:#0A0A0A;--surface-2:#111;--border:#1E1E1E;--border-2:#2A2A2A;--text:#FFF;--text-2:#A0A0A0;--text-3:#555;--sans:'DM Sans',-apple-system,sans-serif;--serif:'DM Serif Display',Georgia,serif}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+nav{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(0,0,0,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--serif);font-size:22px;color:var(--text);text-decoration:none}
+.nav-links{list-style:none;display:flex;gap:32px;position:absolute;left:50%;transform:translateX(-50%)}
+.nav-links a{font-size:13px;color:var(--text-2);text-decoration:none;transition:color .1s;letter-spacing:.01em}
+.nav-links a:hover,.nav-links a.active{color:var(--text)}
+.nav-actions{display:flex;align-items:center;gap:20px}
+.nav-contact{font-size:13px;color:var(--text-2);text-decoration:none;transition:color .1s}
+.nav-contact:hover{color:var(--text)}
+.btn-nav{display:inline-flex;align-items:center;padding:7px 16px;border:1px solid var(--text);color:var(--text);font-size:13px;font-family:var(--sans);background:transparent;text-decoration:none;transition:background .1s,color .1s}
+.btn-nav:hover{background:var(--text);color:var(--bg)}
+.btn-lg{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;font-size:14px;font-family:var(--sans);text-decoration:none;transition:all .1s;white-space:nowrap;letter-spacing:.01em}
+.btn-primary{background:var(--text);color:var(--bg);border:1px solid var(--text)}
+.btn-primary:hover{background:transparent;color:var(--text)}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border-2)}
+.btn-secondary:hover{border-color:var(--text)}
+.full-rule{border:none;border-top:1px solid var(--border);margin:0}
+.section-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-3);margin-bottom:20px;display:block}
+footer{border-top:1px solid var(--border);padding:40px 48px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.footer-logo{font-family:var(--serif);font-size:18px;color:var(--text);text-decoration:none}
+.footer-links{list-style:none;display:flex;gap:24px;flex-wrap:wrap}
+.footer-links a{font-size:12.5px;color:var(--text-3);text-decoration:none;transition:color .1s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:12.5px;color:var(--text-3)}
+.page-hero{padding:88px 48px 96px;max-width:1200px;margin:0 auto}
+.page-hero h1{font-family:var(--serif);font-size:clamp(44px,5.2vw,72px);font-weight:400;line-height:1.04;letter-spacing:-.02em;margin-bottom:28px;max-width:840px}
+.page-hero h1 em{font-style:italic}
+.page-hero-row{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+.page-hero-sub{font-size:17px;color:var(--text-2);line-height:1.7;margin-bottom:36px;font-weight:300;max-width:440px}
+.page-hero-right p{font-size:15px;color:var(--text-2);line-height:1.78;font-weight:300;margin-bottom:18px}
+.buyer-types{display:grid;grid-template-columns:1fr 1fr;background:var(--border);gap:1px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.buyer-panel{background:var(--surface);padding:60px 48px 68px}
+.buyer-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-3);margin-bottom:28px;display:block}
+.buyer-panel h3{font-family:var(--serif);font-size:clamp(26px,2.6vw,36px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:16px;max-width:340px}
+.buyer-panel h3 em{font-style:italic}
+.buyer-panel>p{font-size:15px;color:var(--text-2);line-height:1.75;max-width:380px;margin-bottom:32px;font-weight:300}
+.buyer-rows{list-style:none;margin-bottom:40px;border-top:1px solid var(--border)}
+.buyer-rows li{font-size:13.5px;color:var(--text-2);padding:11px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;line-height:1.55;font-weight:300}
+.buyer-rows li::before{content:'\00B7';color:var(--text-3);flex-shrink:0;margin-top:1px;font-size:16px;font-weight:700}
+.buyer-targets{margin-top:24px}
+.buyer-targets-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:10px;display:block}
+.targets-row{display:flex;flex-wrap:wrap;gap:7px}
+.target-tag{padding:4px 10px;background:var(--bg);border:1px solid var(--border);font-size:12px;color:var(--text-3);font-weight:400}
+.campaign-section{padding:80px 48px;max-width:1200px;margin:0 auto}
+.campaign-section h2{font-family:var(--serif);font-size:clamp(30px,3.2vw,44px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:48px;max-width:480px}
+.campaign-flow{display:flex;flex-direction:column;border-top:1px solid var(--border)}
+.flow-step{display:grid;grid-template-columns:72px 1fr 1fr;gap:36px;padding:36px 0;border-bottom:1px solid var(--border);align-items:start}
+.flow-num{font-family:var(--serif);font-style:italic;font-size:40px;font-weight:400;color:var(--border-2);letter-spacing:-.03em;line-height:1}
+.flow-title{font-size:16px;font-weight:500;margin-bottom:7px;line-height:1.3}
+.flow-desc{font-size:13.5px;color:var(--text-2);line-height:1.7;font-weight:300}
+.flow-detail{font-size:12.5px;color:var(--text-3);line-height:1.65;font-weight:300;padding-top:2px}
+.why-section{padding:0 48px 80px;max-width:1200px;margin:0 auto}
+.why-head{margin-bottom:40px}
+.why-head h2{font-family:var(--serif);font-size:clamp(28px,3vw,40px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:12px}
+.why-head p{font-size:15px;color:var(--text-2);max-width:480px;line-height:1.7;font-weight:300}
+.comparison{display:grid;grid-template-columns:repeat(3,1fr);background:var(--border);gap:1px;border:1px solid var(--border)}
+.compare-col{background:var(--surface);padding:36px 32px 40px}
+.compare-col.highlight{background:var(--surface-2)}
+.compare-title{font-size:14px;font-weight:500;margin-bottom:20px}
+.compare-accent{color:var(--text)}
+.compare-list{list-style:none;border-top:1px solid var(--border)}
+.compare-list li{font-size:12.5px;color:var(--text-2);padding:9px 0;border-bottom:1px solid var(--border);line-height:1.5;display:flex;gap:8px;font-weight:300}
+.compare-list li .ico{flex-shrink:0}
+.compare-list li .ico.y{color:var(--text)}
+.compare-list li .ico.n{color:var(--text-3)}
+.format-head{padding:72px 48px 44px;max-width:1200px;margin:0 auto}
+.format-head h2{font-family:var(--serif);font-size:clamp(28px,3vw,40px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:12px}
+.format-head p{font-size:15px;color:var(--text-2);max-width:440px;line-height:1.7;font-weight:300}
+.formats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--border);gap:1px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.format-card{background:var(--bg);padding:40px 36px 48px}
+.format-card[style*="grid-column"]{background:var(--surface)}
+.format-tag{display:inline-block;padding:3px 9px;border:1px solid var(--border-2);color:var(--text-3);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px}
+.format-card h4{font-size:16px;font-weight:500;margin-bottom:9px;line-height:1.3}
+.format-card p{font-size:13.5px;color:var(--text-2);line-height:1.7;margin-bottom:18px;font-weight:300}
+.format-example{background:var(--surface);border:1px solid var(--border);padding:13px 15px;font-size:12.5px;color:var(--text-3);line-height:1.6;font-weight:300}
+.cta-section{padding:104px 48px;text-align:center;max-width:1200px;margin:0 auto}
+.cta-section h2{font-family:var(--serif);font-style:italic;font-size:clamp(38px,4.5vw,58px);font-weight:400;line-height:1.06;letter-spacing:-.02em;margin-bottom:16px}
+.cta-section p{font-size:15px;color:var(--text-2);margin-bottom:40px;font-weight:300;line-height:1.7}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+@media(max-width:960px){
+  nav{padding:0 24px}.nav-links{display:none}
+  .page-hero{padding:64px 24px 72px}.page-hero-row{grid-template-columns:1fr;gap:28px}
+  .buyer-types{grid-template-columns:1fr}.buyer-panel{padding:44px 24px}
+  .campaign-section{padding:64px 24px}
+  .flow-step{grid-template-columns:56px 1fr;gap:20px}.flow-detail{display:none}
+  .why-section{padding:0 24px 64px}.comparison{grid-template-columns:1fr}
+  .format-head{padding:56px 24px 36px}.formats{grid-template-columns:1fr}
+  .format-card{padding:32px 24px}
+  .cta-section{padding:72px 24px}
+  footer{padding:36px 24px}
 }
 </style>
 </head>
 <body>
-<a class="skip-link" href="#main">Skip to content</a>
-
-
-
-<nav aria-label="Primary">
-  <a href="/" class="nav-logo">Canvas</a>
-  <div class="nav-collapse" id="nav-menu">
-    <ul class="nav-links">
-    <li><a href="/group-owners">Group Owners</a></li>
-    <li><a href="/advertisers" class="active">Advertisers</a></li>
-    <li><a href="/about">About</a></li>
+<nav>
+  <a href="index.html" class="nav-logo">Canvas</a>
+  <ul class="nav-links">
+    <li><a href="group-owners.html">Group Owners</a></li>
+    <li><a href="advertisers.html" class="active">Advertisers</a></li>
+    <li><a href="vision.html">Vision</a></li>
+    <li><a href="about.html">About</a></li>
     <li><a href="https://docs.canvas-protocol.com">Docs</a></li>
   </ul>
   <div class="nav-actions">
     <a href="mailto:hello@canvasprotocol.xyz" class="nav-contact">Contact</a>
-    <a href="mailto:hello@canvasprotocol.xyz" class="btn-nav">Start a campaign →</a>
+    <a href="mailto:hello@canvasprotocol.xyz" class="btn-nav">Start a campaign &rarr;</a>
   </div>
-    </div>
-    <button class="nav-toggle" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span><span></span></button>
 </nav>
-<a id="main" tabindex="-1"></a>
-
-<!-- HERO -->
 <section class="page-hero">
-  <span class="section-eyebrow">For advertisers & AI labs</span>
-  <h1>The most targeted audience in crypto already exists. It's in <span>Telegram groups.</span></h1>
+  <span class="section-label">For advertisers &amp; AI labs</span>
+  <h1>The audience you want already exists. It's inside <em>Telegram groups.</em></h1>
   <div class="page-hero-row">
     <div>
-      <p class="page-hero-sub">Canvas puts your task in front of verified humans who are already in the community you want to reach. You pay per verified completion, not per view. No wasted budget.</p>
-      <a href="mailto:hello@canvasprotocol.xyz" class="btn-lg btn-primary">Start a campaign →</a>
+      <p class="page-hero-sub">Canvas puts your task in front of verified humans who are already in the community you want to reach. You pay per verified completion, not per view.</p>
+      <a href="mailto:hello@canvasprotocol.xyz" class="btn-lg btn-primary">Start a campaign &rarr;</a>
     </div>
     <div class="page-hero-right">
-      <p>A DeFi trader answering a question about lending protocols is a categorically different signal than a banner click. Canvas is the only channel that combines verified identity, community context, and task completion in a single touchpoint.</p>
-      <p>Your task runs inside the join verification flow, the moment a person is most engaged, most identifiable, and most willing to answer a question. That's a window advertisers can't buy anywhere else.</p>
+      <p>A DeFi trader answering a question about lending protocols is a categorically different signal than a banner click. Canvas is the only channel combining verified identity, community context, and task completion in a single touchpoint.</p>
+      <p>Your task runs inside the join verification flow, the moment a person is most engaged, most identifiable, and most willing to answer a question.</p>
     </div>
   </div>
 </section>
-
 <hr class="full-rule">
-
-<!-- TWO BUYER TYPES -->
 <div class="buyer-types">
   <div class="buyer-panel">
     <span class="buyer-label">User acquisition</span>
-    <h3>Pay for verified leads, not impressions.</h3>
-    <p>Target Telegram groups by topic and member profile. Your sponsored task runs inside the join verification. Every person who completes it is a verified human with demonstrated interest in your product area. You pay only when they engage.</p>
+    <h3>Pay for verified leads, not <em>impressions.</em></h3>
+    <p>Target Telegram groups by topic and member profile. Your sponsored task runs inside the join verification. Every person who completes it is a verified human with demonstrated interest in your product area.</p>
     <ul class="buyer-rows">
       <li>Choose groups by topic, size, and member demographics</li>
       <li>Budget held in escrow, drawn down per verified completion</li>
       <li>Preference signals from task responses included with every lead</li>
-      <li>Post-verification agent handoff: the bot offers your agent link to every verified member immediately after they're admitted, turning joins into warm leads</li>
+      <li>Post-verification agent handoff: the bot offers your agent link to every verified member immediately after admission</li>
     </ul>
     <div class="buyer-targets">
       <span class="buyer-targets-label">Strong fit for</span>
-      <div class="targets-row">
-        <span class="target-tag">DeFi protocols</span>
-        <span class="target-tag">Lending platforms</span>
-        <span class="target-tag">Wallet providers</span>
-        <span class="target-tag">AI agents</span>
-        <span class="target-tag">DEXs</span>
-        <span class="target-tag">Yield platforms</span>
-      </div>
+      <div class="targets-row"><span class="target-tag">DeFi protocols</span><span class="target-tag">Lending platforms</span><span class="target-tag">Wallet providers</span><span class="target-tag">AI agents</span><span class="target-tag">DEXs</span><span class="target-tag">Yield platforms</span></div>
     </div>
   </div>
   <div class="buyer-panel">
     <span class="buyer-label">RLHF training data</span>
-    <h3>Context-verified training data from the humans who matter.</h3>
-    <p>Generic annotation pipelines give you random workers. Canvas gives you verified domain experts, DeFi traders ranking DeFi responses, gamers evaluating gaming content, professionals assessing professional outputs. The demographic context is baked in, not estimated.</p>
+    <h3>Context-verified data from the humans who <em>matter.</em></h3>
+    <p>Generic annotation pipelines give you random workers. Canvas gives you verified domain experts: DeFi traders ranking DeFi responses, gamers evaluating gaming content, professionals assessing professional outputs. Demographic context is baked in, not estimated.</p>
     <ul class="buyer-rows">
       <li>Annotators are verified members of topic-specific communities</li>
       <li>Response quality scored before payout releases</li>
@@ -265,186 +161,68 @@ nav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-6px) rotate(-
     </ul>
     <div class="buyer-targets">
       <span class="buyer-targets-label">Strong fit for</span>
-      <div class="targets-row">
-        <span class="target-tag">AI labs</span>
-        <span class="target-tag">Model trainers</span>
-        <span class="target-tag">Evaluation teams</span>
-        <span class="target-tag">Data companies</span>
-        <span class="target-tag">Research orgs</span>
-      </div>
+      <div class="targets-row"><span class="target-tag">AI labs</span><span class="target-tag">Model trainers</span><span class="target-tag">Evaluation teams</span><span class="target-tag">Data companies</span><span class="target-tag">Research orgs</span></div>
     </div>
   </div>
 </div>
-
 <hr class="full-rule">
-
-<!-- HOW CAMPAIGNS WORK -->
 <div class="campaign-section">
-  <span class="section-eyebrow">Campaign flow</span>
-  <h2>From budget to completion in four steps.</h2>
+  <span class="section-label">Campaign flow</span>
+  <h2>Budget to completion in four steps.</h2>
   <div class="campaign-flow">
-    <div class="flow-step">
-      <div class="flow-num">01</div>
-      <div>
-        <div class="flow-title">Choose your groups</div>
-        <div class="flow-desc">Select from the Canvas group registry filtered by topic, member count, and engagement profile. You see the group's community context before you commit any budget.</div>
-      </div>
-      <div class="flow-detail">Groups are organized by topic category: DeFi and trading, gaming, NFTs and collectors, professional networks, local communities, and more. The registry grows as more group owners register.</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">02</div>
-      <div>
-        <div class="flow-title">Set your task and budget</div>
-        <div class="flow-desc">Write your task (or use a Canvas template), set your bid per verified completion, and lock your USDC budget in escrow. You only pay as completions happen.</div>
-      </div>
-      <div class="flow-detail">Tasks are short: a ranking, a preference question, or a choice between options. Most run 2 to 4 choices. The Canvas team reviews each task for clarity before it goes live.</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">03</div>
-      <div>
-        <div class="flow-title">Members complete the task</div>
-        <div class="flow-desc">When a new member tries to join a group in your campaign, they receive your task in a private DM. Their response is scored by AI before the completion is counted and the payout releases.</div>
-      </div>
-      <div class="flow-detail">The AI scoring layer filters out non-genuine responses before any budget is drawn. You never pay for a bot click or a random keystroke. Only scored, genuine completions count.</div>
-    </div>
-    <div class="flow-step">
-      <div class="flow-num">04</div>
-      <div>
-        <div class="flow-title">Receive completion data</div>
-        <div class="flow-desc">After each completion, you receive the anonymized response, the group context, and the timestamp. Unused budget is fully refunded when your campaign ends.</div>
-      </div>
-      <div class="flow-detail">For RLHF campaigns: ranked, labeled responses ready for training pipeline ingestion. For user acquisition: preference signals alongside the verified lead, plus agent handoff click-through data if enabled.</div>
-    </div>
+    <div class="flow-step"><div class="flow-num">01</div><div><div class="flow-title">Choose your groups</div><div class="flow-desc">Select from the Canvas registry filtered by topic, member count, and engagement profile. You see the group's community context before committing any budget.</div></div><div class="flow-detail">Groups are organized by topic: DeFi and trading, gaming, NFTs and collectors, professional networks, local communities. The registry grows as more group owners register.</div></div>
+    <div class="flow-step"><div class="flow-num">02</div><div><div class="flow-title">Set your task and budget</div><div class="flow-desc">Write your task or use a Canvas template, set your bid per verified completion, and lock your USDC budget in escrow. You only pay as completions happen.</div></div><div class="flow-detail">Tasks are short: a ranking, a preference question, or a choice between options. Most run 2 to 4 choices. The Canvas team reviews each task for clarity before it goes live.</div></div>
+    <div class="flow-step"><div class="flow-num">03</div><div><div class="flow-title">Members complete the task</div><div class="flow-desc">When a new member tries to join a group in your campaign, they receive your task in a private DM. Their response is scored by AI before the completion is counted and the payout releases.</div></div><div class="flow-detail">The AI scoring layer filters out non-genuine responses before any budget is drawn. You never pay for a bot click or a random keystroke.</div></div>
+    <div class="flow-step"><div class="flow-num">04</div><div><div class="flow-title">Receive completion data</div><div class="flow-desc">After each completion, you receive the anonymized response, the group context, and the timestamp. Unused budget is fully refunded when your campaign ends.</div></div><div class="flow-detail">For RLHF campaigns: ranked, labeled responses ready for training pipeline ingestion. For user acquisition: preference signals alongside the verified lead, plus agent handoff data if enabled.</div></div>
   </div>
 </div>
-
 <hr class="full-rule">
-
-<!-- WHY CANVAS -->
 <div class="why-section">
   <div class="why-head">
-    <span class="section-eyebrow">Why Canvas</span>
+    <span class="section-label">Why Canvas</span>
     <h2>What you actually get versus the alternatives.</h2>
     <p>Most channels sell you exposure. Canvas sells you verified, contextualized engagement from humans you can identify.</p>
   </div>
   <div class="comparison">
-    <div class="compare-col">
-      <div class="compare-title">Twitter / X ads</div>
-      <ul class="compare-list">
-        <li><span class="ico n">✗</span> Pay per impression, not completion</li>
-        <li><span class="ico n">✗</span> No audience identity verification</li>
-        <li><span class="ico n">✗</span> No response data or preference signal</li>
-        <li><span class="ico n">✗</span> Bot traffic mixed into delivery</li>
-        <li><span class="ico y">✓</span> Large scale reach</li>
-      </ul>
-    </div>
-    <div class="compare-col highlight">
-      <div class="compare-title compare-accent">Canvas</div>
-      <ul class="compare-list">
-        <li><span class="ico y">✓</span> Pay per verified human completion</li>
-        <li><span class="ico y">✓</span> Community membership verified</li>
-        <li><span class="ico y">✓</span> Response data with every completion</li>
-        <li><span class="ico y">✓</span> AI scoring filters non-genuine responses</li>
-        <li><span class="ico y">✓</span> Budget fully refunded if unused</li>
-      </ul>
-    </div>
-    <div class="compare-col">
-      <div class="compare-title">Mechanical Turk / Scale AI</div>
-      <ul class="compare-list">
-        <li><span class="ico n">✗</span> Workers opt in, no community context</li>
-        <li><span class="ico n">✗</span> No domain verification for annotators</li>
-        <li><span class="ico n">✗</span> High cost for domain-specific data</li>
-        <li><span class="ico n">✗</span> No preference signal from engagement</li>
-        <li><span class="ico y">✓</span> Established quality pipelines</li>
-      </ul>
-    </div>
+    <div class="compare-col"><div class="compare-title">Twitter / X ads</div><ul class="compare-list"><li><span class="ico n">&times;</span> Pay per impression, not completion</li><li><span class="ico n">&times;</span> No audience identity verification</li><li><span class="ico n">&times;</span> No response data or preference signal</li><li><span class="ico n">&times;</span> Bot traffic mixed into delivery</li><li><span class="ico y">&#10003;</span> Large scale reach</li></ul></div>
+    <div class="compare-col highlight"><div class="compare-title compare-accent">Canvas</div><ul class="compare-list"><li><span class="ico y">&#10003;</span> Pay per verified human completion</li><li><span class="ico y">&#10003;</span> Community membership verified</li><li><span class="ico y">&#10003;</span> Response data with every completion</li><li><span class="ico y">&#10003;</span> AI scoring filters non-genuine responses</li><li><span class="ico y">&#10003;</span> Budget fully refunded if unused</li></ul></div>
+    <div class="compare-col"><div class="compare-title">Mechanical Turk / Scale AI</div><ul class="compare-list"><li><span class="ico n">&times;</span> Workers opt in, no community context</li><li><span class="ico n">&times;</span> No domain verification for annotators</li><li><span class="ico n">&times;</span> High cost for domain-specific data</li><li><span class="ico n">&times;</span> No preference signal from engagement</li><li><span class="ico y">&#10003;</span> Established quality pipelines</li></ul></div>
   </div>
 </div>
-
 <hr class="full-rule">
-
-<!-- TASK FORMATS -->
-<div class="format-section">
-  <div class="format-head">
-    <span class="section-eyebrow">Task formats</span>
-    <h2>Three ways to engage your audience.</h2>
-    <p>Every task format is designed to take 10 to 15 seconds. Members answer in a Telegram DM before they're admitted to the group.</p>
-  </div>
-  <div class="formats">
-    <div class="format-card">
-      <span class="format-tag">Ranking</span>
-      <h4>Best for RLHF data collection</h4>
-      <p>Members rank two to four options from most to least preferred. Generates labeled comparison data for model training. The community context of the annotator is the differentiator.</p>
-      <div class="format-example">
-        "Rank these responses from most to least helpful. Reply with the order, e.g. B, A, C."
-      </div>
-    </div>
-    <div class="format-card">
-      <span class="format-tag">Multiple choice</span>
-      <h4>Best for user acquisition and preference mapping</h4>
-      <p>Members select from two to four options. No wrong answer for acquisition campaigns. The choice reveals genuine preference, not a correct answer. The advertiser receives the selection signal with every completion.</p>
-      <div class="format-example">
-        "You have 10,000 USDC to allocate. What would you do? Reply A, B, or C. Sponsored by Aave · no wrong answer."
-      </div>
-    </div>
-    <div class="format-card">
-      <span class="format-tag">Open response</span>
-      <h4>Best for qualitative research and brand feedback</h4>
-      <p>Members write a short free-text response. Scored by AI for genuine engagement before payout releases. Best for open-ended research questions and brand sentiment collection from specific audience segments.</p>
-      <div class="format-example">
-        "What's the biggest challenge you face when trying to manage yield across multiple protocols? One sentence is fine."
-      </div>
-    </div>
-    <div class="format-card" style="grid-column: 1 / -1;">
-      <span class="format-tag">Agent handoff</span>
-      <h4>Turn every verification into a conversation</h4>
-      <p>After any task type, the bot can offer verified members a direct link to your brand's AI agent, right in the DM where they just completed the task. No friction, no redirect, no cold outreach. The member is already engaged, already verified, and already in context. Add-on to any campaign format.</p>
-      <div class="format-example">
-        ✓ Verified. You're in., "Want to know current lending rates on Aave? Their agent can answer in plain English, no wallet needed." [Chat with Aave →] [Skip]
-      </div>
-    </div>
-  </div>
+<div class="format-head">
+  <span class="section-label">Task formats</span>
+  <h2>Three ways to engage your audience.</h2>
+  <p>Every format is designed to take 10 to 15 seconds. Members answer in a Telegram DM before they're admitted.</p>
 </div>
-
+<div class="formats">
+  <div class="format-card"><span class="format-tag">Ranking</span><h4>Best for RLHF data collection</h4><p>Members rank two to four options from most to least preferred. Generates labeled comparison data for model training. The community context of the annotator is the differentiator.</p><div class="format-example">"Rank these responses from most to least helpful. Reply with the order, e.g. B, A, C."</div></div>
+  <div class="format-card"><span class="format-tag">Multiple choice</span><h4>Best for user acquisition and preference mapping</h4><p>Members select from two to four options. No wrong answer for acquisition campaigns. The choice reveals genuine preference. The advertiser receives the selection signal with every completion.</p><div class="format-example">"You have 10,000 USDC to allocate. What would you do? Reply A, B, or C. Sponsored by Aave &middot; no wrong answer."</div></div>
+  <div class="format-card"><span class="format-tag">Open response</span><h4>Best for qualitative research and brand feedback</h4><p>Members write a short free-text response, scored by AI for genuine engagement before payout releases. Best for open-ended research and brand sentiment collection from specific audience segments.</p><div class="format-example">"What's the biggest challenge you face managing yield across multiple protocols? One sentence is fine."</div></div>
+  <div class="format-card" style="grid-column:1/-1"><span class="format-tag">Agent handoff</span><h4>Turn every verification into a conversation</h4><p>After any task type, the bot can offer verified members a direct link to your brand's AI agent, right in the DM where they just completed the task. No friction, no redirect, no cold outreach. The member is already engaged, already verified, and already in context.</p><div class="format-example">&#10003; Verified. You're in. "Want to know current lending rates on Aave? Their agent can answer in plain English, no wallet needed." [Chat with Aave &rarr;] [Skip]</div></div>
+</div>
 <hr class="full-rule">
-
-<!-- CTA -->
 <div class="cta-section">
-  <h2>Verified human completions<br>starting at <span>$0.05 each.</span></h2>
+  <h2>Verified human completions<br>starting at $0.05 each.</h2>
   <p>Talk to the Canvas team to set up your first campaign. We'll help you write the task, choose the right groups, and size the budget.</p>
   <div class="cta-btns">
-    <a href="mailto:hello@canvasprotocol.xyz" class="btn-lg btn-primary">Start a campaign →</a>
-    <a href="/group-owners" class="btn-lg btn-secondary">See the supply side</a>
+    <a href="mailto:hello@canvasprotocol.xyz" class="btn-lg btn-primary">Start a campaign &rarr;</a>
+    <a href="group-owners.html" class="btn-lg btn-secondary">See the supply side</a>
   </div>
 </div>
-
 <footer>
   <div class="footer-inner">
-    <a href="/" class="footer-logo">Canvas</a>
+    <a href="index.html" class="footer-logo">Canvas</a>
     <ul class="footer-links">
-      <li><a href="/group-owners">Group Owners</a></li>
-      <li><a href="/advertisers">Advertisers</a></li>
-      <li><a href="/about">About</a></li>
+      <li><a href="group-owners.html">Group Owners</a></li>
+      <li><a href="advertisers.html">Advertisers</a></li>
+      <li><a href="vision.html">Vision</a></li>
+      <li><a href="about.html">About</a></li>
       <li><a href="https://docs.canvas-protocol.com">Docs</a></li>
       <li><a href="mailto:hello@canvasprotocol.xyz">Contact</a></li>
     </ul>
-    <span class="footer-copy">© 2026 Canvas Protocol</span>
+    <span class="footer-copy">&copy; 2026 Canvas Protocol</span>
   </div>
 </footer>
-
-<script>
-(function(){
-  var nav=document.querySelector('nav');
-  var btn=nav&&nav.querySelector('.nav-toggle');
-  if(!nav||!btn)return;
-  btn.addEventListener('click',function(){
-    var open=nav.classList.toggle('nav-open');
-    btn.setAttribute('aria-expanded',open?'true':'false');
-  });
-  nav.querySelectorAll('.nav-collapse a').forEach(function(a){
-    a.addEventListener('click',function(){nav.classList.remove('nav-open');btn.setAttribute('aria-expanded','false');});
-  });
-})();
-</script>
 </body>
 </html>

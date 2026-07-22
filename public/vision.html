@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canvas &mdash; Vision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#000;--surface:#0A0A0A;--surface-2:#111;--border:#1E1E1E;--border-2:#2A2A2A;--text:#FFF;--text-2:#A0A0A0;--text-3:#555;--sans:'DM Sans',-apple-system,sans-serif;--serif:'DM Serif Display',Georgia,serif}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+nav{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(0,0,0,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--serif);font-size:22px;color:var(--text);text-decoration:none}
+.nav-links{list-style:none;display:flex;gap:32px;position:absolute;left:50%;transform:translateX(-50%)}
+.nav-links a{font-size:13px;color:var(--text-2);text-decoration:none;transition:color .1s;letter-spacing:.01em}
+.nav-links a:hover,.nav-links a.active{color:var(--text)}
+.nav-actions{display:flex;align-items:center;gap:20px}
+.nav-contact{font-size:13px;color:var(--text-2);text-decoration:none;transition:color .1s}
+.nav-contact:hover{color:var(--text)}
+.btn-nav{display:inline-flex;align-items:center;padding:7px 16px;border:1px solid var(--text);color:var(--text);font-size:13px;font-family:var(--sans);background:transparent;text-decoration:none;transition:background .1s,color .1s}
+.btn-nav:hover{background:var(--text);color:var(--bg)}
+.btn-lg{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;font-size:14px;font-family:var(--sans);text-decoration:none;transition:all .1s;white-space:nowrap;letter-spacing:.01em}
+.btn-primary{background:var(--text);color:var(--bg);border:1px solid var(--text)}
+.btn-primary:hover{background:transparent;color:var(--text)}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border-2)}
+.btn-secondary:hover{border-color:var(--text)}
+.full-rule{border:none;border-top:1px solid var(--border);margin:0}
+.section-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-3);margin-bottom:20px;display:block}
+footer{border-top:1px solid var(--border);padding:40px 48px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.footer-logo{font-family:var(--serif);font-size:18px;color:var(--text);text-decoration:none}
+.footer-links{list-style:none;display:flex;gap:24px;flex-wrap:wrap}
+.footer-links a{font-size:12.5px;color:var(--text-3);text-decoration:none;transition:color .1s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:12.5px;color:var(--text-3)}
+.opening{max-width:1200px;margin:0 auto;padding:96px 48px 88px}
+.opening h1{font-family:var(--serif);font-size:clamp(44px,5.5vw,76px);font-weight:400;line-height:1.04;letter-spacing:-.02em;margin-bottom:48px;max-width:900px}
+.opening h1 em{font-style:italic}
+.opening-body{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+.opening-body p{font-size:17px;color:var(--text-2);line-height:1.8;font-weight:300;margin-bottom:22px}
+.opening-body p:last-child{margin-bottom:0}
+.opening-body p strong{color:var(--text);font-weight:500}
+.problem-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.problem-inner{max-width:1200px;margin:0 auto;padding:88px 48px}
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;background:var(--border);gap:1px;border:1px solid var(--border)}
+.problem-panel{background:var(--surface-2);padding:48px 40px 52px}
+.problem-num{font-family:var(--serif);font-style:italic;font-size:64px;font-weight:400;color:var(--border-2);letter-spacing:-.04em;line-height:0.9;margin-bottom:20px;display:block}
+.problem-title{font-size:19px;font-weight:500;color:var(--text);line-height:1.25;margin-bottom:16px}
+.problem-body{font-size:15px;color:var(--text-2);line-height:1.78;font-weight:300}
+.problem-body p{margin-bottom:14px}
+.problem-body p:last-child{margin-bottom:0}
+.problem-body strong{color:var(--text);font-weight:500}
+.transition{max-width:1200px;margin:0 auto;padding:96px 48px;text-align:center}
+.transition blockquote{font-family:var(--serif);font-style:italic;font-size:clamp(32px,4vw,52px);font-weight:400;line-height:1.1;letter-spacing:-.02em;max-width:800px;margin:0 auto 24px;color:var(--text)}
+.transition p{font-size:17px;color:var(--text-2);line-height:1.75;font-weight:300;max-width:560px;margin:0 auto}
+.creator-section{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface)}
+.creator-inner{max-width:1200px;margin:0 auto;padding:88px 48px}
+.creator-scenario{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;margin-bottom:72px}
+.creator-scenario:last-of-type{margin-bottom:0}
+.scenario-eyebrow{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-3);margin-bottom:16px;display:block}
+.scenario-title{font-family:var(--serif);font-size:clamp(24px,2.6vw,36px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:16px}
+.scenario-title em{font-style:italic}
+.scenario-body{font-size:15px;color:var(--text-2);line-height:1.78;font-weight:300;margin-bottom:14px}
+.scenario-body strong{color:var(--text);font-weight:500}
+.scenario-divider{border:none;border-top:1px solid var(--border);margin:72px 0}
+.scenario-math{background:var(--surface-2);border:1px solid var(--border)}
+.math-row{display:flex;justify-content:space-between;align-items:baseline;padding:12px 20px;border-bottom:1px solid var(--border);font-size:14px}
+.math-row:last-child{border-bottom:none}
+.math-label{color:var(--text-2);font-weight:300}
+.math-value{font-family:var(--serif);font-style:italic;font-size:22px;font-weight:400;color:var(--text);letter-spacing:-.02em}
+.math-value.total{font-size:30px}
+.math-note{font-size:11px;color:var(--text-3);font-style:normal;font-family:var(--sans);font-weight:300;text-align:right;display:block}
+.ai-data-section{max-width:1200px;margin:0 auto;padding:88px 48px}
+.ai-data-top{display:grid;grid-template-columns:1fr 1fr;gap:72px;margin-bottom:56px;align-items:start}
+.ai-data-top h2{font-family:var(--serif);font-size:clamp(30px,3.2vw,44px);font-weight:400;line-height:1.1;letter-spacing:-.02em}
+.ai-data-top h2 em{font-style:italic}
+.ai-data-top p{font-size:15px;color:var(--text-2);line-height:1.78;font-weight:300;margin-bottom:14px}
+.ai-data-top p strong{color:var(--text);font-weight:500}
+.pipeline-flow{display:grid;grid-template-columns:repeat(4,1fr);background:var(--border);gap:1px;border:1px solid var(--border)}
+.pipeline-step{background:var(--surface);padding:28px 22px 32px}
+.pipeline-icon{font-size:20px;margin-bottom:12px;display:block}
+.pipeline-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-3);margin-bottom:8px;display:block}
+.pipeline-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:8px;line-height:1.3}
+.pipeline-body{font-size:12.5px;color:var(--text-2);line-height:1.65;font-weight:300}
+.scale-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.scale-inner{max-width:1200px;margin:0 auto;padding:88px 48px}
+.scale-top{display:grid;grid-template-columns:1fr 1fr;gap:72px;margin-bottom:56px;align-items:start}
+.scale-top h2{font-family:var(--serif);font-size:clamp(30px,3.2vw,44px);font-weight:400;line-height:1.1;letter-spacing:-.02em}
+.scale-top h2 em{font-style:italic}
+.scale-top p{font-size:15px;color:var(--text-2);line-height:1.78;font-weight:300;margin-bottom:14px}
+.scale-top p strong{color:var(--text);font-weight:500}
+.scale-numbers{display:grid;grid-template-columns:repeat(3,1fr);background:var(--border);gap:1px;border:1px solid var(--border)}
+.scale-num{background:var(--surface-2);padding:36px 28px}
+.scale-num-value{font-family:var(--serif);font-style:italic;font-size:clamp(40px,4vw,56px);font-weight:400;color:var(--text);letter-spacing:-.03em;line-height:1;margin-bottom:8px;display:block}
+.scale-num-label{font-size:13px;color:var(--text-2);font-weight:300;line-height:1.5}
+.roadmap-section{max-width:1200px;margin:0 auto;padding:88px 48px}
+.roadmap-section>h2{font-family:var(--serif);font-size:clamp(30px,3.2vw,44px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:48px;max-width:560px}
+.phases{display:flex;flex-direction:column;gap:1px;background:var(--border);border:1px solid var(--border)}
+.phase{background:var(--surface);padding:36px 40px;display:grid;grid-template-columns:180px 1fr;gap:48px;align-items:start}
+.phase-tag{display:inline-block;padding:3px 10px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;border:1px solid var(--border-2);margin-bottom:8px;color:var(--text-3)}
+.phase-tag.now{border-color:#3a3a3a;color:#A0A0A0}
+.phase-name{font-size:14px;font-weight:500;color:var(--text)}
+.phase-content h3{font-size:17px;font-weight:500;color:var(--text);margin-bottom:10px;line-height:1.3}
+.phase-content p{font-size:14px;color:var(--text-2);line-height:1.72;font-weight:300;max-width:580px}
+.phase-milestones{list-style:none;margin-top:16px}
+.phase-milestones li{font-size:13px;color:var(--text-2);padding:6px 0;border-top:1px solid var(--border);display:flex;gap:10px;line-height:1.5;font-weight:300}
+.phase-milestones li:first-child{border-top:none;padding-top:0}
+.phase-milestones li::before{content:'\00B7';color:var(--text-3);flex-shrink:0;font-size:16px;font-weight:700}
+.cta-section{background:var(--surface);border-top:1px solid var(--border);padding:96px 48px;text-align:center}
+.cta-section h2{font-family:var(--serif);font-style:italic;font-size:clamp(40px,5vw,64px);font-weight:400;line-height:1.06;letter-spacing:-.02em;margin-bottom:16px}
+.cta-section p{font-size:16px;color:var(--text-2);margin-bottom:44px;font-weight:300;line-height:1.7;max-width:520px;margin-left:auto;margin-right:auto}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+@media(max-width:960px){
+  nav{padding:0 24px}.nav-links{display:none}
+  .opening{padding:64px 24px 64px}
+  .opening-body{grid-template-columns:1fr;gap:0}
+  .problem-inner{padding:64px 24px}
+  .problem-grid{grid-template-columns:1fr}.problem-panel{padding:36px 24px}
+  .transition{padding:64px 24px}
+  .creator-inner{padding:64px 24px}
+  .creator-scenario{grid-template-columns:1fr;gap:40px}
+  .ai-data-section{padding:64px 24px}
+  .ai-data-top{grid-template-columns:1fr;gap:28px}
+  .pipeline-flow{grid-template-columns:1fr 1fr}
+  .scale-inner{padding:64px 24px}
+  .scale-top{grid-template-columns:1fr;gap:28px}
+  .scale-numbers{grid-template-columns:1fr}
+  .roadmap-section{padding:64px 24px}
+  .phase{grid-template-columns:1fr;gap:16px;padding:28px 24px}
+  .cta-section{padding:72px 24px}
+  footer{padding:36px 24px}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Canvas</a>
+  <ul class="nav-links">
+    <li><a href="group-owners.html">Group Owners</a></li>
+    <li><a href="advertisers.html">Advertisers</a></li>
+    <li><a href="vision.html" class="active">Vision</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="https://docs.canvas-protocol.com">Docs</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="mailto:hello@canvasprotocol.xyz" class="nav-contact">Contact</a>
+    <a href="group-owners.html" class="btn-nav">Register your group &rarr;</a>
+  </div>
+</nav>
+<section class="opening">
+  <span class="section-label">The vision</span>
+  <h1>100,000 community builders earning a living from the audiences <em>they built.</em></h1>
+  <div class="opening-body">
+    <div>
+      <p>Human attention has always been the most valuable commodity on the internet. Search engines were built on it. Social platforms were monetized by auctioning it. AI labs are now spending billions to collect and label it.</p>
+      <p>But the people who actually gather that attention, the community builders, the creators, the group owners who spent years earning trust from a specific audience, have never been cut in. <strong>Canvas changes that.</strong></p>
+    </div>
+    <div>
+      <p>Replace the standard Telegram join check with a short sponsored task. The human gets in. The advertiser or AI lab gets a verified, contextual human response. The group owner gets paid in USDC on every single join.</p>
+      <p>No brand deals. No sponsorship pitches. No minimum audience size. The market for verified human attention runs continuously, and it should flow to the people who built that attention in the first place.</p>
+    </div>
+  </div>
+</section>
+<hr class="full-rule">
+<section class="problem-section">
+  <div class="problem-inner">
+    <span class="section-label">Two problems, one mechanism</span>
+    <div class="problem-grid">
+      <div class="problem-panel">
+        <span class="problem-num">01</span>
+        <div class="problem-title">Brand deals are collapsing. Community builders have no reliable income.</div>
+        <div class="problem-body">
+          <p>Automation is displacing knowledge workers faster than new roles appear. Creators who once relied on YouTube ad revenue or influencer sponsorships are watching payouts fall. Brands can't justify spend without direct conversion data, so the checks stop coming.</p>
+          <p>A creator with 80,000 Telegram followers and a deeply engaged community sits on real, recurring, verifiable human attention. <strong>But there's no mechanism to route revenue from brands directly to that person, per verified completion, without an agent or a negotiation.</strong></p>
+          <p>The community builders doing the actual work of aggregating and maintaining trust across specific audiences are left out of the market they created.</p>
+        </div>
+      </div>
+      <div class="problem-panel">
+        <span class="problem-num">02</span>
+        <div class="problem-title">AI labs are paying millions for labeled data. Most of it has no context.</div>
+        <div class="problem-body">
+          <p>Training large language models requires vast quantities of human-labeled data. Current pipelines, Mechanical Turk, Scale AI, and their equivalents, share a structural flaw: <strong>annotators have no verifiable connection to the subject matter.</strong></p>
+          <p>A generic crowdworker ranking responses about DeFi lending is not the same signal as a verified DeFi trader doing the same task. The label looks identical in the training set. One annotator knows what slippage means. The other is clicking for a dollar.</p>
+          <p>What AI labs need is not just volume. It's provenance: labeled outputs where the annotator's context is part of the data record. That doesn't exist at scale today. Canvas is how it gets built.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="full-rule">
+<div class="transition">
+  <blockquote>"The CAPTCHA is a toll booth that collects human attention and pays it to nobody."</blockquote>
+  <p>Every day, millions of people solve join verifications to enter Telegram groups. That attention is real, recurring, and currently wasted. Canvas redirects it.</p>
+</div>
+<hr class="full-rule">
+<section class="creator-section">
+  <div class="creator-inner">
+    <span class="section-label">What this looks like</span>
+    <div class="creator-scenario">
+      <div>
+        <span class="scenario-eyebrow">Scenario &middot; Creator monetization</span>
+        <div class="scenario-title">A creator with 50,000 followers hosts a live Q&amp;A.<br>They earn <em>$2,592 in one evening.</em></div>
+        <p class="scenario-body">A music creator announces a live Q&amp;A on Telegram. Fans who want to join and ask questions in real time complete a short sponsored task first. A concert ticketing app sponsors the session. The creator earns on every verified fan who walks through the door.</p>
+        <p class="scenario-body">The brand gets verified fan preference data: concert habits, streaming behavior. The creator gets <strong>a direct revenue line from their audience that doesn't depend on platform algorithms or post engagement rates.</strong></p>
+        <p class="scenario-body">This replaces the sponsorship model for live events. Instead of negotiating a flat fee for a mention, the creator gets paid per verified human, in real time.</p>
+      </div>
+      <div class="scenario-math">
+        <div class="math-row"><span class="math-label">Followers invited</span><span class="math-value">50,000</span></div>
+        <div class="math-row"><span class="math-label">Joins in the event window</span><span class="math-value">2,400</span></div>
+        <div class="math-row"><span class="math-label">Sponsor bid per verified join</span><span class="math-value">$1.20</span></div>
+        <div class="math-row"><span class="math-label">Canvas protocol fee (10%)</span><span class="math-value">$0.12</span></div>
+        <div class="math-row"><span class="math-label" style="font-weight:500;color:var(--text)">Creator earnings &middot; one evening</span><div><span class="math-value total">$2,592</span><span class="math-note">paid in USDC &middot; same night</span></div></div>
+      </div>
+    </div>
+    <hr class="scenario-divider">
+    <div class="creator-scenario">
+      <div>
+        <span class="scenario-eyebrow">Scenario &middot; Recurring revenue</span>
+        <div class="scenario-title">A finance creator earns <em>$450/month</em> from a community they built two years ago.</div>
+        <p class="scenario-body">A personal finance creator has a 5,000-person Telegram group built while posting about investing and budgeting. The group is active but the creator hasn't posted in months. With Canvas, the group re-verifies every 30 days: every existing member answers a quick sponsored question to retain access.</p>
+        <p class="scenario-body">A fintech app sponsors the re-verification. They get monthly preference data from 5,000 verified retail investors. The creator gets <strong>$450 every month from an audience they built once,</strong> without posting, without pitching, without any ongoing work.</p>
+      </div>
+      <div class="scenario-math">
+        <div class="math-row"><span class="math-label">Active community members</span><span class="math-value">5,000</span></div>
+        <div class="math-row"><span class="math-label">Re-verification cadence</span><span class="math-value">Monthly</span></div>
+        <div class="math-row"><span class="math-label">Sponsor bid per re-verification</span><span class="math-value">$0.10</span></div>
+        <div class="math-row"><span class="math-label">Canvas protocol fee (10%)</span><span class="math-value">$0.01</span></div>
+        <div class="math-row"><span class="math-label" style="font-weight:500;color:var(--text)">Creator earnings &middot; per month</span><div><span class="math-value total">$450</span><span class="math-note">passive &middot; no ongoing work</span></div></div>
+      </div>
+    </div>
+    <hr class="scenario-divider">
+    <div class="creator-scenario">
+      <div>
+        <span class="scenario-eyebrow">Scenario &middot; Niche audience premium</span>
+        <div class="scenario-title">A 900-person crypto group earns <em>more per join</em> than a 90,000-person lifestyle account.</div>
+        <p class="scenario-body">Canvas is not a follower count game. A small, highly specialized community of verified DeFi traders is worth more per member to an AI lab than a large, diffuse audience of general interest followers.</p>
+        <p class="scenario-body">The owner of a 900-person group where every member understands impermanent loss can charge $0.50 or more per verified join from an AI lab that needs exactly that label quality. <strong>The market prices community expertise, not just community size.</strong></p>
+        <p class="scenario-body">This opens up monetization for thousands of group owners told their audience is "too small" for brand deals. On Canvas, a tight expert community is a premium product.</p>
+      </div>
+      <div class="scenario-math">
+        <div class="math-row"><span class="math-label">Group size</span><span class="math-value">900</span></div>
+        <div class="math-row"><span class="math-label">New joins per month</span><span class="math-value">~60</span></div>
+        <div class="math-row"><span class="math-label">AI lab bid (specialist context)</span><span class="math-value">$0.50</span></div>
+        <div class="math-row"><span class="math-label">Re-verification &middot; 900 members/month</span><span class="math-value">$81</span></div>
+        <div class="math-row"><span class="math-label" style="font-weight:500;color:var(--text)">Owner earnings &middot; per month</span><div><span class="math-value total">$108</span><span class="math-note">from a 900-person community</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+<hr class="full-rule">
+<div class="ai-data-section">
+  <span class="section-label">The AI data opportunity</span>
+  <div class="ai-data-top">
+    <h2>Canvas is the data supply chain AI labs <em>can't build themselves.</em></h2>
+    <div>
+      <p>Anthropic, OpenAI, Google DeepMind, and every frontier lab training competitive models needs one thing they cannot manufacture: <strong>high-quality human-labeled data from people with verified domain expertise.</strong></p>
+      <p>They can hire contractors. They can build crowdsourcing platforms. But they cannot create the communities. The 4,200-person DeFi trading group, the 12,000-person physician network, the 800-person competitive gaming community: these took years to build and are impossible to replicate on demand.</p>
+      <p>Canvas is the infrastructure layer that connects those communities to the AI labs that need their labels. Every Telegram group that registers becomes a node in a context-verified human data network.</p>
+    </div>
+  </div>
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="pipeline-icon">&#x1F3D8;</span><div class="pipeline-label">Step 1</div><div class="pipeline-title">Verified community member joins</div><p class="pipeline-body">A real human, already embedded in a topic-specific community, attempts to join a registered group.</p></div>
+    <div class="pipeline-step"><span class="pipeline-icon">&#x1F4CB;</span><div class="pipeline-label">Step 2</div><div class="pipeline-title">AI lab task served in DM</div><p class="pipeline-body">A ranking or preference question matched to the group's topic and the AI lab's training objective is delivered via Telegram DM.</p></div>
+    <div class="pipeline-step"><span class="pipeline-icon">&#x1F916;</span><div class="pipeline-label">Step 3</div><div class="pipeline-title">Response scored and filtered</div><p class="pipeline-body">AI scoring checks the response for genuine engagement before the completion is counted. Non-genuine responses are rejected before any budget moves.</p></div>
+    <div class="pipeline-step"><span class="pipeline-icon">&#x26D3;</span><div class="pipeline-label">Step 4</div><div class="pipeline-title">Label logged onchain</div><p class="pipeline-body">Every completion is recorded on Base with group context, timestamp, and scoring outcome. The AI lab receives a labeled output with cryptographic provenance.</p></div>
+  </div>
+</div>
+<hr class="full-rule">
+<section class="scale-section">
+  <div class="scale-inner">
+    <span class="section-label">Scale</span>
+    <div class="scale-top">
+      <h2>Telegram has 900 million monthly active users. Most groups do <em>zero verification today.</em></h2>
+      <div>
+        <p>The total addressable market is every Telegram group that runs any form of join verification. That includes community groups, creator fan clubs, professional networks, local interest communities, and every project or brand that maintains a Telegram presence.</p>
+        <p>Canvas does not require a crypto-native audience. A parenting group, a local restaurant community, or a fitness accountability group can register and earn. <strong>Crypto is the starting vertical because the payment rails are native.</strong> The long-term market is every community on the internet.</p>
+      </div>
+    </div>
+    <div class="scale-numbers">
+      <div class="scale-num"><span class="scale-num-value">900M</span><div class="scale-num-label">Telegram monthly active users</div></div>
+      <div class="scale-num"><span class="scale-num-value">$4.5B</span><div class="scale-num-label">AI training data market in 2025, growing rapidly</div></div>
+      <div class="scale-num"><span class="scale-num-value">100K</span><div class="scale-num-label">Community builders Canvas aims to put on payroll</div></div>
+    </div>
+  </div>
+</section>
+<hr class="full-rule">
+<div class="roadmap-section">
+  <span class="section-label">Roadmap</span>
+  <h2>Crypto communities first. Then every community on the internet.</h2>
+  <div class="phases">
+    <div class="phase">
+      <div><span class="phase-tag now">Now</span><div class="phase-name">Phase 1 &middot; Crypto vertical</div></div>
+      <div class="phase-content">
+        <h3>Prove the loop with DeFi and AI lab buyers</h3>
+        <p>Verify the core mechanic: group owners register, advertisers fund campaigns, members complete tasks, USDC flows automatically.</p>
+        <ul class="phase-milestones">
+          <li>Live on Base mainnet with real USDC payouts</li>
+          <li>First AI lab advertiser campaign running</li>
+          <li>Group owner registry open to any Telegram group</li>
+          <li>Conversational bot flow, no dashboards, no friction</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div><span class="phase-tag">Next</span><div class="phase-name">Phase 2 &middot; Creator economy</div></div>
+      <div class="phase-content">
+        <h3>Creator Q&amp;A drops and influencer monetization</h3>
+        <p>Build the event-driven monetization format: creator announces a live session, fans join a Canvas-verified group, sponsors pay per verified fan.</p>
+        <ul class="phase-milestones">
+          <li>Event-mode verification with surge pricing</li>
+          <li>Fiat onboarding for non-crypto creators</li>
+          <li>Creator dashboard: earnings history, audience breakdown</li>
+          <li>Sponsor marketplace: brands bid on creator audience categories</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase">
+      <div><span class="phase-tag">Later</span><div class="phase-name">Phase 3 &middot; Permissionless marketplace</div></div>
+      <div class="phase-content">
+        <h3>Any community, any topic, any advertiser</h3>
+        <p>Open the registry entirely. Staking, velocity caps, and cross-group reputation prevent abuse. The protocol becomes self-sustaining infrastructure.</p>
+        <ul class="phase-milestones">
+          <li>Permissionless group registration with staking</li>
+          <li>Open advertiser onboarding, self-serve campaign creation</li>
+          <li>Cross-group identity and re-verification cadences</li>
+          <li>Expansion beyond Telegram to other messaging platforms</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cta-section">
+  <h2>Your audience has value.<br>Start collecting it.</h2>
+  <p>Register your group in two minutes. The next person who joins pays you.</p>
+  <div class="cta-btns">
+    <a href="group-owners.html" class="btn-lg btn-primary">Register your group &rarr;</a>
+    <a href="advertisers.html" class="btn-lg btn-secondary">Run a campaign</a>
+  </div>
+</div>
+<footer>
+  <div class="footer-inner">
+    <a href="index.html" class="footer-logo">Canvas</a>
+    <ul class="footer-links">
+      <li><a href="group-owners.html">Group Owners</a></li>
+      <li><a href="advertisers.html">Advertisers</a></li>
+      <li><a href="vision.html">Vision</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="https://docs.canvas-protocol.com">Docs</a></li>
+      <li><a href="mailto:hello@canvasprotocol.xyz">Contact</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2026 Canvas Protocol</span>
+  </div>
+</footer>
+</body>
+</html>

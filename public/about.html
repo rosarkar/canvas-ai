@@ -3,376 +3,123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Canvas · About</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Canvas &middot; About</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root {
-  --bg: #08080B; --surface: #0E0E14; --surface-2: #131319; --border: #1C1C28;
-  --text: #F0EDE8; --muted: #66637A; --muted-2: #9694A4; --accent: #E9A84C;
-  --accent-bg: rgba(233,168,76,0.07); --green: #4ADE80;
-  --sans: 'Inter', -apple-system, sans-serif; --serif: 'Cormorant Garamond', Georgia, serif;
-}
-html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-
-
-
-nav { position: sticky; top: 0; z-index: 200; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 56px; background: rgba(8,8,11,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
-.nav-logo { font-family: var(--serif); font-weight: 700; font-size: 22px; color: var(--text); text-decoration: none; letter-spacing: -0.01em; }
-.nav-links { list-style: none; display: flex; gap: 36px; position: absolute; left: 50%; transform: translateX(-50%); }
-.nav-links a { font-size: 13.5px; color: var(--muted-2); text-decoration: none; transition: color 0.15s; }
-.nav-links a:hover, .nav-links a.active { color: var(--text); }
-.nav-actions { display: flex; align-items: center; gap: 20px; }
-.nav-contact { font-size: 13.5px; color: var(--muted-2); text-decoration: none; }
-.nav-contact:hover { color: var(--text); }
-.btn-nav { display: inline-flex; align-items: center; gap: 5px; padding: 8px 18px; background: var(--accent); color: #08080B; font-size: 13.5px; font-weight: 600; font-family: var(--sans); border-radius: 5px; text-decoration: none; transition: opacity 0.15s; }
-.btn-nav:hover { opacity: 0.85; }
-.btn-lg { display: inline-flex; align-items: center; gap: 7px; padding: 13px 26px; font-size: 15px; font-weight: 600; font-family: var(--sans); border-radius: 5px; text-decoration: none; transition: opacity 0.15s; }
-.btn-primary { background: var(--accent); color: #08080B; }
-.btn-primary:hover { opacity: 0.85; }
-.btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
-.btn-secondary:hover { border-color: var(--muted); }
-.full-rule { border: none; border-top: 1px solid var(--border); }
-.section-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 16px; display: block; }
-
-/* MISSION */
-.mission {
-  padding: 96px 56px 112px;
-  max-width: 1240px;
-  margin: 0 auto;
-}
-.mission h1 {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(44px, 5.5vw, 76px);
-  font-weight: 700;
-  line-height: 1.06;
-  letter-spacing: -0.02em;
-  margin-bottom: 40px;
-  max-width: 880px;
-}
-.mission h1 span { color: var(--accent); font-style: normal; }
-.mission-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 80px;
-  align-items: start;
-}
-.mission-body p {
-  font-size: 17px;
-  color: var(--muted-2);
-  line-height: 1.82;
-  font-weight: 300;
-}
-.mission-body p + p { margin-top: 24px; }
-.mission-body p strong { color: var(--text); font-weight: 500; }
-
-/* ORIGIN */
-.origin-section {
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.origin-inner {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 88px 56px;
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 80px;
-  align-items: start;
-}
-.origin-label {
-  padding-top: 6px;
-}
-.origin-year {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 80px;
-  font-weight: 700;
-  color: var(--border);
-  letter-spacing: -0.04em;
-  line-height: 0.9;
-  margin-bottom: 12px;
-  display: block;
-}
-.origin-sub { font-size: 13px; color: var(--muted); font-weight: 300; line-height: 1.6; }
-.origin-content h2 {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(28px, 3vw, 40px);
-  font-weight: 700;
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  margin-bottom: 24px;
-}
-.origin-content p {
-  font-size: 15px;
-  color: var(--muted-2);
-  line-height: 1.82;
-  font-weight: 300;
-  margin-bottom: 20px;
-}
-.origin-content p strong { color: var(--text); font-weight: 500; }
-.origin-content p:last-child { margin-bottom: 0; }
-
-/* TEAM */
-.team-section {
-  padding: 0;
-}
-.team-head {
-  padding: 80px 56px 56px;
-  max-width: 1240px;
-  margin: 0 auto;
-}
-.team-head h2 {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(34px, 3.5vw, 48px);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-bottom: 14px;
-}
-.team-head p { font-size: 16px; color: var(--muted-2); max-width: 520px; line-height: 1.75; font-weight: 300; }
-.team-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  background: var(--border);
-  gap: 1px;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.team-card {
-  background: var(--bg);
-  padding: 56px 56px 64px;
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  gap: 32px;
-  align-items: start;
-}
-.team-avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 6px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--accent);
-  flex-shrink: 0;
-}
-.team-name {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 4px;
-  line-height: 1.2;
-}
-.team-handle {
-  font-size: 13px;
-  color: var(--accent);
-  margin-bottom: 14px;
-  font-weight: 400;
-  text-decoration: none;
-  display: inline-block;
-  transition: opacity 0.15s;
-}
-.team-handle:hover { opacity: 0.7; }
-.team-role {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  margin-bottom: 18px;
-  display: block;
-}
-.team-bio {
-  font-size: 14.5px;
-  color: var(--muted-2);
-  line-height: 1.78;
-  font-weight: 300;
-}
-.team-bio strong { color: var(--text); font-weight: 500; }
-.team-prev {
-  list-style: none;
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.team-prev li {
-  padding: 4px 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  font-size: 12px;
-  color: var(--muted-2);
-  font-weight: 400;
-}
-
-/* VALUES */
-.values-section {
-  padding: 88px 56px;
-  max-width: 1240px;
-  margin: 0 auto;
-}
-.values-section h2 {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(34px, 3.5vw, 48px);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-bottom: 56px;
-}
-.values-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border-top: 1px solid var(--border);
-}
-.value-row {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 56px;
-  padding: 40px 0;
-  border-bottom: 1px solid var(--border);
-  align-items: start;
-}
-.value-title {
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--text);
-}
-.value-desc {
-  font-size: 15px;
-  color: var(--muted-2);
-  line-height: 1.78;
-  font-weight: 300;
-}
-
-/* ROADMAP */
-.roadmap-section {
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 88px 56px;
-}
-.roadmap-inner {
-  max-width: 1240px;
-  margin: 0 auto;
-}
-.roadmap-inner h2 {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(32px, 3.5vw, 44px);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-bottom: 16px;
-}
-.roadmap-inner > p {
-  font-size: 16px;
-  color: var(--muted-2);
-  max-width: 520px;
-  line-height: 1.75;
-  margin-bottom: 56px;
-  font-weight: 300;
-}
-.roadmap-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  background: var(--border);
-  gap: 1px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
-}
-.roadmap-phase { background: var(--bg); padding: 40px 36px 44px; }
-.phase-tag {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 3px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 20px;
-}
-.phase-now { background: rgba(74,222,128,0.1); color: var(--green); }
-.phase-next { background: var(--accent-bg); color: var(--accent); }
-.phase-later { background: rgba(148,148,180,0.08); color: var(--muted-2); }
-.roadmap-phase h4 { font-size: 17px; font-weight: 600; margin-bottom: 16px; line-height: 1.3; }
-.roadmap-phase ul { list-style: none; display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--border); }
-.roadmap-phase ul li { font-size: 13px; color: var(--muted-2); padding: 10px 0; border-bottom: 1px solid var(--border); font-weight: 300; display: flex; gap: 9px; line-height: 1.5; }
-.roadmap-phase ul li::before { content: '·'; color: var(--accent); font-size: 16px; font-weight: 700; flex-shrink: 0; }
-
-/* CTA */
-.cta-section { padding: 120px 56px; text-align: center; max-width: 1240px; margin: 0 auto; }
-.cta-section h2 { font-family: var(--serif); font-style: italic; font-size: clamp(40px, 4.5vw, 60px); font-weight: 700; line-height: 1.06; letter-spacing: -0.02em; margin-bottom: 18px; }
-.cta-section h2 span { color: var(--accent); font-style: normal; }
-.cta-section p { font-size: 16px; color: var(--muted-2); margin-bottom: 44px; font-weight: 300; line-height: 1.7; max-width: 480px; margin-left: auto; margin-right: auto; }
-.cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-
-footer { border-top: 1px solid var(--border); padding: 44px 56px; }
-.footer-inner { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
-.footer-logo { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; }
-.footer-links { list-style: none; display: flex; gap: 28px; flex-wrap: wrap; }
-.footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
-.footer-links a:hover { color: var(--text); }
-.footer-copy { font-size: 13px; color: var(--muted); }
-
-@media (max-width: 960px) {
-  nav { padding: 0 24px; }
-  .nav-links { display: none; }
-  .mission { padding: 72px 24px 80px; }
-  .mission-body { grid-template-columns: 1fr; gap: 32px; }
-  .origin-inner { grid-template-columns: 1fr; gap: 40px; padding: 72px 24px; }
-  .team-head { padding: 64px 24px 40px; }
-  .team-grid { grid-template-columns: 1fr; }
-  .team-card { padding: 44px 28px; grid-template-columns: 60px 1fr; gap: 24px; }
-  .team-avatar { width: 60px; height: 60px; font-size: 20px; }
-  .values-section { padding: 72px 24px; }
-  .value-row { grid-template-columns: 1fr; gap: 12px; padding: 32px 0; }
-  .roadmap-section { padding: 72px 24px; }
-  .roadmap-grid { grid-template-columns: 1fr; }
-  .cta-section { padding: 88px 24px; }
-  footer { padding: 40px 24px; }
+:root{--bg:#000;--surface:#0A0A0A;--surface-2:#111;--border:#1E1E1E;--border-2:#2A2A2A;--text:#FFF;--text-2:#A0A0A0;--text-3:#555;--sans:'DM Sans',-apple-system,sans-serif;--serif:'DM Serif Display',Georgia,serif}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+nav{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(0,0,0,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--serif);font-size:22px;color:var(--text);text-decoration:none}
+.nav-links{list-style:none;display:flex;gap:32px;position:absolute;left:50%;transform:translateX(-50%)}
+.nav-links a{font-size:13px;color:var(--text-2);text-decoration:none;transition:color .1s;letter-spacing:.01em}
+.nav-links a:hover,.nav-links a.active{color:var(--text)}
+.nav-actions{display:flex;align-items:center;gap:20px}
+.nav-contact{font-size:13px;color:var(--text-2);text-decoration:none;transition:color .1s}
+.nav-contact:hover{color:var(--text)}
+.btn-nav{display:inline-flex;align-items:center;padding:7px 16px;border:1px solid var(--text);color:var(--text);font-size:13px;font-family:var(--sans);background:transparent;text-decoration:none;transition:background .1s,color .1s}
+.btn-nav:hover{background:var(--text);color:var(--bg)}
+.btn-lg{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;font-size:14px;font-family:var(--sans);text-decoration:none;transition:all .1s;white-space:nowrap;letter-spacing:.01em}
+.btn-primary{background:var(--text);color:var(--bg);border:1px solid var(--text)}
+.btn-primary:hover{background:transparent;color:var(--text)}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border-2)}
+.btn-secondary:hover{border-color:var(--text)}
+.full-rule{border:none;border-top:1px solid var(--border);margin:0}
+.section-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-3);margin-bottom:20px;display:block}
+footer{border-top:1px solid var(--border);padding:40px 48px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.footer-logo{font-family:var(--serif);font-size:18px;color:var(--text);text-decoration:none}
+.footer-links{list-style:none;display:flex;gap:24px;flex-wrap:wrap}
+.footer-links a{font-size:12.5px;color:var(--text-3);text-decoration:none;transition:color .1s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:12.5px;color:var(--text-3)}
+.mission{max-width:1200px;margin:0 auto;padding:96px 48px 104px}
+.mission h1{font-family:var(--serif);font-size:clamp(44px,5.5vw,76px);font-weight:400;line-height:1.04;letter-spacing:-.02em;margin-bottom:44px;max-width:880px}
+.mission h1 em{font-style:italic}
+.mission-body{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+.mission-body p{font-size:17px;color:var(--text-2);line-height:1.8;font-weight:300}
+.mission-body p+p{margin-top:22px}
+.mission-body p strong{color:var(--text);font-weight:500}
+.origin-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.origin-inner{max-width:1200px;margin:0 auto;padding:88px 48px;display:grid;grid-template-columns:1fr 2fr;gap:72px;align-items:start}
+.origin-year{font-family:var(--serif);font-style:italic;font-size:72px;font-weight:400;color:var(--border-2);letter-spacing:-.04em;line-height:0.9;margin-bottom:12px;display:block}
+.origin-sub{font-size:13px;color:var(--text-3);font-weight:300;line-height:1.6}
+.origin-content h2{font-family:var(--serif);font-size:clamp(26px,2.8vw,38px);font-weight:400;line-height:1.12;letter-spacing:-.02em;margin-bottom:22px}
+.origin-content p{font-size:15px;color:var(--text-2);line-height:1.8;font-weight:300;margin-bottom:18px}
+.origin-content p strong{color:var(--text);font-weight:500}
+.origin-content p:last-child{margin-bottom:0}
+.team-head{padding:80px 48px 48px;max-width:1200px;margin:0 auto}
+.team-head h2{font-family:var(--serif);font-size:clamp(32px,3.5vw,46px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:12px}
+.team-head p{font-size:15px;color:var(--text-2);max-width:480px;line-height:1.7;font-weight:300}
+.team-grid{display:grid;grid-template-columns:1fr 1fr;background:var(--border);gap:1px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.team-card{background:var(--bg);padding:52px 48px 60px;display:grid;grid-template-columns:72px 1fr;gap:28px;align-items:start}
+.team-avatar{width:72px;height:72px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:26px;font-weight:400;color:var(--text-2);flex-shrink:0}
+.team-name{font-size:17px;font-weight:500;margin-bottom:4px;line-height:1.2}
+.team-links{display:flex;gap:14px;margin-bottom:12px}
+.team-handle{font-size:12.5px;color:var(--text-3);text-decoration:none;border-bottom:1px solid var(--border);padding-bottom:1px;transition:color .1s,border-color .1s}
+.team-handle:hover{color:var(--text);border-color:var(--text)}
+.team-role{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:16px;display:block}
+.team-bio{font-size:14px;color:var(--text-2);line-height:1.75;font-weight:300}
+.team-bio strong{color:var(--text);font-weight:500}
+.team-prev{list-style:none;margin-top:18px;display:flex;flex-wrap:wrap;gap:7px}
+.team-prev li{padding:3px 9px;background:var(--surface);border:1px solid var(--border);font-size:11.5px;color:var(--text-3);font-weight:400}
+.values-section{padding:80px 48px;max-width:1200px;margin:0 auto}
+.values-section h2{font-family:var(--serif);font-size:clamp(32px,3.5vw,46px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:48px}
+.values-list{border-top:1px solid var(--border)}
+.value-row{display:grid;grid-template-columns:260px 1fr;gap:52px;padding:36px 0;border-bottom:1px solid var(--border);align-items:start}
+.value-title{font-size:16px;font-weight:500;line-height:1.3;color:var(--text)}
+.value-desc{font-size:14.5px;color:var(--text-2);line-height:1.75;font-weight:300}
+.roadmap-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:80px 48px}
+.roadmap-inner{max-width:1200px;margin:0 auto}
+.roadmap-inner h2{font-family:var(--serif);font-size:clamp(30px,3.2vw,42px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:14px}
+.roadmap-inner>p{font-size:15px;color:var(--text-2);max-width:480px;line-height:1.7;margin-bottom:48px;font-weight:300}
+.roadmap-grid{display:grid;grid-template-columns:repeat(3,1fr);background:var(--border);gap:1px;border:1px solid var(--border)}
+.roadmap-phase{background:var(--bg);padding:36px 32px 40px}
+.phase-tag{display:inline-block;padding:3px 9px;border:1px solid var(--border-2);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px;color:var(--text-3)}
+.phase-tag.now{color:var(--text-2);border-color:var(--border-2)}
+.roadmap-phase h4{font-size:16px;font-weight:500;margin-bottom:16px;line-height:1.3}
+.roadmap-phase ul{list-style:none;border-top:1px solid var(--border)}
+.roadmap-phase ul li{font-size:13px;color:var(--text-2);padding:9px 0;border-bottom:1px solid var(--border);font-weight:300;display:flex;gap:9px;line-height:1.5}
+.roadmap-phase ul li::before{content:'\00B7';color:var(--text-3);font-size:16px;font-weight:700;flex-shrink:0}
+.cta-section{padding:112px 48px;text-align:center;max-width:1200px;margin:0 auto}
+.cta-section h2{font-family:var(--serif);font-style:italic;font-size:clamp(38px,4.5vw,58px);font-weight:400;line-height:1.06;letter-spacing:-.02em;margin-bottom:16px}
+.cta-section p{font-size:16px;color:var(--text-2);margin-bottom:40px;font-weight:300;line-height:1.7;max-width:440px;margin-left:auto;margin-right:auto}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+@media(max-width:960px){
+  nav{padding:0 24px}.nav-links{display:none}
+  .mission{padding:64px 24px 72px}.mission-body{grid-template-columns:1fr;gap:0}
+  .origin-inner{grid-template-columns:1fr;gap:36px;padding:64px 24px}
+  .team-head{padding:64px 24px 40px}
+  .team-grid{grid-template-columns:1fr}.team-card{padding:40px 24px;grid-template-columns:56px 1fr;gap:20px}
+  .team-avatar{width:56px;height:56px;font-size:20px}
+  .values-section{padding:64px 24px}
+  .value-row{grid-template-columns:1fr;gap:10px;padding:28px 0}
+  .roadmap-section{padding:64px 24px}
+  .roadmap-grid{grid-template-columns:1fr}
+  .cta-section{padding:80px 24px}
+  footer{padding:36px 24px}
 }
 </style>
 </head>
 <body>
-
-
-
 <nav>
   <a href="index.html" class="nav-logo">Canvas</a>
   <ul class="nav-links">
     <li><a href="group-owners.html">Group Owners</a></li>
     <li><a href="advertisers.html">Advertisers</a></li>
+    <li><a href="vision.html">Vision</a></li>
     <li><a href="about.html" class="active">About</a></li>
-    <li><a href="#">Docs</a></li>
+    <li><a href="https://docs.canvas-protocol.com">Docs</a></li>
   </ul>
   <div class="nav-actions">
     <a href="mailto:hello@canvasprotocol.xyz" class="nav-contact">Contact</a>
-    <a href="group-owners.html" class="btn-nav">Register your group →</a>
+    <a href="group-owners.html" class="btn-nav">Register your group &rarr;</a>
   </div>
 </nav>
-
-<!-- MISSION -->
 <section class="mission">
-  <span class="section-eyebrow">What we believe</span>
-  <h1>Every group join is a moment of human attention. Right now, <span>all of it goes to waste.</span></h1>
+  <span class="section-label">What we believe</span>
+  <h1>Every group join is a moment of human attention. Right now, <em>all of it goes to waste.</em></h1>
   <div class="mission-body">
     <div>
       <p>Someone built a Telegram community over years. Wrote the content, answered the questions, kept the conversation going. When a new person shows up and wants in, they solve a CAPTCHA that benefits Google or Cloudflare and nobody else. The group owner gets nothing. The attention spent is gone.</p>
@@ -380,174 +127,103 @@ footer { border-top: 1px solid var(--border); padding: 44px 56px; }
     </div>
     <div>
       <p>The longer-term project is straightforward: group owners should have direct revenue from the communities they built. Not from brand deals they have to chase, not from platform ad splits that require scale they don't have yet. From the membership activity that's already happening.</p>
-      <p>Crypto is where we're starting because both sides of the market already speak the language. But the goal is bigger. <strong>A Taylor Swift fan community, a fitness group, a cooking channel: every topic has group owners doing real work with no way to earn from it.</strong> Canvas is building the infrastructure to change that, one community at a time.</p>
+      <p>Crypto is where we're starting because both sides of the market already speak the language. But the goal is bigger. <strong>A Taylor Swift fan community, a fitness group, a cooking channel: every topic has group owners doing real work with no way to earn from it.</strong> Canvas is building the infrastructure to change that.</p>
     </div>
   </div>
 </section>
-
 <hr class="full-rule">
-
-<!-- ORIGIN -->
 <div class="origin-section">
   <div class="origin-inner">
-    <div class="origin-label">
+    <div>
       <span class="origin-year">2025</span>
-      <span class="origin-sub">DevConnect Buenos Aires<br>EigenCloud × ETH Foundation<br>The Vault · 2025</span>
+      <span class="origin-sub">DevConnect Buenos Aires<br>EigenCloud &times; ETH Foundation<br>The Vault &middot; 2025</span>
     </div>
     <div class="origin-content">
-      <span class="section-eyebrow">Where this started</span>
-      <h2>One of five finalist projects. Selected at The Vault Buenos Aires.</h2>
+      <span class="section-label">Where this started</span>
+      <h2>One of five finalist projects. Selected at The Vault, Buenos Aires.</h2>
       <p>Rohit had been working on the same problem for several years before Canvas had a name: the CAPTCHA is a toll booth that collects human attention and pays it to nobody. The question was how to redirect that value to the people who built the community hosting it.</p>
       <p>At DevConnect 2025 in Buenos Aires, EigenCloud and the Ethereum Foundation's Developer Growth team co-organized The Vault, a builder residency for teams working on verifiable applications. <strong>Canvas was selected as one of five finalists</strong> and presented the protocol architecture to the cohort.</p>
       <p>That version ran on EigenLayer. The current version runs on Base mainnet: USDC settlements, a live escrow contract, AI scoring on every response before any payout clears. The mechanism is the same one that got selected in Buenos Aires. <strong>The stack is the one that ships.</strong></p>
     </div>
   </div>
 </div>
-
-<!-- TEAM -->
-<div class="team-section">
-  <div class="team-head">
-    <span class="section-eyebrow">The team</span>
-    <h2>Product, infrastructure, and distribution.</h2>
-    <p>Two founders from the University of Toronto. Rohit brought the idea. Alex joined and they've been building and iterating together since.</p>
-  </div>
-  <div class="team-grid">
-    <div class="team-card">
-      <div class="team-avatar">R</div>
-      <div>
-        <div class="team-name">Rohit Sarkar</div>
-        <div style="display:flex;gap:14px;margin-bottom:14px;">
-          <a href="https://www.linkedin.com/in/rohit-sarkar-094a68126/" class="team-handle" target="_blank" rel="noopener">LinkedIn</a>
-          <a href="https://twitter.com/_rosark" class="team-handle" target="_blank" rel="noopener">@_rosark</a>
-        </div>
-        <span class="team-role">Co-founder · Product & Architecture</span>
-        <p class="team-bio">
-          Rohit spent five years covering the infrastructure layer of crypto from the inside: content at <strong>0x</strong> (the swap infrastructure powering Bankr, Coinbase, MetaMask, and Robinhood) and <strong>Caldera</strong> (Rollup-as-a-Service), and research at <strong>InfStones</strong>. That position, writing about how crypto protocols work for the people who build on them, is where the Canvas thesis came from. He has a degree in Applied Statistics from the University of Toronto and has been developing the concept for three years.
-        </p>
-        <p class="team-bio" style="margin-top: 16px;">
-          He brought the original idea and the marketplace design. He and Alex build and iterate together; Alex contributed key architectural decisions including the conversational captcha flow. He left 0x in June 2026 and is fully committed to Canvas.
-        </p>
-        <ul class="team-prev">
-          <li>0x Protocol</li>
-          <li>Caldera</li>
-          <li>InfStones</li>
-          <li>Applied Statistics · UofT</li>
-        </ul>
+<div class="team-head">
+  <span class="section-label">The team</span>
+  <h2>Product, infrastructure, distribution.</h2>
+  <p>Two founders from the University of Toronto. Rohit brought the idea. Alex joined and they've been building together since.</p>
+</div>
+<div class="team-grid">
+  <div class="team-card">
+    <div class="team-avatar">R</div>
+    <div>
+      <div class="team-name">Rohit Sarkar</div>
+      <div class="team-links">
+        <a href="https://www.linkedin.com/in/rohit-sarkar-094a68126/" class="team-handle" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://twitter.com/_rosark" class="team-handle" target="_blank" rel="noopener">@_rosark</a>
       </div>
+      <span class="team-role">Co-founder &middot; Product &amp; Architecture</span>
+      <p class="team-bio">Rohit spent five years covering the infrastructure layer of crypto from the inside: content at <strong>0x</strong> (the swap infrastructure powering Bankr, Coinbase, MetaMask, and Robinhood) and <strong>Caldera</strong> (Rollup-as-a-Service), and research at <strong>InfStones</strong>. He has a degree in Applied Statistics from the University of Toronto and has been developing the Canvas concept for three years.</p>
+      <p class="team-bio" style="margin-top:14px">He brought the original idea and the marketplace design. He and Alex build and iterate together; Alex contributed key architectural decisions including the conversational captcha flow. He left 0x in June 2026 and is fully committed to Canvas.</p>
+      <ul class="team-prev"><li>0x Protocol</li><li>Caldera</li><li>InfStones</li><li>Applied Statistics &middot; UofT</li></ul>
     </div>
-    <div class="team-card">
-      <div class="team-avatar">A</div>
-      <div>
-        <div class="team-name">Alexander Vicol</div>
+  </div>
+  <div class="team-card">
+    <div class="team-avatar">A</div>
+    <div>
+      <div class="team-name">Alexander Vicol</div>
+      <div class="team-links">
         <a href="https://www.linkedin.com/in/alexander-vicol/" class="team-handle" target="_blank" rel="noopener">LinkedIn</a>
-        <span class="team-role">Co-founder · Engineering & Architecture</span>
-        <p class="team-bio">
-          Alex is an MEng candidate in Electrical and Computer Engineering at the <strong>University of Toronto</strong>, supervised by Professor Steve Mann. A <strong>Schulich Leader</strong> and NSERC USRA recipient, he has co-authored five papers published at IEEE ICCE 2026 and has presented research internationally.
-        </p>
-        <p class="team-bio" style="margin-top: 16px;">
-          He joined as co-founder after Rohit brought the original idea, and the two build and iterate together. Alex contributed key architectural decisions, including the conversational captcha flow, where a cheap LLM probes thin answers to produce richer signal. He owns the full engineering stack: Railway deployment, Telegram bot infrastructure, smart contract integration, and AI scoring layer.
-        </p>
-        <ul class="team-prev">
-          <li>Schulich Leader</li>
-          <li>NSERC USRA</li>
-          <li>5 IEEE papers · 2026</li>
-          <li>MEng ECE · UofT</li>
-        </ul>
       </div>
+      <span class="team-role">Co-founder &middot; Engineering &amp; Architecture</span>
+      <p class="team-bio">Alex is an MEng candidate in Electrical and Computer Engineering at the <strong>University of Toronto</strong>, supervised by Professor Steve Mann. A <strong>Schulich Leader</strong> and NSERC USRA recipient, he has co-authored five papers published at IEEE ICCE 2026.</p>
+      <p class="team-bio" style="margin-top:14px">He joined as co-founder after Rohit brought the original idea, and the two build and iterate together. Alex contributed key architectural decisions, including the conversational captcha flow, where a cheap LLM probes thin answers to produce richer signal. He owns the full engineering stack: Railway deployment, Telegram bot infrastructure, smart contract integration, and AI scoring layer.</p>
+      <ul class="team-prev"><li>Schulich Leader</li><li>NSERC USRA</li><li>5 IEEE papers &middot; 2026</li><li>MEng ECE &middot; UofT</li></ul>
     </div>
   </div>
 </div>
-
 <hr class="full-rule">
-
-<!-- VALUES -->
 <div class="values-section">
-  <span class="section-eyebrow">What we stand for</span>
-  <h2>Four things we won't compromise on.</h2>
+  <span class="section-label">What we stand for</span>
+  <h2>Four things we won't trade away.</h2>
   <div class="values-list">
-    <div class="value-row">
-      <div class="value-title">Group owners get paid directly</div>
-      <div class="value-desc">The person who spent two years building a 5,000-member DeFi community did real work. Canvas pays them per verified join and per re-verification, straight to their wallet, with no invoice and no waiting on an advertiser's billing cycle.</div>
-    </div>
-    <div class="value-row">
-      <div class="value-title">The task has to be worth doing</div>
-      <div class="value-desc">A Canvas verification takes ten seconds. That's a real ask. The task has to be matched to the group's topic, relevant to the advertiser's product, and short enough that a genuine human completes it without friction. If the task is bad, the data is bad. We treat task quality as a product constraint.</div>
-    </div>
-    <div class="value-row">
-      <div class="value-title">Context is what makes the data valuable</div>
-      <div class="value-desc">A DeFi trader ranking protocol responses knows what good looks like. A random Mechanical Turk worker doing the same task doesn't. Canvas ties every response to a verified, topic-matched human. That provenance is the thing AI labs are actually paying for, and it can't be faked after the fact.</div>
-    </div>
-    <div class="value-row">
-      <div class="value-title">The product runs where people already are</div>
-      <div class="value-desc">No new app. No new wallet. No behavior change for the person joining a group. Canvas runs inside Telegram, through a bot that group owners already know how to add. The verification flow is the only thing that changes, and for the human completing it, the change is ten seconds longer than before.</div>
-    </div>
+    <div class="value-row"><div class="value-title">Group owners get paid directly</div><div class="value-desc">The person who spent two years building a 5,000-member DeFi community did real work. Canvas pays them per verified join and per re-verification, straight to their wallet, with no invoice and no waiting on an advertiser's billing cycle.</div></div>
+    <div class="value-row"><div class="value-title">The task has to be worth doing</div><div class="value-desc">A Canvas verification takes ten seconds. That's a real ask. The task has to be matched to the group's topic, relevant to the advertiser's product, and short enough that a genuine human completes it without friction. If the task is bad, the data is bad.</div></div>
+    <div class="value-row"><div class="value-title">Context is what makes the data valuable</div><div class="value-desc">A DeFi trader ranking protocol responses knows what good looks like. A random Mechanical Turk worker doing the same task doesn't. Canvas ties every response to a verified, topic-matched human. That provenance is what AI labs are actually paying for, and it can't be faked after the fact.</div></div>
+    <div class="value-row"><div class="value-title">The product runs where people already are</div><div class="value-desc">No new app. No new wallet. No behavior change for the person joining a group. Canvas runs inside Telegram, through a bot group owners already know how to add. The verification flow is the only thing that changes, and for the human completing it, the change is ten seconds longer than before.</div></div>
   </div>
 </div>
-
-<!-- ROADMAP -->
 <div class="roadmap-section">
   <div class="roadmap-inner">
-    <span class="section-eyebrow">Where we're going</span>
+    <span class="section-label">Where we're going</span>
     <h2>Telegram first.</h2>
-    <p>Discord, the open web, and every other platform where communities gather have the same join moment. Telegram is where we prove the model before expanding to them.</p>
+    <p>Discord, the open web, and every other platform where communities gather have the same join moment. Telegram is where we prove the model.</p>
     <div class="roadmap-grid">
-      <div class="roadmap-phase">
-        <span class="phase-tag phase-now">Now</span>
-        <h4>Telegram · Live</h4>
-        <ul>
-          <li>Join verification with sponsored tasks</li>
-          <li>USDC payouts per verified join</li>
-          <li>AI scoring for response quality</li>
-          <li>Live escrow contract on Base mainnet</li>
-          <li>Group owner registration via bot</li>
-        </ul>
-      </div>
-      <div class="roadmap-phase">
-        <span class="phase-tag phase-next">Next</span>
-        <h4>Phase 2 · Re-verification</h4>
-        <ul>
-          <li>Monthly re-verification of existing members</li>
-          <li>Recurring income from full member base</li>
-          <li>Mod and admin payout splits</li>
-          <li>Multi-advertiser bidding per group</li>
-          <li>Discord verification channel</li>
-        </ul>
-      </div>
-      <div class="roadmap-phase">
-        <span class="phase-tag phase-later">Planned</span>
-        <h4>Phase 3 · Marketplace</h4>
-        <ul>
-          <li>Open group registry with advertiser discovery</li>
-          <li>Web verification embeds</li>
-          <li>AI lab data pipeline integrations</li>
-          <li>Expansion beyond crypto communities</li>
-        </ul>
-      </div>
+      <div class="roadmap-phase"><span class="phase-tag now">Now</span><h4>Telegram &middot; Live</h4><ul><li>Join verification with sponsored tasks</li><li>USDC payouts per verified join</li><li>AI scoring for response quality</li><li>Live escrow contract on Base mainnet</li><li>Group owner registration via bot</li></ul></div>
+      <div class="roadmap-phase"><span class="phase-tag">Next</span><h4>Phase 2 &middot; Re-verification</h4><ul><li>Monthly re-verification of existing members</li><li>Recurring income from full member base</li><li>Mod and admin payout splits</li><li>Multi-advertiser bidding per group</li><li>Discord verification channel</li></ul></div>
+      <div class="roadmap-phase"><span class="phase-tag">Planned</span><h4>Phase 3 &middot; Marketplace</h4><ul><li>Open group registry with advertiser discovery</li><li>Web verification embeds</li><li>AI lab data pipeline integrations</li><li>Expansion beyond crypto communities</li></ul></div>
     </div>
   </div>
 </div>
-
-<!-- CTA -->
 <div class="cta-section">
-  <h2>Run a group or <span>run a campaign?</span></h2>
+  <h2>Run a group or run a campaign?</h2>
   <p>If you have a Telegram community and want to start earning from it, or if you want to reach a specific crypto-native audience, get in touch.</p>
   <div class="cta-btns">
-    <a href="group-owners.html" class="btn-lg btn-primary">Register your group →</a>
+    <a href="group-owners.html" class="btn-lg btn-primary">Register your group &rarr;</a>
     <a href="mailto:hello@canvasprotocol.xyz" class="btn-lg btn-secondary">Get in touch</a>
   </div>
 </div>
-
 <footer>
   <div class="footer-inner">
     <a href="index.html" class="footer-logo">Canvas</a>
     <ul class="footer-links">
       <li><a href="group-owners.html">Group Owners</a></li>
       <li><a href="advertisers.html">Advertisers</a></li>
+      <li><a href="vision.html">Vision</a></li>
       <li><a href="about.html">About</a></li>
-      <li><a href="#">Docs</a></li>
+      <li><a href="https://docs.canvas-protocol.com">Docs</a></li>
       <li><a href="mailto:hello@canvasprotocol.xyz">Contact</a></li>
     </ul>
-    <span class="footer-copy">© 2026 Canvas Protocol</span>
+    <span class="footer-copy">&copy; 2026 Canvas Protocol</span>
   </div>
 </footer>
 </body>

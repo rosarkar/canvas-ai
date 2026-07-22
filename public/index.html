@@ -3,717 +3,299 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Canvas — Get paid every time someone joins your group</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Canvas &mdash; For group owners</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root {
-  --bg: #08080B; --surface: #0E0E14; --surface-2: #131319; --border: #1C1C28;
-  --text: #F0EDE8; --muted: #66637A; --muted-2: #9694A4; --accent: #E9A84C;
-  --accent-bg: rgba(233,168,76,0.07); --green: #4ADE80;
-  --sans: 'Inter', -apple-system, sans-serif; --serif: 'Cormorant Garamond', Georgia, serif;
-}
-html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-
-nav { position: sticky; top: 0; z-index: 200; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 56px; background: rgba(8,8,11,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
-.nav-logo { font-family: var(--serif); font-weight: 700; font-size: 22px; color: var(--text); text-decoration: none; letter-spacing: -0.01em; flex-shrink: 0; }
-.nav-links { list-style: none; display: flex; gap: 36px; position: absolute; left: 50%; transform: translateX(-50%); }
-.nav-links a { font-size: 13.5px; color: var(--muted-2); text-decoration: none; transition: color 0.15s; }
-.nav-links a:hover { color: var(--text); }
-.nav-actions { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
-.nav-contact { font-size: 13.5px; color: var(--muted-2); text-decoration: none; transition: color 0.15s; }
-.nav-contact:hover { color: var(--text); }
-.btn-nav { display: inline-flex; align-items: center; gap: 5px; padding: 8px 18px; background: var(--accent); color: #08080B; font-size: 13.5px; font-weight: 600; font-family: var(--sans); border-radius: 5px; text-decoration: none; transition: opacity 0.15s; }
-.btn-nav:hover { opacity: 0.85; }
-
-.btn-lg { display: inline-flex; align-items: center; gap: 7px; padding: 13px 26px; font-size: 15px; font-weight: 600; font-family: var(--sans); border-radius: 5px; text-decoration: none; transition: opacity 0.15s; white-space: nowrap; }
-.btn-primary { background: var(--accent); color: #08080B; }
-.btn-primary:hover { opacity: 0.85; }
-.btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); transition: border-color 0.15s; }
-.btn-secondary:hover { border-color: var(--muted); }
-
-.full-rule { border: none; border-top: 1px solid var(--border); margin: 0; }
-.section-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 16px; display: block; }
-
-/* HERO */
-.hero { padding: 88px 56px 104px; max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 52fr 48fr; gap: 72px; align-items: center; min-height: calc(100vh - 60px); }
-.hero-left {}
-.hero-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 28px; display: flex; align-items: center; gap: 10px; }
-.hero-eyebrow::before { content: ''; display: block; width: 28px; height: 1px; background: var(--accent); }
-.hero h1 { font-family: var(--serif); font-style: italic; font-size: clamp(48px, 5.2vw, 74px); font-weight: 700; line-height: 1.06; letter-spacing: -0.02em; color: var(--text); margin-bottom: 26px; }
-.hero h1 span { color: var(--accent); font-style: normal; }
-.hero-sub { font-size: 17px; color: var(--muted-2); line-height: 1.75; max-width: 460px; margin-bottom: 44px; font-weight: 300; }
-.hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
-
-/* TELEGRAM MOCKUP */
-.tg-mockup { background: #17212B; border-radius: 14px; overflow: hidden; width: 100%; max-width: 420px; margin: 0 auto; }
-.tg-topbar { display: flex; align-items: center; gap: 12px; padding: 13px 18px; background: #1F2D3D; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.tg-avatar { width: 34px; height: 34px; border-radius: 50%; background: #2B5278; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
-.tg-info { flex: 1; }
-.tg-name { font-size: 13.5px; font-weight: 600; color: #fff; display: block; line-height: 1.2; }
-.tg-online { font-size: 11px; color: #4ADE80; display: block; }
-.tg-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-.tg-msg-bot, .tg-msg-user { max-width: 86%; border-radius: 12px; padding: 10px 14px; font-size: 13px; line-height: 1.55; }
-.tg-msg-bot { background: #1F2D3D; border-radius: 4px 12px 12px 12px; color: #E8E8E8; align-self: flex-start; }
-.tg-msg-user { background: #2B5278; border-radius: 12px 4px 12px 12px; color: #fff; align-self: flex-end; font-weight: 400; }
-.tg-msg-bot p { margin-bottom: 6px; }
-.tg-msg-bot p:last-child { margin-bottom: 0; }
-.tg-time { font-size: 10px; color: rgba(255,255,255,0.3); display: block; text-align: right; margin-top: 5px; }
-.tg-task-card { background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px 12px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.06); }
-.tg-task-q { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 8px; line-height: 1.5; }
-.tg-task-opt { font-size: 12px; color: rgba(255,255,255,0.8); padding: 5px 0; border-top: 1px solid rgba(255,255,255,0.07); display: flex; gap: 8px; line-height: 1.4; }
-.tg-task-key { font-weight: 700; color: #7EB0E8; flex-shrink: 0; }
-.tg-user-reply { font-size: 12.5px; line-height: 1.6; }
-.tg-agent-offer { background: rgba(0,0,0,0.15); border-radius: 8px; padding: 10px 12px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.06); }
-.tg-agent-offer p { font-size: 12px; color: rgba(255,255,255,0.65); margin-bottom: 10px; line-height: 1.5; }
-.tg-agent-btns { display: flex; gap: 7px; }
-.tg-agent-btn { padding: 5px 11px; border-radius: 5px; font-size: 11.5px; font-weight: 600; }
-.tg-agent-btn.primary { background: #2B5278; color: #fff; }
-.tg-agent-btn.ghost { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); font-weight: 400; }
-
-/* HOW IT WORKS */
-.section-head { padding: 80px 56px 52px; max-width: 1240px; margin: 0 auto; }
-.section-head h2 { font-family: var(--serif); font-style: italic; font-size: clamp(34px, 3.5vw, 50px); font-weight: 700; line-height: 1.08; letter-spacing: -0.02em; max-width: 520px; }
-.section-note { font-size: 15px; color: var(--muted-2); max-width: 300px; line-height: 1.7; text-align: right; font-weight: 300; padding-bottom: 4px; }
-
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--border); gap: 1px; }
-.step { background: var(--bg); padding: 48px 44px 52px; }
-.step-num { font-family: var(--serif); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 24px; display: block; }
-.step h3 { font-size: 18px; font-weight: 600; line-height: 1.3; margin-bottom: 12px; color: var(--text); }
-.step p { font-size: 14px; color: var(--muted-2); line-height: 1.75; font-weight: 300; }
-
-/* DUAL AUDIENCES */
-.audiences { display: grid; grid-template-columns: 1fr 1fr; background: var(--border); gap: 1px; }
-.audience-panel { background: var(--surface); padding: 68px 56px 76px; }
-.audience-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 28px; display: block; }
-.audience-panel h3 { font-family: var(--serif); font-style: italic; font-size: clamp(28px, 2.8vw, 40px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 18px; max-width: 380px; }
-.audience-panel > p { font-size: 15px; color: var(--muted-2); line-height: 1.78; max-width: 400px; margin-bottom: 32px; font-weight: 300; }
-.feature-rows { list-style: none; margin-bottom: 40px; border-top: 1px solid var(--border); }
-.feature-rows li { font-size: 14px; color: var(--muted-2); padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 11px; line-height: 1.55; font-weight: 300; }
-.feature-rows li::before { content: '→'; color: var(--accent); flex-shrink: 0; margin-top: 1px; font-size: 12px; }
-.audience-link { font-size: 14px; font-weight: 600; color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: gap 0.15s; }
-.audience-link:hover { gap: 10px; }
-
-/* USE CASES */
-.use-cases-head { padding: 80px 56px 52px; max-width: 1240px; margin: 0 auto; }
-.use-cases-head h2 { font-family: var(--serif); font-style: italic; font-size: clamp(34px, 3.5vw, 48px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 12px; }
-.use-cases-head p { font-size: 16px; color: var(--muted-2); max-width: 560px; line-height: 1.75; font-weight: 300; }
-
-.uc-grid { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--border); gap: 1px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-.uc-card { background: var(--bg); padding: 36px 28px 40px; }
-.uc-tag { display: inline-block; padding: 4px 10px; background: var(--accent-bg); color: var(--accent); font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; border-radius: 3px; margin-bottom: 10px; }
-.uc-advertiser { font-size: 12px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; font-weight: 300; }
-.uc-tg { background: #17212B; border-radius: 10px; overflow: hidden; width: 100%; }
-.uc-tg .tg-topbar { padding: 11px 14px; }
-.uc-tg .tg-avatar { width: 30px; height: 30px; font-size: 10px; }
-.uc-tg .tg-name { font-size: 12.5px; }
-.uc-tg .tg-online { font-size: 10px; }
-.uc-tg .tg-body { padding: 12px; gap: 8px; }
-.uc-tg .tg-msg-bot { font-size: 11.5px; padding: 9px 11px; }
-.uc-tg .tg-msg-user { font-size: 11.5px; padding: 8px 11px; }
-.uc-tg .tg-task-card { padding: 8px 10px; }
-.uc-tg .tg-task-q { font-size: 11px; }
-.uc-tg .tg-task-opt { font-size: 11px; padding: 4px 0; }
-.uc-tg .tg-task-key { font-size: 11px; }
-.uc-tg .tg-time { font-size: 9px; }
-.uc-tg .ptf-rules-mini { padding: 6px 8px; }
-.uc-tg .ptf-rules-title { font-size: 10px; margin-bottom: 3px; }
-.uc-tg .ptf-rules-item { font-size: 10px; }
-.uc-tg .ptf-btns { gap: 5px; margin-top: 7px; }
-.uc-tg .ptf-btn-p { padding: 4px 9px; font-size: 10.5px; }
-.uc-tg .ptf-btn-g { padding: 4px 9px; font-size: 10.5px; }
-.uc-tg .tg-agent-offer p { font-size: 11px; }
-.uc-tg .tg-agent-btn { padding: 4px 9px; font-size: 10.5px; }
-
-.post-task-flow {
-  margin: 18px 0;
-  background: #17212B;
-  border-radius: 8px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.ptf-label-row {
-  font-size: 10px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.3);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 2px;
-  padding-left: 2px;
-}
-.ptf-bubble {
-  background: #1F2D3D;
-  border-radius: 4px 10px 10px 10px;
-  padding: 10px 13px;
-  font-size: 12.5px;
-  color: #E8E8E8;
-  line-height: 1.5;
-  align-self: flex-start;
-  max-width: 95%;
-}
-.ptf-bubble p { margin-bottom: 8px; }
-.ptf-bubble p:last-child { margin-bottom: 0; }
-.ptf-rules-mini {
-  background: rgba(0,0,0,0.2);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 6px;
-  padding: 8px 10px;
-  margin-bottom: 8px;
-}
-.ptf-rules-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.6);
-  margin-bottom: 5px;
-}
-.ptf-rules-item {
-  font-size: 11px;
-  color: rgba(255,255,255,0.45);
-  display: block;
-  line-height: 1.7;
-}
-.ptf-btns {
-  display: flex;
-  gap: 6px;
-  margin-top: 8px;
-}
-.ptf-btn-p {
-  padding: 5px 10px;
-  background: #2B5278;
-  border-radius: 4px;
-  font-size: 11.5px;
-  font-weight: 600;
-  color: #fff;
-}
-.ptf-btn-g {
-  padding: 5px 10px;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 4px;
-  font-size: 11.5px;
-  color: rgba(255,255,255,0.4);
-}
-
-/* VISION STRIP */
-.vision-strip { max-width: 1240px; margin: 0 auto; padding: 80px 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
-.vision-left h2 { font-family: var(--serif); font-style: italic; font-size: clamp(30px, 3vw, 42px); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 16px; }
-.vision-left p { font-size: 15px; color: var(--muted-2); line-height: 1.78; font-weight: 300; max-width: 440px; }
-.vision-right { font-family: var(--serif); font-style: italic; font-size: clamp(22px, 2.5vw, 32px); font-weight: 700; line-height: 1.3; letter-spacing: -0.02em; color: var(--muted); }
-.vision-right span { color: var(--text); }
-
-/* CTA */
-.cta-section { padding: 112px 56px; text-align: center; max-width: 1240px; margin: 0 auto; }
-.cta-section h2 { font-family: var(--serif); font-style: italic; font-size: clamp(44px, 5vw, 68px); font-weight: 700; line-height: 1.06; letter-spacing: -0.02em; margin-bottom: 18px; }
-.cta-section h2 span { color: var(--accent); font-style: normal; }
-.cta-section p { font-size: 17px; color: var(--muted-2); margin-bottom: 48px; font-weight: 300; line-height: 1.7; }
-.cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-
-footer { border-top: 1px solid var(--border); padding: 44px 56px; }
-.footer-inner { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
-.footer-logo { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--text); text-decoration: none; }
-.footer-links { list-style: none; display: flex; gap: 28px; flex-wrap: wrap; }
-.footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
-.footer-links a:hover { color: var(--text); }
-.footer-copy { font-size: 13px; color: var(--muted); }
-
-@media (max-width: 960px) {
-  nav { padding: 0 24px; }
-  .nav-links { display: none; }
-  .hero { grid-template-columns: 1fr; gap: 56px; padding: 72px 24px 80px; min-height: auto; }
-  .tg-mockup { max-width: 100%; }
-  .section-head { padding: 64px 24px 40px; flex-direction: column; gap: 16px; }
-  .section-note { text-align: left; }
-  .steps { grid-template-columns: 1fr; }
-  .step { padding: 36px 28px; }
-  .audiences { grid-template-columns: 1fr; }
-  .audience-panel { padding: 48px 28px; }
-  .use-cases-head { padding: 64px 24px 40px; }
-  .uc-grid { grid-template-columns: 1fr; }
-  .uc-card { padding: 32px 24px 36px; }
-  .vision-strip { grid-template-columns: 1fr; gap: 40px; padding: 72px 24px; }
-  .cta-section { padding: 88px 24px; }
-  footer { padding: 40px 24px; }
+:root{--bg:#000;--surface:#0A0A0A;--surface-2:#111;--border:#1E1E1E;--border-2:#2A2A2A;--text:#FFF;--text-2:#A0A0A0;--text-3:#555;--sans:'DM Sans',-apple-system,sans-serif;--serif:'DM Serif Display',Georgia,serif}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+nav{position:sticky;top:0;z-index:200;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(0,0,0,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--serif);font-size:22px;color:var(--text);text-decoration:none}
+.nav-links{list-style:none;display:flex;gap:32px;position:absolute;left:50%;transform:translateX(-50%)}
+.nav-links a{font-size:13px;color:var(--text-2);text-decoration:none;transition:color .1s;letter-spacing:.01em}
+.nav-links a:hover,.nav-links a.active{color:var(--text)}
+.nav-actions{display:flex;align-items:center;gap:20px}
+.nav-contact{font-size:13px;color:var(--text-2);text-decoration:none;transition:color .1s}
+.nav-contact:hover{color:var(--text)}
+.btn-nav{display:inline-flex;align-items:center;padding:7px 16px;border:1px solid var(--text);color:var(--text);font-size:13px;font-family:var(--sans);background:transparent;text-decoration:none;transition:background .1s,color .1s}
+.btn-nav:hover{background:var(--text);color:var(--bg)}
+.btn-lg{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;font-size:14px;font-family:var(--sans);text-decoration:none;transition:all .1s;white-space:nowrap;letter-spacing:.01em}
+.btn-primary{background:var(--text);color:var(--bg);border:1px solid var(--text)}
+.btn-primary:hover{background:transparent;color:var(--text)}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border-2)}
+.btn-secondary:hover{border-color:var(--text)}
+.full-rule{border:none;border-top:1px solid var(--border);margin:0}
+.section-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-3);margin-bottom:20px;display:block}
+footer{border-top:1px solid var(--border);padding:40px 48px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.footer-logo{font-family:var(--serif);font-size:18px;color:var(--text);text-decoration:none}
+.footer-links{list-style:none;display:flex;gap:24px;flex-wrap:wrap}
+.footer-links a{font-size:12.5px;color:var(--text-3);text-decoration:none;transition:color .1s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:12.5px;color:var(--text-3)}
+.page-hero{padding:80px 48px 88px;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:end}
+.page-hero h1{font-family:var(--serif);font-size:clamp(40px,5vw,66px);font-weight:400;line-height:1.04;letter-spacing:-.02em;margin-bottom:22px}
+.page-hero h1 em{font-style:italic}
+.page-hero-sub{font-size:17px;color:var(--text-2);line-height:1.7;margin-bottom:36px;font-weight:300;max-width:420px}
+.page-hero-right p{font-size:15px;color:var(--text-2);line-height:1.78;font-weight:300;margin-bottom:18px}
+.audience-head{padding:72px 48px 44px;max-width:1200px;margin:0 auto}
+.audience-head h2{font-family:var(--serif);font-size:clamp(30px,3.2vw,44px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:10px}
+.audience-head p{font-size:15px;color:var(--text-2);max-width:480px;line-height:1.7;font-weight:300}
+.audience-types{display:grid;grid-template-columns:repeat(3,1fr);background:var(--border);gap:1px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.atype{background:var(--bg);padding:44px 36px 52px}
+.atype-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-3);margin-bottom:20px;display:block}
+.atype-hook{font-family:var(--serif);font-style:italic;font-size:20px;font-weight:400;line-height:1.3;color:var(--text);margin-bottom:14px;letter-spacing:-.01em;display:block}
+.atype p{font-size:13.5px;color:var(--text-2);line-height:1.75;margin-bottom:24px;font-weight:300}
+.atype-examples{list-style:none;border-top:1px solid var(--border)}
+.atype-examples li{font-size:13px;color:var(--text-3);padding:8px 0;border-bottom:1px solid var(--border);font-weight:300;display:flex;align-items:center;gap:8px}
+.atype-examples li::before{content:'\00B7';color:var(--text-3);font-weight:700;font-size:16px}
+.features-section{padding:72px 48px;max-width:1200px;margin:0 auto}
+.features-section h2{font-family:var(--serif);font-size:clamp(28px,3vw,40px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:44px}
+.features-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border)}
+.feature-block{background:var(--surface);padding:36px 36px 40px}
+.feature-block h3{font-size:15px;font-weight:500;margin-bottom:9px;line-height:1.3}
+.feature-block p{font-size:13.5px;color:var(--text-2);line-height:1.7;font-weight:300}
+.feature-accent{font-family:var(--serif);font-style:italic;font-size:30px;font-weight:400;color:var(--text-2);letter-spacing:-.02em;margin-bottom:10px;display:block;line-height:1}
+.calc-wrap{padding:0 48px 80px;max-width:1200px;margin:0 auto}
+.calc-header{display:flex;align-items:flex-end;justify-content:space-between;gap:36px;margin-bottom:28px}
+.calc-header h2{font-family:var(--serif);font-size:clamp(28px,3vw,40px);font-weight:400;line-height:1.1;letter-spacing:-.02em}
+.calc-header-note{font-size:13.5px;color:var(--text-2);max-width:240px;line-height:1.6;font-weight:300;text-align:right;padding-bottom:3px;flex-shrink:0}
+.calc-card{background:var(--surface);border:1px solid var(--border);padding:36px 36px 28px}
+.calc-sliders{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.csg-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.csg-label{font-size:11px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em}
+.csg-value{font-family:var(--serif);font-size:30px;font-weight:400;color:var(--text);letter-spacing:-.03em;line-height:1}
+.csg-value.accent{color:var(--text-2)}
+.calc-input{width:100%;height:2px;-webkit-appearance:none;appearance:none;background:var(--border-2);outline:none;cursor:pointer;display:block;margin-bottom:6px}
+.calc-input::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--text);cursor:pointer}
+.calc-input::-moz-range-thumb{width:16px;height:16px;background:var(--text);border:none;cursor:pointer}
+.csg-range{display:flex;justify-content:space-between;font-size:11px;color:var(--text-3)}
+.freq-wrap{margin-bottom:24px}
+.freq-label{font-size:11px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:10px}
+.freq-toggle{display:flex;gap:1px;background:var(--border);overflow:hidden;width:fit-content}
+.freq-btn{padding:8px 18px;background:var(--bg);border:none;color:var(--text-2);font-size:13px;font-family:var(--sans);cursor:pointer;transition:background .1s,color .1s;white-space:nowrap}
+.freq-btn:hover{color:var(--text);background:var(--surface-2)}
+.freq-btn.active{background:var(--text);color:var(--bg);font-weight:500}
+.chart-wrap{margin-bottom:6px}
+.chart-legend{display:flex;gap:18px;margin-bottom:20px}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-3);font-weight:300}
+.legend-dot{width:10px;height:10px;flex-shrink:0}
+.calc-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}
+.cstat{background:var(--bg);padding:18px 20px}
+.cstat.hi{background:var(--surface)}
+.cstat-val{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--text);letter-spacing:-.02em;display:block;margin-bottom:4px;line-height:1}
+.cstat-val.accent{color:var(--text-2)}
+.cstat-label{font-size:10px;color:var(--text-3);font-weight:400;text-transform:uppercase;letter-spacing:.08em}
+.setup-head{padding:72px 48px 44px;max-width:1200px;margin:0 auto}
+.setup-head h2{font-family:var(--serif);font-size:clamp(30px,3.2vw,44px);font-weight:400;line-height:1.1;letter-spacing:-.02em;margin-bottom:10px}
+.setup-head p{font-size:15px;color:var(--text-2);max-width:440px;line-height:1.7;font-weight:300}
+.setup-steps{max-width:1200px;margin:0 auto;padding:0 48px 80px;border-top:1px solid var(--border)}
+.setup-step{display:grid;grid-template-columns:80px 1fr;gap:32px;padding:36px 0;border-bottom:1px solid var(--border);align-items:start}
+.setup-num{font-family:var(--serif);font-style:italic;font-size:44px;font-weight:400;color:var(--border-2);letter-spacing:-.03em;line-height:1}
+.setup-content h3{font-size:17px;font-weight:500;margin-bottom:9px;line-height:1.3}
+.setup-content p{font-size:14px;color:var(--text-2);line-height:1.72;max-width:520px;font-weight:300}
+.cta-section{padding:104px 48px;text-align:center;max-width:1200px;margin:0 auto}
+.cta-section h2{font-family:var(--serif);font-style:italic;font-size:clamp(38px,4.5vw,58px);font-weight:400;line-height:1.06;letter-spacing:-.02em;margin-bottom:14px}
+.cta-section p{font-size:15px;color:var(--text-2);margin-bottom:40px;font-weight:300;line-height:1.7}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+@media(max-width:960px){
+  nav{padding:0 24px}.nav-links{display:none}
+  .page-hero{grid-template-columns:1fr;gap:36px;padding:64px 24px 72px}
+  .audience-head,.setup-head{padding:56px 24px 36px}
+  .audience-types{grid-template-columns:1fr}.atype{padding:36px 24px}
+  .features-section{padding:56px 24px}.features-grid{grid-template-columns:1fr}
+  .calc-wrap{padding:0 24px 64px}.calc-header{flex-direction:column;align-items:flex-start;gap:10px}
+  .calc-header-note{text-align:left}.calc-card{padding:24px 20px}
+  .calc-sliders{grid-template-columns:1fr;gap:24px}.freq-toggle{flex-direction:column;width:100%}
+  .freq-btn{text-align:left}.calc-stats-row{grid-template-columns:1fr 1fr}
+  .setup-steps{padding:0 24px 64px}.setup-step{grid-template-columns:52px 1fr;gap:18px;padding:28px 0}
+  .setup-num{font-size:32px}.cta-section{padding:72px 24px}
+  footer{padding:36px 24px}
 }
 </style>
 </head>
 <body>
-
 <nav>
   <a href="index.html" class="nav-logo">Canvas</a>
   <ul class="nav-links">
-    <li><a href="group-owners.html">Group Owners</a></li>
+    <li><a href="group-owners.html" class="active">Group Owners</a></li>
     <li><a href="advertisers.html">Advertisers</a></li>
+    <li><a href="vision.html">Vision</a></li>
     <li><a href="about.html">About</a></li>
     <li><a href="https://docs.canvas-protocol.com">Docs</a></li>
   </ul>
   <div class="nav-actions">
     <a href="mailto:hello@canvasprotocol.xyz" class="nav-contact">Contact</a>
-    <a href="group-owners.html" class="btn-nav">Register your group →</a>
+    <a href="#register" class="btn-nav">Register your group &rarr;</a>
   </div>
 </nav>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-left">
-    <h1>Get paid every time someone joins your group.</h1>
-    <p class="hero-sub">Canvas replaces the standard join verification with a short sponsored task. New members answer a question before they're let in. You earn USDC. Every join, automatically.</p>
-    <div class="hero-ctas">
-      <a href="group-owners.html" class="btn-lg btn-primary">Register your group →</a>
-      <a href="advertisers.html" class="btn-lg btn-secondary">Run a campaign</a>
-    </div>
-  </div>
-
-  <div class="tg-mockup" id="canvas-chat-phone">
-    <div class="tg-topbar">
-      <div class="tg-avatar" id="cv-avatar" style="background:#2B5278">CV</div>
-      <div class="tg-info">
-        <span class="tg-name" id="cv-name">@CanvasVerificationBot</span>
-        <span class="tg-online" id="cv-status">online</span>
-      </div>
-    </div>
-    <div id="cv-chat" style="padding:14px 14px;display:flex;flex-direction:column;gap:10px;background:#17212B;height:460px;overflow-y:auto;scroll-behavior:smooth"></div>
-  </div>
-
-  <style>
-    #cv-chat::-webkit-scrollbar{display:none}
-    .cv-wrap{display:flex;gap:7px;flex-shrink:0;animation:cvFade .3s ease forwards}
-    .cv-wrap.user{flex-direction:row-reverse}
-    @keyframes cvFade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-    .cv-bub{max-width:84%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.55;color:#e8e8e8}
-    .cv-bub.bot{background:#1F2D3D;border-radius:4px 12px 12px 12px}
-    .cv-bub.user{background:#2B5278;border-radius:12px 4px 12px 12px}
-    .cv-time{font-size:10px;color:rgba(255,255,255,0.3);display:block;text-align:right;margin-top:4px}
-    .cv-typing-wrap{display:flex;gap:7px;flex-shrink:0;animation:cvFade .3s ease forwards}
-    .cv-typing{display:flex;align-items:center;gap:4px;padding:10px 13px;background:#1F2D3D;border-radius:4px 12px 12px 12px;width:50px}
-    .cv-dot{width:6px;height:6px;border-radius:50%;background:#66637A;animation:cvBounce .9s infinite}
-    .cv-dot:nth-child(2){animation-delay:.15s}.cv-dot:nth-child(3){animation-delay:.3s}
-    @keyframes cvBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
-    .cv-task{background:rgba(0,0,0,0.2);border-radius:8px;padding:9px 11px;margin-top:7px;border:1px solid rgba(255,255,255,0.06);font-size:12px;color:rgba(255,255,255,0.7);line-height:1.5}
-    .cv-task-label{font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
-    .cv-opt{display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer;transition:background .12s,transform .1s,border-color .12s;margin-top:4px}
-    .cv-opt:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.2)}
-    .cv-opt.tapped{background:#2B5278;border-color:#3d6b99;color:#fff;transform:scale(0.96)}
-    .cv-opt-key{color:#7EB0E8;font-weight:700;flex-shrink:0;min-width:12px}
-    .cv-rules{background:rgba(0,0,0,0.2);border-radius:8px;padding:9px 11px;margin-top:7px;border:1px solid rgba(255,255,255,0.06)}
-    .cv-rules-title{font-size:12px;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:5px}
-    .cv-rules-list{font-size:11px;color:rgba(255,255,255,0.45);line-height:1.9}
-    .cv-btn-row{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
-    .cv-btn{font-size:12px;padding:6px 12px;border-radius:6px;cursor:default;user-select:none;transition:transform .1s,background .1s;display:inline-block}
-    .cv-btn.p{background:#2B5278;border:1px solid #3d6b99;color:#fff}
-    .cv-btn.g{background:transparent;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.4)}
-    .cv-btn.tapped{transform:scale(0.93);background:#3a6b99}
-    .cv-ad{background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:9px 11px;margin-top:7px}
-    .cv-ad-label{font-size:10px;color:#4ADE80;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
-    .cv-ad-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px}
-    .cv-ad-sub{font-size:11.5px;color:rgba(255,255,255,0.5);line-height:1.55;margin-bottom:7px}
-    .cv-pill{display:inline-block;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);color:#4ADE80;font-size:10px;padding:2px 7px;border-radius:20px;margin-bottom:7px}
-  </style>
-
-  <script>
-  (function(){
-    const chat=document.getElementById('cv-chat');
-    const cvName=document.getElementById('cv-name');
-    const cvStatus=document.getElementById('cv-status');
-    const cvAvatar=document.getElementById('cv-avatar');
-    let tids=[];
-    function q(ms,fn){const t=setTimeout(fn,ms);tids.push(t);}
-    function clearAll(){tids.forEach(clearTimeout);tids=[];}
-    function ts(){const n=new Date();return n.getHours()+':'+(String(n.getMinutes()).padStart(2,'0'));}
-    function scroll(){chat.scrollTo({top:chat.scrollHeight,behavior:'smooth'});}
-
-    function showTyping(){
-      const w=document.createElement('div');
-      w.className='cv-typing-wrap';
-      w.innerHTML='<div class="cv-typing"><div class="cv-dot"></div><div class="cv-dot"></div><div class="cv-dot"></div></div>';
-      chat.appendChild(w);scroll();return w;
-    }
-
-    function addBubble(type,html){
-      const w=document.createElement('div');
-      w.className='cv-wrap '+type;
-      const b=document.createElement('div');
-      b.className='cv-bub '+type;
-      b.innerHTML=html+'<span class="cv-time">'+ts()+'</span>';
-      w.appendChild(b);chat.appendChild(w);scroll();return b;
-    }
-
-    function botSay(html,dur,cb){
-      const ind=showTyping();
-      q(dur,()=>{ind.remove();addBubble('bot',html);if(cb)cb();});
-    }
-
-    function userSay(text,cb){
-      addBubble('user',text);
-      if(cb)q(300,cb);
-    }
-
-    function tap(btn,cb){
-      btn.classList.add('tapped');
-      q(180,()=>{btn.classList.remove('tapped');if(cb)q(120,cb);});
-    }
-
-    function toSeatScout(cb){
-      cvAvatar.style.background='#1a4a2a';
-      cvAvatar.textContent='SS';
-      cvName.textContent='@SeatScoutBot';
-      cvStatus.style.color='#4ADE80';
-      cvStatus.textContent='online';
-      chat.innerHTML='';
-      if(cb)cb();
-    }
-
-    function toCanvas(){
-      cvAvatar.style.background='#2B5278';
-      cvAvatar.textContent='CV';
-      cvName.textContent='@CanvasVerificationBot';
-      cvStatus.style.color='#4ADE80';
-      cvStatus.textContent='online';
-    }
-
-    function runSeatScout(){
-      toSeatScout(()=>{
-        q(500,()=>{
-          botSay('Hey! Tell me your favourite artists and I\'ll message you the moment they announce a tour or drop new tickets.',900,()=>{
-            q(1400,()=>{
-              userSay('Taylor Swift, Sabrina Carpenter, Chappell Roan',()=>{
-                q(400,()=>{
-                  botSay('Got them. I\'ll watch all three and send you a heads up as soon as anything goes on sale. You\'ll never have to check again.',800,()=>{
-                    q(3500,()=>{toCanvas();start();});
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    }
-
-    function start(){
-      clearAll();chat.innerHTML='';scroll();
-      q(600,()=>{
-        botSay('👋 To join <strong style="color:#fff">Taylor Nation</strong>, complete a quick question first.',900,()=>{
-          q(400,()=>{
-            const taskHtml='<div class="cv-task"><div class="cv-task-label">Setlist AI · fan preference data</div>At a concert, where do you prefer to be? Pick your spot.<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.07);padding-top:4px;display:flex;flex-direction:column"><div class="cv-opt" id="cv-opt-a"><span class="cv-opt-key">A</span><span>Front floor, as close as possible</span></div><div class="cv-opt" id="cv-opt-b"><span class="cv-opt-key">B</span><span>Lower bowl with a clear view of the stage</span></div><div class="cv-opt" id="cv-opt-c"><span class="cv-opt-key">C</span><span>Upper section, full view of the crowd</span></div></div></div>';
-            botSay(taskHtml,900,()=>{
-              q(1400,()=>{
-                const optA=document.getElementById('cv-opt-a');
-                optA.classList.add('tapped');
-                q(200,()=>{
-                  optA.classList.remove('tapped');
-                  q(120,()=>{
-                    userSay('A. Front floor, as close as possible.',()=>{
-                      q(400,()=>{
-                        botSay('Nice. Why the floor?',500,()=>{
-                          q(1200,()=>{
-                            userSay('You feel the bass in your chest and there is nothing between you and the stage.',()=>{
-                              q(400,()=>{
-                                botSay('✓ Verified. One last step before you\'re in.',700,()=>{
-                                  q(300,()=>{
-                                    const rHtml='<div class="cv-rules"><div class="cv-rules-title">Taylor Nation community rules</div><div class="cv-rules-list">· No spoilers without warnings<br>· Be kind to other fans<br>· No unauthorized ticket resales or scalping</div></div><div class="cv-btn-row"><span class="cv-btn p" id="cv-accept">Accept and join →</span><span class="cv-btn g">Decline</span></div>';
-                                    botSay(rHtml,800,()=>{
-                                      q(1400,()=>{
-                                        const btn=document.getElementById('cv-accept');
-                                        tap(btn,()=>{
-                                          btn.closest('.cv-btn-row').style.display='none';
-                                          userSay('Accept and join →',()=>{
-                                            q(400,()=>{
-                                              botSay("You're in. Welcome to Taylor Nation. 🎶",600,()=>{
-                                                q(500,()=>{
-                                                  const aHtml='<div class="cv-ad"><div class="cv-ad-label">Sponsored · SeatScout</div><div class="cv-ad-title">Never miss a tour announcement</div><span class="cv-pill">Free · concert agent</span><div class="cv-ad-sub">SeatScout watches your favourite artists and messages you the moment tickets go live.</div><div class="cv-btn-row"><span class="cv-btn p" id="cv-scout">Open SeatScout →</span><span class="cv-btn g">Skip</span></div></div>';
-                                                  botSay(aHtml,1000,()=>{
-                                                    q(1600,()=>{
-                                                      const sb=document.getElementById('cv-scout');
-                                                      tap(sb,()=>{
-                                                        sb.closest('.cv-btn-row').style.display='none';
-                                                        userSay('Open SeatScout →',()=>{
-                                                          q(600,()=>runSeatScout());
-                                                        });
-                                                      });
-                                                    });
-                                                  });
-                                                });
-                                              });
-                                            });
-                                          });
-                                        });
-                                      });
-                                    });
-                                  });
-                                });
-                              });
-                            });
-                          });
-                        });
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    }
-
-    start();
-  })();
-  </script>
-</section>
-
-<hr class="full-rule">
-
-<!-- HOW IT WORKS -->
-<div class="section-head">
+<section class="page-hero">
   <div>
-    <span class="section-eyebrow">How it works</span>
-    <h2>Three steps.<br>Then it runs itself.</h2>
-    <p style="font-size:15px;color:var(--muted-2);line-height:1.7;font-weight:300;margin-top:12px;max-width:480px;">No ongoing work. No dashboards to check. No invoices to send.</p>
+    <span class="section-label">For group owners</span>
+    <h1>Your group was always an asset. Start <em>getting paid</em> for it.</h1>
+    <p class="page-hero-sub">Every time someone joins your Telegram group, they complete a short sponsored task. You receive USDC in your wallet. Every join, automatically.</p>
+    <a href="#register" class="btn-lg btn-primary">Register your group &rarr;</a>
   </div>
-</div>
-<div class="steps">
-  <div class="step">
-    <span class="step-num">01</span>
-    <h3>Add @CanvasVerificationBot to your group</h3>
-    <p>Search for the bot in Telegram and add it to your group.</p>
+  <div class="page-hero-right">
+    <p>Canvas sits between your group and every new join request. Advertisers pay to put their task in front of new members. The verification happens either way. The only difference is that now it pays you.</p>
+    <p>Set how often members re-verify, split revenue with your mods automatically, and configure everything from a DM with the bot or through the group owner dashboard. No technical setup required.</p>
   </div>
-  <div class="step">
-    <span class="step-num">02</span>
-    <h3>Set it as admin</h3>
-    <p>The bot needs admin permissions to intercept join requests and send private DMs. That's the only permission required.</p>
-  </div>
-  <div class="step">
-    <span class="step-num">03</span>
-    <h3>Configure your settings</h3>
-    <p>DM the bot or use the group owner dashboard to set your verification frequency, payout splits for mods, and campaign preferences. Then you're live.</p>
-  </div>
-</div>
-
+</section>
 <hr class="full-rule">
-
-<!-- TWO AUDIENCES -->
-<div class="audiences">
-  <div class="audience-panel">
-    <span class="audience-label">For group owners</span>
-    <h3>Your members are your inventory.</h3>
-    <p>You built the community. Advertisers want access to it. Canvas connects them and pays you per verified join. No brand deals, no pitch emails, no minimum size requirement.</p>
-    <ul class="feature-rows">
-      <li>Starts at $0.05 per join. High-intent groups earn more. The market sets the price.</li>
-      <li>Works for any Telegram group, any topic, any size</li>
-      <li>Set how often members re-verify: every join, every 30 days, or any cadence you choose</li>
-      <li>Revenue splits for mods and admins, paid automatically to each wallet</li>
-    </ul>
-    <a href="group-owners.html" class="audience-link">How it works for group owners →</a>
-  </div>
-  <div class="audience-panel">
-    <span class="audience-label">For advertisers</span>
-    <h3>Pay for verified humans, not impressions.</h3>
-    <p>Your task reaches people who are already in the community you care about. After verification, the bot can connect them directly to your agent, turning every join into a warm lead, not just a data point.</p>
-    <ul class="feature-rows">
-      <li>Target by group topic, size, and member profile</li>
-      <li>Budget held in escrow, drawn down per verified completion</li>
-      <li>Every response scored by AI before payout releases</li>
-      <li>Post-verification agent handoff: offer your product to every verified member</li>
-    </ul>
-    <a href="advertisers.html" class="audience-link">How it works for advertisers →</a>
-  </div>
+<div class="audience-head">
+  <span class="section-label">Who earns on Canvas</span>
+  <h2>Built for every kind of community.</h2>
+  <p>If people are trying to join your Telegram group, you can earn from it.</p>
 </div>
-
+<div class="audience-types">
+  <div class="atype"><span class="atype-label">Creators &amp; influencers</span><span class="atype-hook">"I built this audience over years. Now it pays me per join."</span><p>If you have followers on X, Instagram, or YouTube who you direct toward a Telegram group, every one of those joins can now earn you USDC. You were already doing the work.</p><ul class="atype-examples"><li>Crypto and finance commentators</li><li>Trading signal providers</li><li>Independent analysts and researchers</li></ul></div>
+  <div class="atype"><span class="atype-label">Interest-based communities</span><span class="atype-hook">"Our niche is exactly what advertisers want to reach."</span><p>The more specific your audience, the more valuable each verified join is to an advertiser trying to reach that exact person. Niche groups earn more than broad ones.</p><ul class="atype-examples"><li>DeFi and crypto trading groups</li><li>Gaming and esports communities</li><li>Fandom and interest groups</li></ul></div>
+  <div class="atype"><span class="atype-label">Organizations &amp; DAOs</span><span class="atype-hook">"Our members are our biggest asset. We should earn from that."</span><p>Protocol communities, professional associations, and company customer groups all have verified, context-specific humans that advertisers can't easily buy elsewhere.</p><ul class="atype-examples"><li>Protocol and DAO communities</li><li>Professional associations</li><li>Company and brand communities</li></ul></div>
+</div>
 <hr class="full-rule">
-
-<!-- USE CASES -->
-<div class="use-cases-head">
-  <span class="section-eyebrow">Use cases</span>
-  <h2>What members actually see.</h2>
-  <p>The task format and goal vary by campaign. The experience is always native to Telegram.</p>
+<div class="features-section">
+  <span class="section-label">What you control</span>
+  <h2>Built around how real communities work.</h2>
+  <div class="features-grid">
+    <div class="feature-block"><span class="feature-accent">$0.05+</span><h3>Market-priced earnings per join</h3><p>$0.05 is the floor. Popular groups with high-intent audiences see competitive bids well above it. The market prices your community the same way it prices any asset.</p></div>
+    <div class="feature-block"><span class="feature-accent">Your cadence</span><h3>Set verification frequency</h3><p>Verify on every new join, every 7 days, every 30 days, or any schedule you choose. More frequent re-verification means recurring income from your existing base, not just new joins.</p></div>
+    <div class="feature-block"><span class="feature-accent">Auto-split</span><h3>Revenue splits for mods and admins</h3><p>Set custom payout percentages for your moderators, co-admins, and key contributors. Revenue flows to each wallet automatically, every time a verification completes.</p></div>
+    <div class="feature-block"><span class="feature-accent">No code</span><h3>Configure via DM or dashboard</h3><p>DM @CanvasVerificationBot directly to configure your settings, or use the group owner dashboard. Either way, setup takes under five minutes.</p></div>
+  </div>
 </div>
-<div class="uc-grid">
-
-  <!-- RLHF -->
-  <div class="uc-card">
-    <span class="uc-tag">RLHF training data</span>
-    <p class="uc-advertiser">AI lab collecting human perception data for content recommendation models</p>
-    <div class="uc-tg">
-      <div class="tg-topbar">
-        <div class="tg-avatar" style="background:#3D6B8E">NF</div>
-        <div class="tg-info">
-          <span class="tg-name">NYC Foodies Collective</span>
-          <span class="tg-online">@CanvasVerificationBot</span>
-        </div>
+<hr class="full-rule">
+<div class="calc-wrap">
+  <div class="calc-header">
+    <div>
+      <span class="section-label">Earnings calculator</span>
+      <h2>How much could your group earn?</h2>
+    </div>
+    <p class="calc-header-note">Projected monthly earnings over 12 months. Canvas takes a 10% protocol fee.</p>
+  </div>
+  <div class="calc-card">
+    <div class="calc-sliders">
+      <div class="calc-slider-group">
+        <div class="csg-header"><span class="csg-label">New members per month</span><span class="csg-value" id="joinsVal">100</span></div>
+        <input type="range" class="calc-input" id="joinsSlider" min="10" max="2000" value="100" step="10">
+        <div class="csg-range"><span>10</span><span>2,000</span></div>
       </div>
-      <div class="tg-body">
-        <div class="tg-msg-bot">
-          <p>👋 To join NYC Foodies, one quick question.</p>
-          <div class="tg-task-card">
-            <p class="tg-task-q">One of these pizza reviews was written by an AI. Which one? Tell us how you can tell.</p>
-            <div class="tg-task-opt"><span class="tg-task-key">A</span><span>"Joe's on Carmine. The slice hasn't changed in 20 years. That's the whole point."</span></div>
-            <div class="tg-task-opt"><span class="tg-task-key">B</span><span>"A quintessential NYC experience with perfectly balanced sauce and a crust texture that pizza connoisseurs will appreciate."</span></div>
-            <div class="tg-task-opt"><span class="tg-task-key">C</span><span>"No line Tuesday. Guy remembered my usual. Two plain, one seltzer. $6. Exactly right."</span></div>
-          </div>
-          <span class="tg-time">11:14</span>
-        </div>
-        <div class="tg-msg-user">
-          B. No New Yorker says "pizza connoisseurs." A and C are about a specific moment. B is describing pizza in the abstract.
-          <span class="tg-time">11:14</span>
-        </div>
-        <div class="tg-msg-bot">
-          <p>✓ Verified. Last step.</p>
-          <div class="ptf-rules-mini">
-            <div class="ptf-rules-title">NYC Foodies Collective rules</div>
-            <span class="ptf-rules-item">· Keep it food-related</span>
-            <span class="ptf-rules-item">· No spam or affiliate links</span>
-          </div>
-          <div class="ptf-btns"><span class="ptf-btn-p">Accept and join →</span><span class="ptf-btn-g">Decline</span></div>
-          <span class="tg-time">11:14</span>
-        </div>
-        <div class="tg-msg-bot">
-          You're in. Welcome to NYC Foodies. 🍕
-          <span class="tg-time">11:14</span>
-        </div>
+      <div class="calc-slider-group">
+        <div class="csg-header"><span class="csg-label">Price per join</span><span class="csg-value accent" id="priceVal">$0.08</span></div>
+        <input type="range" class="calc-input" id="priceSlider" min="5" max="50" value="8" step="1">
+        <div class="csg-range"><span>$0.05</span><span>$0.50</span></div>
       </div>
     </div>
-  </div>
-
-  <!-- USER ACQUISITION -->
-  <div class="uc-card">
-    <span class="uc-tag">User acquisition</span>
-    <p class="uc-advertiser">Leading lending protocol on Base · warm leads from verified DeFi-native members</p>
-    <div class="uc-tg">
-      <div class="tg-topbar">
-        <div class="tg-avatar" style="background:#2B5278">BD</div>
-        <div class="tg-info">
-          <span class="tg-name">Base DeFi Collective</span>
-          <span class="tg-online">@CanvasVerificationBot</span>
-        </div>
-      </div>
-      <div class="tg-body">
-        <div class="tg-msg-bot">
-          <p>👋 To join Base DeFi Collective, one quick question. No wrong answer.</p>
-          <div class="tg-task-card">
-            <p class="tg-task-q">You have $5,000 in stablecoins sitting idle. What sounds most like your move?</p>
-            <div class="tg-task-opt"><span class="tg-task-key">A</span><span>Supply to a lending protocol, earn yield, borrow against it if a trade shows up</span></div>
-            <div class="tg-task-opt"><span class="tg-task-key">B</span><span>Hold until I find a clear opportunity, then deploy quickly</span></div>
-            <div class="tg-task-opt"><span class="tg-task-key">C</span><span>Put it across a few positions now rather than wait</span></div>
-          </div>
-          <span class="tg-time">14:22</span>
-        </div>
-        <div class="tg-msg-user">
-          A
-          <span class="tg-time">14:22</span>
-        </div>
-        <div class="tg-msg-bot">
-          <p>✓ Verified. Last step.</p>
-          <div class="ptf-rules-mini">
-            <div class="ptf-rules-title">Base DeFi Collective rules</div>
-            <span class="ptf-rules-item">· No shilling or spam</span>
-            <span class="ptf-rules-item">· No unsolicited DMs</span>
-          </div>
-          <div class="ptf-btns"><span class="ptf-btn-p">Accept and join →</span><span class="ptf-btn-g">Decline</span></div>
-          <span class="tg-time">14:22</span>
-        </div>
-        <div class="tg-msg-bot">
-          <p>You're in. Want to see current yield rates? The lending agent can answer now.</p>
-          <div class="tg-agent-btns">
-            <span class="tg-agent-btn primary">Chat with lending agent →</span>
-            <span class="tg-agent-btn ghost">Skip</span>
-          </div>
-          <span class="tg-time">14:22</span>
-        </div>
+    <div class="freq-wrap">
+      <span class="freq-label">Verification frequency</span>
+      <div class="freq-toggle">
+        <button class="freq-btn active" data-freq="joins">New joins only</button>
+        <button class="freq-btn" data-freq="monthly">Monthly re-verify</button>
+        <button class="freq-btn" data-freq="weekly">Weekly re-verify</button>
       </div>
     </div>
-  </div>
-
-  <!-- COMMUNITY GROWTH -->
-  <div class="uc-card">
-    <span class="uc-tag">Community growth</span>
-    <p class="uc-advertiser">Aeons (SPX6900) · growing their community through ads in adjacent crypto trading groups</p>
-    <div class="uc-tg">
-      <div class="tg-topbar">
-        <div class="tg-avatar" style="background:#2A6B4A">ST</div>
-        <div class="tg-info">
-          <span class="tg-name">Solana Trenches</span>
-          <span class="tg-online">@CanvasVerificationBot</span>
-        </div>
-      </div>
-      <div class="tg-body">
-        <div class="tg-msg-bot">
-          <p>👋 To join Solana Trenches, complete a quick sponsored task.</p>
-          <div class="tg-task-card">
-            <p class="tg-task-q">Sponsored by Aeons · What does the community stand for?</p>
-            <div class="tg-task-opt"><span class="tg-task-key">A</span><span>6900 &gt; 500</span></div>
-            <div class="tg-task-opt"><span class="tg-task-key">B</span><span>Diamond hands only</span></div>
-            <div class="tg-task-opt"><span class="tg-task-key">C</span><span>To the moon, eventually</span></div>
-          </div>
-          <span class="tg-time">20:07</span>
-        </div>
-        <div class="tg-msg-user">
-          C
-          <span class="tg-time">20:07</span>
-        </div>
-        <div class="tg-msg-bot">
-          <p>Not quite. Hint: 6900 refers to SPX6900. What does that tell you about how Aeons feel about the S&amp;P 500? One more try.</p>
-          <div class="tg-task-card">
-            <div class="tg-task-opt" style="border-top:none;padding-top:0"><span class="tg-task-key">A</span><span>6900 &gt; 500</span></div>
-            <div class="tg-task-opt"><span class="tg-task-key">B</span><span>Diamond hands only</span></div>
-            <div class="tg-task-opt"><span class="tg-task-key">C</span><span>To the moon, eventually</span></div>
-          </div>
-          <span class="tg-time">20:07</span>
-        </div>
-        <div class="tg-msg-user">
-          A
-          <span class="tg-time">20:08</span>
-        </div>
-        <div class="tg-msg-bot">
-          <p>Exactly. Last step before you're in.</p>
-          <div class="ptf-rules-mini">
-            <div class="ptf-rules-title">Solana Trenches rules</div>
-            <span class="ptf-rules-item">· Signals only, no noise</span>
-            <span class="ptf-rules-item">· No shilling your own bags</span>
-          </div>
-          <div class="ptf-btns"><span class="ptf-btn-p">Accept and join →</span><span class="ptf-btn-g">Decline</span></div>
-          <span class="tg-time">20:08</span>
-        </div>
-        <div class="tg-msg-bot">
-          <p>You're in to Solana Trenches. You got it right — Aeons is the SPX6900 community and they're growing. Want to join?</p>
-          <div class="tg-agent-btns">
-            <span class="tg-agent-btn primary">Join Aeons →</span>
-            <span class="tg-agent-btn ghost">Skip</span>
-          </div>
-          <span class="tg-time">20:08</span>
-        </div>
-      </div>
+    <div class="chart-wrap">
+      <svg id="earningsChart" viewBox="0 0 700 210" style="width:100%;height:210px;display:block;"></svg>
+    </div>
+    <div class="chart-legend">
+      <div class="legend-item"><span class="legend-dot" style="background:#2A2A3A"></span>New join earnings</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--text-2)"></span>Re-verification earnings</div>
+    </div>
+    <div class="calc-stats-row">
+      <div class="cstat"><span class="cstat-val" id="s1">$0</span><span class="cstat-label">Month 1</span></div>
+      <div class="cstat"><span class="cstat-val" id="s6">$0</span><span class="cstat-label">Month 6</span></div>
+      <div class="cstat"><span class="cstat-val" id="s12">$0</span><span class="cstat-label">Month 12</span></div>
+      <div class="cstat hi"><span class="cstat-val accent" id="sTotal">$0</span><span class="cstat-label">12-month total</span></div>
     </div>
   </div>
-
 </div>
-
-
 <hr class="full-rule">
-
-<!-- CTA -->
-<div class="cta-section">
-  <h2>Your next member is worth<br>more than <span>you think.</span></h2>
-  <p>Register your group in two minutes. Start earning from the very next join.</p>
+<div class="setup-head">
+  <span class="section-label">Getting started</span>
+  <h2>Up in three steps.</h2>
+  <p>No SDK. No code. No developer required.</p>
+</div>
+<div class="setup-steps">
+  <div class="setup-step"><div class="setup-num">01</div><div class="setup-content"><h3>Add @CanvasVerificationBot to your group</h3><p>Search for @CanvasVerificationBot in Telegram and add it to your group. This takes about thirty seconds.</p></div></div>
+  <div class="setup-step"><div class="setup-num">02</div><div class="setup-content"><h3>Set it as admin</h3><p>Promote @CanvasVerificationBot to admin in your group settings. It needs permission to mute members and send messages. Those are the only two permissions required.</p></div></div>
+  <div class="setup-step"><div class="setup-num">03</div><div class="setup-content"><h3>Configure your settings</h3><p>DM the bot directly to set your payout wallet, verification cadence, topic category, and mod revenue splits. Or open the group owner dashboard if you prefer a visual interface. Once configured, Canvas matches your group to active advertiser campaigns and you start earning from the very next join.</p></div></div>
+</div>
+<hr class="full-rule">
+<div class="cta-section" id="register">
+  <h2>Your next join is worth<br>more than nothing.</h2>
+  <p>Register in three steps. Start earning from the very next join.</p>
   <div class="cta-btns">
-    <a href="group-owners.html" class="btn-lg btn-primary">Register your group →</a>
-    <a href="advertisers.html" class="btn-lg btn-secondary">Run a campaign</a>
+    <a href="#" class="btn-lg btn-primary">Register your group &rarr;</a>
+    <a href="advertisers.html" class="btn-lg btn-secondary">See how advertisers buy</a>
   </div>
 </div>
-
+<script>
+let freq='joins';
+const FEE=0.9;
+function monthData(m,joins,price){
+  const existing=(m-1)*joins;
+  const newE=joins*price*FEE;
+  let rev=0;
+  if(freq==='monthly')rev=existing*price*FEE;
+  else if(freq==='weekly')rev=existing*(30/7)*price*FEE;
+  return{new:newE,rev,total:newE+rev};
+}
+function fmtMoney(n){if(n>=10000)return'$'+Math.round(n/1000)+'k';if(n>=1000)return'$'+(n/1000).toFixed(1).replace('.0','')+'k';if(n>=100)return'$'+Math.round(n);return'$'+n.toFixed(n<10?1:0);}
+function fmtAxis(n){if(n<=0)return'$0';if(n>=1000)return'$'+Math.round(n/1000)+'k';return'$'+Math.round(n);}
+function drawChart(data){
+  const W=700,H=210,pL=54,pR=12,pT=16,pB=30;
+  const cW=W-pL-pR,cH=H-pT-pB;
+  const maxVal=Math.max(...data.map(d=>d.total),1);
+  const niceMax=Math.ceil(maxVal/50)*50||50;
+  const n=data.length,gW=cW/n,bW=gW*0.58;
+  let s='';
+  for(let i=0;i<=4;i++){
+    const y=(pT+(cH/4)*i).toFixed(1);
+    const val=niceMax*(1-i/4);
+    s+=`<line x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}" stroke="#1E1E1E" stroke-width="1"/>`;
+    s+=`<text x="${pL-7}" y="${(parseFloat(y)+4).toFixed(1)}" text-anchor="end" font-size="10" fill="#555" font-family="DM Sans,sans-serif">${fmtAxis(val)}</text>`;
+  }
+  data.forEach((d,i)=>{
+    const x=(pL+i*gW+(gW-bW)/2).toFixed(1);
+    const baseY=pT+cH;
+    if(d.rev>0){const h=Math.max((d.rev/niceMax)*cH,0);const y=(baseY-h).toFixed(1);s+=`<rect x="${x}" y="${y}" width="${bW.toFixed(1)}" height="${h.toFixed(1)}" fill="#A0A0A0" rx="1"/>`;}
+    const newH=Math.max((d.new/niceMax)*cH,1);
+    const revH=(d.rev/niceMax)*cH;
+    const newY=(baseY-revH-newH).toFixed(1);
+    s+=`<rect x="${x}" y="${newY}" width="${bW.toFixed(1)}" height="${newH.toFixed(1)}" fill="#2A2A3A" rx="1"/>`;
+    s+=`<text x="${(parseFloat(x)+bW/2).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="9.5" fill="#555" font-family="DM Sans,sans-serif">M${i+1}</text>`;
+  });
+  document.getElementById('earningsChart').innerHTML=s;
+}
+function update(){
+  const joins=parseInt(document.getElementById('joinsSlider').value);
+  const price=parseInt(document.getElementById('priceSlider').value)/100;
+  document.getElementById('joinsVal').textContent=joins>=1000?(joins/1000).toFixed(1).replace('.0','')+'k':joins;
+  document.getElementById('priceVal').textContent='$'+price.toFixed(2);
+  const data=Array.from({length:12},(_,i)=>monthData(i+1,joins,price));
+  drawChart(data);
+  document.getElementById('s1').textContent=fmtMoney(data[0].total)+'/mo';
+  document.getElementById('s6').textContent=fmtMoney(data[5].total)+'/mo';
+  document.getElementById('s12').textContent=fmtMoney(data[11].total)+'/mo';
+  document.getElementById('sTotal').textContent=fmtMoney(data.reduce((s,d)=>s+d.total,0));
+}
+document.getElementById('joinsSlider').addEventListener('input',update);
+document.getElementById('priceSlider').addEventListener('input',update);
+document.querySelectorAll('.freq-btn').forEach(btn=>{btn.addEventListener('click',function(){document.querySelectorAll('.freq-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');freq=this.dataset.freq;update();});});
+update();
+</script>
 <footer>
   <div class="footer-inner">
     <a href="index.html" class="footer-logo">Canvas</a>
     <ul class="footer-links">
       <li><a href="group-owners.html">Group Owners</a></li>
       <li><a href="advertisers.html">Advertisers</a></li>
+      <li><a href="vision.html">Vision</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="https://docs.canvas-protocol.com">Docs</a></li>
       <li><a href="mailto:hello@canvasprotocol.xyz">Contact</a></li>
     </ul>
-    <span class="footer-copy">© 2026 Canvas Protocol</span>
+    <span class="footer-copy">&copy; 2026 Canvas Protocol</span>
   </div>
 </footer>
 </body>
